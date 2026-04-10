@@ -1,0 +1,138 @@
+<div class="sidebar-logo">
+    <div class="logo-header d-flex align-items-center justify-content-center p-3 pt-4 pb-4" style="padding:14px 16px;">
+        <a href="{{ url('dashboard') }}" class="logo" style="display:block; width:100%; text-decoration:none;">
+            <div
+                style="
+                    background:#fff;
+                    padding:10px 14px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    overflow:hidden;
+                    width:100%;
+                ">
+                <img src="/assets/img/Logo-reka.png" alt="SIPO"
+                    style="display:block; max-width:100%; height:auto; max-height:60px; margin:0;" />
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="sidebar-wrapper">
+    <div class="sidebar-content">
+        <ul class="nav nav-secondary" style="margin-top: 50px;">
+
+        <!-- SUPERADMIN -->
+            @if (Auth::user()->role->nm_role == 'superadmin')
+                <li class="nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active_' : '' }}">
+                    <a href="{{ route('superadmin.dashboard') }}" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'active_' : '' }}">
+                    <a href="#strukturOrganisasiDrop" 
+                        class="nav-link {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse" 
+                        aria-expanded="{{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'true' : 'false' }}">
+                            <i class="fas fa-sitemap"></i>
+                            <p>Struktur Organisasi</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'show' : '' }}" 
+                        id="strukturOrganisasiDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+
+                            <li class="{{ request()->routeIs('organization.manageOrganization') ? 'active' : '' }}">
+                                <a href="{{ route('organization.manageOrganization') }}">
+                                    <span class="sub-item">Kelola Struktur</span>
+                                </a>
+                            </li>
+
+                            <li class="{{ request()->routeIs('kode-bagian.index') ? 'active' : '' }}">
+                                <a href="{{ route('kode-bagian.index') }}">
+                                    <span class="sub-item">Manajemen Kode Bagian Kerja</span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('user.manage') ? 'active_' : '' }}">
+                    <a href="{{ route('user.manage') }}" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <p>Manage Users</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
+                    <a href="#lokasiDrop" 
+                        class="nav-link {{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse" 
+                        aria-expanded="{{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'true' : 'false' }}">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <p>Lokasi</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'show' : '' }}" 
+                        id="lokasiDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+
+                            {{-- Sub-menu 1: Lokasi Kepemilikan --}}
+                            <li class="{{ request()->routeIs('lokasi-kepemilikan.*') ? 'active' : '' }}">
+                                <a href="{{ route('lokasi-kepemilikan.index') }}">
+                                    <span class="sub-item">Lokasi Kepemilikan</span>
+                                </a>
+                            </li>
+
+                            {{-- Sub-menu 2: Lokasi Aset --}}
+                            <li class="{{ request()->routeIs('lokasi-aset.*') ? 'active' : '' }}">
+                                {{-- Pastikan route 'lokasi-aset.index' sudah dibuat di web.php --}}
+                                <a href="{{ route('lokasi-aset.index') }}">
+                                    <span class="sub-item">Lokasi Aset</span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? 'active_' : '' }}">
+                    <a href="#jenisAsetDrop" 
+                        class="nav-link {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse" 
+                        aria-expanded="{{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? 'true' : 'false' }}">
+                            <i class="fas fa-boxes"></i>
+                            <p>Jenis Aset</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? 'show' : '' }}" 
+                        id="jenisAsetDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+
+                            {{-- Sub-menu 1: Jenis Aset Umum --}}
+                            <li class="{{ request()->routeIs('jenis-umum.*') ? 'active' : '' }}">
+                                <a href="{{ route('jenis-umum.index') }}">
+                                    <span class="sub-item">Aset Umum</span>
+                                </a>
+                            </li>
+
+                            {{-- Sub-menu 2: Jenis Aset Khusus --}}
+                            <li class="{{ request()->routeIs('jenis-khusus.*') ? 'active' : '' }}">
+                                <a href="{{ route('jenis-khusus.index') }}">
+                                    <span class="sub-item">Aset Khusus</span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
+            @endif 
+        </ul>
+    </div>
+</div>

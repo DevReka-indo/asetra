@@ -1,0 +1,246 @@
+/* ===== Mobile override: sidebar slide-in ===== */
+@media (max-width: 991.98px) {
+  .sidebar, .sidebar[data-background-color="white"] {
+    transform: translateX(-100%) !important;
+    transition: transform .3s ease !important;
+  }
+  .sidebar.active, .sidebar.active[data-background-color="white"] {
+    transform: translateX(0) !important;
+    z-index: 1050 !important;
+  }
+  .main-panel {
+    width: 100% !important;
+    float: none !important;
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.25);
+    z-index: 1049;
+    display: none;
+  }
+  .sidebar-backdrop.show { display: block; }
+  .sidebar .logo-header,
+  .sidebar_minimize .sidebar .sidebar-logo,
+  .sidebar_minimize .sidebar .logo-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 82px !important;
+    padding: 16px 20px !important;
+  }
+  .sidebar .logo-header img {
+    max-height: 48px !important;
+    width: auto !important;
+  }
+}
+
+/* ===== Toggle sidebar: hanya untuk tombol di navbar ===== */
+.navbar .toggle-sidebar, .navbar button.toggle-sidebar, .navbar .btn.toggle-sidebar {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+.navbar .toggle-sidebar:hover, .navbar .toggle-sidebar:focus, .navbar .toggle-sidebar:active,
+.navbar .toggle-sidebar:focus-visible, .navbar .btn.toggle-sidebar:hover, .navbar .btn.toggle-sidebar:focus,
+.navbar .btn.toggle-sidebar:active, .navbar .btn.toggle-sidebar:focus-visible {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.navbar .toggle-sidebar i.fa-bars, .navbar .toggle-sidebar i.fa-solid.fa-bars {
+  background: rgba(37, 48, 112, 0.1) !important;
+  color: #253070 !important;
+  padding: 10px !important;
+  border-radius: 10px !important;
+  display: inline-block !important;
+}
+
+.navbar .toggle-sidebar:hover i.fa-bars, .navbar .toggle-sidebar:active i.fa-bars,
+.navbar .toggle-sidebar:focus i.fa-bars, .navbar .toggle-sidebar:focus-visible i.fa-bars,
+.navbar .toggle-sidebar[aria-expanded="true"] i.fa-bars, .navbar .toggle-sidebar:hover i.fa-solid.fa-bars,
+.navbar .toggle-sidebar:active i.fa-solid.fa-bars, .navbar .toggle-sidebar:focus i.fa-solid.fa-bars,
+.navbar .toggle-sidebar:focus-visible i.fa-solid.fa-bars, .navbar .toggle-sidebar[aria-expanded="true"] i.fa-solid.fa-bars {
+  background: rgba(37, 48, 112, 0.1) !important;
+  color: #253070 !important;
+  transform: none !important;
+}
+
+/* ===== ROOT COLORS ===== */
+:root {
+    --navy: #1A2355;
+    --navy-dk: #111840;
+    --navy-lt: #253070;
+    --icon-default: #8d9498;
+}
+
+/* ===== TAMPILAN DEFAULT & HOVER MENU (TIDAK AKTIF) ===== */
+.sidebar-wrapper .nav-secondary .nav-item > a i,
+.sidebar-wrapper .nav-secondary .nav-item > a svg {
+    color: var(--icon-default) !important;
+    fill: var(--icon-default) !important;
+    transition: all 0.3s ease;
+}
+
+body .wrapper .sidebar .sidebar-wrapper .nav.nav-secondary .nav-item:not(.active_) > a:hover i,
+body .wrapper .sidebar .sidebar-wrapper .nav.nav-secondary .nav-item:not(.active_) > a:hover i::before,
+body .wrapper .sidebar .sidebar-wrapper .nav.nav-secondary .nav-item:not(.active_) > a:hover svg {
+    color: var(--navy-lt) !important;
+    fill: var(--navy-lt) !important;
+}
+
+body .wrapper .sidebar .sidebar-wrapper .nav.nav-secondary .nav-item:not(.active_) > a:hover {
+    background-color: rgba(37, 48, 112, 0.05) !important;
+}
+
+body .wrapper .sidebar .sidebar-wrapper .nav.nav-secondary .nav-item:not(.active_) > a:hover p {
+    color: var(--navy-lt) !important;
+}
+
+/* ===== TATA LETAK ICON & TEKS SEJAJAR ===== */
+.sidebar-wrapper .nav-secondary .nav-item > a {
+    display: flex !important;
+    align-items: center !important; 
+}
+
+.sidebar-wrapper .nav-secondary .nav-item > a p {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
+    line-height: 1.5;
+}
+
+.sidebar-wrapper .nav-secondary .nav-item > a i,
+.sidebar-wrapper .nav-secondary .nav-item > a svg {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== SAAT SIDEBAR DIMINIMIZE ===== */
+body.sidebar_minimize .sidebar-wrapper .nav-secondary .nav-item > a {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    padding: 0 !important; 
+    margin: 0 auto 10px auto !important;
+}
+
+body.sidebar_minimize .sidebar-wrapper .nav-secondary .nav-item > a i,
+body.sidebar_minimize .sidebar-wrapper .nav-secondary .nav-item > a svg {
+    margin-right: 0 !important;
+}
+
+body.sidebar_minimize .sidebar-wrapper .nav-secondary .nav-item > a p,
+body.sidebar_minimize .sidebar-wrapper .nav-secondary .nav-item > a span {
+    display: none !important;
+}
+
+/* ===== ICON NOTIFIKASI LONCENG ===== */
+header .navbar-nav .nav-link i.fa-bell,
+.navbar .navbar-nav .nav-link i.fa-bell {
+    color: #253070 !important;
+}
+
+header .navbar-nav .nav-link.dropdown-toggle,
+.navbar .navbar-nav .nav-link.dropdown-toggle {
+    background-color: rgba(37, 48, 112, 0.1) !important;
+}
+
+/* ===== STYLING ISI DROPDOWN ===== */
+.sidebar-wrapper .nav-collapse li.active > a .sub-item {
+    color: #253070 !important;
+    font-weight: 600 !important;
+}
+
+.sidebar-wrapper .nav-collapse li.active > a {
+    background-color: rgba(37, 48, 112, 0.05) !important; 
+}
+
+.sidebar-wrapper .nav-collapse li:nth-child(1) > a::before,
+.sidebar-wrapper .nav-collapse li:nth-child(1) .sub-item::before {
+    background-color: #FF4D4D !important;
+    color: #FF4D4D !important;
+    border-color: #FF4D4D !important;
+}
+
+.sidebar-wrapper .nav-collapse li:nth-child(2) > a::before,
+.sidebar-wrapper .nav-collapse li:nth-child(2) .sub-item::before {
+    background-color: #00BFFF !important;
+    color: #00BFFF !important;
+    border-color: #00BFFF !important;
+}
+
+.sidebar-wrapper .nav-collapse li > a::before,
+.sidebar-wrapper .nav-collapse li .sub-item::before {
+    transform: scale(1.5) !important;
+}
+
+/* =========================================================
+   KUNCI MATI WARNA BIRU MENU AKTIF / TERBUKA
+   (Anti-Hover Kaiadmin, Anti-Kedip, Anti-Ungu)
+   ========================================================= */
+
+/* 1. Background Tetap Biru Solid dalam segala kondisi */
+.sidebar[data-background-color="white"] .nav-item.active_ > a,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:hover,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:focus,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:active,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"],
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:hover,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:focus,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:active {
+    background-color: var(--navy-lt) !important;
+    box-shadow: none !important;
+    transition: none !important; /* Membunuh kedipan/FOUC saat refresh */
+    animation: none !important;
+}
+
+/* 2. Teks, Icon, dan Caret (Panah) Tetap Putih Solid (Membunuh Ungu di Icon) */
+.sidebar[data-background-color="white"] .nav-item.active_ > a p,
+.sidebar[data-background-color="white"] .nav-item.active_ > a i,
+.sidebar[data-background-color="white"] .nav-item.active_ > a i::before,
+.sidebar[data-background-color="white"] .nav-item.active_ > a svg,
+.sidebar[data-background-color="white"] .nav-item.active_ > a span.caret,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:hover p,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:hover i,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:hover i::before,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:hover svg,
+.sidebar[data-background-color="white"] .nav-item.active_ > a:hover span.caret,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"] p,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"] i,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"] i::before,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"] svg,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"] span.caret,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:hover p,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:hover i,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:hover i::before,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:hover svg,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]:hover span.caret {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    transition: none !important;
+}
+
+/* 3. Matikan Garis Vertikal Bawaan Template Kaiadmin */
+.sidebar[data-background-color="white"] .nav-item.active_ > a::before,
+.sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]::before {
+    display: none !important;
+}
+
