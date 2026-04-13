@@ -5,23 +5,21 @@
         <div class="page-header d-flex align-items-center justify-content-between mb-4">
             <h3 class="fw-bold mb-0">Profil</h3>
             <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
-    
-    <li class="nav-home d-flex align-items-center">
-        <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
-            <i class="fas fa-home me-2" style="font-size: 15px;"></i>
-            <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
-        </a>
-    </li>
-    
-    <li class="separator text-muted d-flex align-items-center px-2">
-        <span style="font-size: 14px; position: relative; top: 2px;">-</span>
-    </li>
-    
-    <li class="nav-item d-flex align-items-center">
-        <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Profil</span>
-    </li>
-
-</ul>
+                <li class="nav-home d-flex align-items-center">
+                    <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                        <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
+                    </a>
+                </li>
+                
+                <li class="separator text-muted d-flex align-items-center px-2">
+                    <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+                </li>
+                
+                <li class="nav-item d-flex align-items-center">
+                    <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Profil</span>
+                </li>
+            </ul>
         </div>
 
         <div class="row">
