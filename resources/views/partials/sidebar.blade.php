@@ -32,9 +32,9 @@
                 </li>
 
                 <li class="nav-item {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'active_' : '' }}">
-                    <a href="#strukturOrganisasiDrop" 
+                    <a href="#strukturOrganisasiDrop"
                         class="nav-link {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? '' : 'collapsed' }}" 
-                        data-toggle="collapse" 
+                        data-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'true' : 'false' }}">
                             <i class="fas fa-sitemap"></i>
                             <p>Struktur Organisasi</p>
@@ -68,24 +68,24 @@
                     </a>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
-                    <a href="#lokasiDrop" 
-                        class="nav-link {{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? '' : 'collapsed' }}" 
-                        data-toggle="collapse" 
-                        aria-expanded="{{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'true' : 'false' }}">
+                <li class="nav-item {{ request()->routeIs('sumber-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
+                    <a href="#lokasiDrop"
+                        class="nav-link {{ request()->routeIs('sumber-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse"
+                        aria-expanded="{{ request()->routeIs('sumber-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'true' : 'false' }}">
                             <i class="fas fa-map-marker-alt"></i>
                             <p>Lokasi</p>
                             <span class="caret"></span>
                     </a>
 
-                    <div class="collapse {{ request()->routeIs('lokasi-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'show' : '' }}" 
+                    <div class="collapse {{ request()->routeIs('sumber-kepemilikan.*') || request()->routeIs('lokasi-aset.*') ? 'show' : '' }}" 
                         id="lokasiDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
 
-                            {{-- Sub-menu 1: Lokasi Kepemilikan --}}
-                            <li class="{{ request()->routeIs('lokasi-kepemilikan.*') ? 'active' : '' }}">
-                                <a href="{{ route('lokasi-kepemilikan.index') }}">
-                                    <span class="sub-item">Lokasi Kepemilikan</span>
+                            {{-- Sub-menu 1: Sumber Kepemilikan --}}
+                            <li class="{{ request()->routeIs('sumber-kepemilikan.*') ? 'active' : '' }}">
+                                <a href="{{ route('sumber-kepemilikan.index') }}">
+                                    <span class="sub-item">Sumber Kepemilikan</span>
                                 </a>
                             </li>
 
@@ -132,7 +132,14 @@
                         </ul>
                     </div>
                 </li>
-            @endif 
+
+                <li class="nav-item {{ request()->routeIs('aset.*') && !request()->routeIs('aset.scanner') ? 'active_' : '' }}">
+                    <a href="{{ route('aset.index') }}" class="nav-link">
+                        <i class="fas fa-box"></i>
+                        <p>Data Aset Perusahaan</p>
+                    </a>
+                </li>
+            @endif
         </ul>
     </div>
 </div>

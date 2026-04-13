@@ -9,9 +9,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserManageController;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\LokasiKepemilikanController;
+use App\Http\Controllers\SumberKepemilikanController;
 use App\Http\Controllers\LokasiAsetController;
 use App\Http\Controllers\JenisAsetController;
+use App\Http\Controllers\DataAsetController;
 
 
 
@@ -87,8 +88,8 @@ Route::post('organization-manage/add', [OrganizationController::class, 'store'])
 
 
 Route::middleware(['auth', 'role:1,2'])->group(function () {
-// LOKASI KEPEMILIKAN
-Route::resource('lokasi-kepemilikan', LokasiKepemilikanController::class)->middleware('auth');
+
+Route::resource('sumber-kepemilikan', SumberKepemilikanController::class)->middleware('auth');
 Route::resource('lokasi-aset', LokasiAsetController::class)->middleware('auth');
 
 // JENIS ASET UMUM
@@ -102,4 +103,13 @@ Route::get('/jenis-khusus', [JenisAsetController::class, 'indexKhusus'])->name('
 Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name('jenis-aset.storeKhusus');
 Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
 Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
+
+
+Route::get('/aset', [DataAsetController::class, 'index'])->name('aset.index');
+Route::get('/aset/create', [DataAsetController::class, 'create'])->name('aset.create');
+Route::post('/aset', [DataAsetController::class, 'store'])->name('aset.store');
+Route::get('/aset/{id}', [DataAsetController::class, 'show'])->name('aset.show');
+Route::get('/aset/{id}/edit', [DataAsetController::class, 'edit'])->name('aset.edit');
+Route::put('/aset/{id}', [DataAsetController::class, 'update'])->name('aset.update');
+Route::delete('/aset/{id}', [DataAsetController::class, 'destroy'])->name('aset.destroy');
 });

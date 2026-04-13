@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/info.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/aset.css') }}">
 
     @stack('styles')
 
@@ -198,7 +199,7 @@
             // Script Handle Logika Klik Dropdown Sidebar
             document.querySelectorAll('.nav-link[data-toggle="collapse"]').forEach(function (link) {
                 link.addEventListener('click', function (e) {
-                    e.preventDefault(); // Mencegah akhiran # masuk ke URL
+                    e.preventDefault(); 
 
                     var targetId = this.getAttribute('href');
                     var target = document.querySelector(targetId);
@@ -228,7 +229,6 @@
                         }
                     });
 
-                    // 3. Toggle menu yang sedang diklik
                     if (!isOpen) {
                         target.classList.add('show');
                         link.setAttribute('aria-expanded', 'true');

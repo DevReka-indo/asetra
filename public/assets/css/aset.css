@@ -1,0 +1,52 @@
+.text-navy { color: #003366 !important; }
+.bg-navy { background-color: #003366 !important; }
+
+/* Styling untuk Tab */
+.custom-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding-bottom: 10px;
+}
+.custom-tabs .nav-link.active {
+    color: #003366;
+    font-weight: 700;
+    border-bottom: 3px solid #003366;
+    background: transparent;
+}
+
+/* Styling untuk detail informasi */
+.info-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #858c93;
+    margin-bottom: 4px;
+    display: block;
+}
+.info-value {
+    font-size: 1.05rem;
+    color: #2b3035;
+    font-weight: 600;
+}
+.info-box {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    height: 100%;
+    border-left: 4px solid #003366;
+    transition: all 0.2s ease-in-out;
+}
+.info-box:hover {
+    background-color: #eef1f5;
+    transform: translateY(-2px);
+}
+.icon-wrapper {
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 51, 102, 0.1);
+}
