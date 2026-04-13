@@ -112,4 +112,8 @@ Route::get('/aset/{id}', [DataAsetController::class, 'show'])->name('aset.show')
 Route::get('/aset/{id}/edit', [DataAsetController::class, 'edit'])->name('aset.edit');
 Route::put('/aset/{id}', [DataAsetController::class, 'update'])->name('aset.update');
 Route::delete('/aset/{id}', [DataAsetController::class, 'destroy'])->name('aset.destroy');
+
+//Scanner QR Code
+Route::get('/aset-scanner', [DataAsetController::class, 'scanner'])->name('aset.scanner');
+Route::post('/aset-scanner/proses', [DataAsetController::class, 'scanProses'])->name('aset.scanProses');
 });

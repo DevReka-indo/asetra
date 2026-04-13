@@ -122,6 +122,44 @@ class DataAsetController extends Controller
     }
 
     
+    /**
+     * Memproses hasil scan barcode.
+     */
+    public function scanProses(Request $request)
+    {
+        $request->validate([
+            'nomor_aset' => 'required|string'
+        ]);
+
+        $inputData = trim($request->nomor_aset);
+
+        // Cek hasil scan berupa URL
+        if (filter_var($inputData, FILTER_VALIDATE_URL)) {
+            // Ekstrak path dari URL
+            $path = parse_url($inputData, PHP_URL_PATH);
+            $segments = explode('/', trim($path, '/'));
+            
+            // Ambil ID aset
+            $id = end($segments);
+
+            $aset = DataAset::find($id);
+            if ($aset) {
+                return redirect()->route('aset.show', $aset->id)
+                    ->with('success', 'Aset berhasil ditemukan dari QR code (URL).');
+            }
+        }
+
+        //input manual nomor aset
+        $aset = DataAset::where('nomor_aset', $inputData)->first();
+
+        if ($aset) {
+            return redirect()->route('aset.show', $aset->id)
+                ->with('success', 'Aset berhasil ditemukan dari input manual.');
+        }
+
+        return redirect()->route('aset.scanner')
+            ->with('error', 'Aset dengan identitas "' . $inputData . '" tidak ditemukan.');
+    }
 
     /**
      * Menampilkan form untuk mengedit aset.
