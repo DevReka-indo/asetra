@@ -224,7 +224,7 @@
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE BAGIAN <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
-                        <input type="text" name="kode_bagian" class="form-control border-start-0 fs-6 @error('kode_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_bagian') : '' }}" placeholder="Contoh: IT-01"> 
+                        <input type="text" name="kode_bagian" class="form-control border-start-0 fs-6 @error('kode_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_bagian') : '' }}" placeholder="Contoh: TI"> 
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('kode_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -235,7 +235,7 @@
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA BAGIAN <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-building"></i></span>
-                        <input type="text" name="nama_bagian" class="form-control border-start-0 fs-6 @error('nama_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_bagian') : '' }}" placeholder="Contoh: Information Technology">
+                        <input type="text" name="nama_bagian" class="form-control border-start-0 fs-6 @error('nama_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_bagian') : '' }}" placeholder="Contoh: Teknologi Informasi">
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('nama_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -246,7 +246,7 @@
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KATEGORI</label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tags"></i></span>
-                        <input type="text" name="kategori" class="form-control border-start-0 fs-6 @error('kategori') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kategori') : '' }}" placeholder="Contoh: Operasional">
+                        <input type="text" name="kategori" class="form-control border-start-0 fs-6 @error('kategori') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kategori') : '' }}" placeholder="Contoh: Departemen">
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('kategori') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror

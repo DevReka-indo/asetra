@@ -11,7 +11,18 @@ class SumberKepemilikanController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $data    = SumberKepemilikan::oldest()->paginate($perPage);
+        $search  = $request->input('search');
+
+        $query = SumberKepemilikan::query();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kode', 'LIKE', "%{$search}%")
+                  ->orWhere('nama', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $data = $query->oldest('id')->paginate($perPage)->withQueryString();
 
         return view('sumber_kepemilikan.index', compact('data'));
     }
