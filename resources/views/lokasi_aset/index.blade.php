@@ -12,19 +12,42 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('lokasi-aset.index') }}" class="row g-2 align-items-end">
-                <div class="col-md-2">
+                {{-- Entries --}}
+                <div class="col-md-1">
                     <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
                     <select name="per_page" class="form-select form-select-sm rounded-3" onchange="this.form.submit()">
                         <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
 
+                {{-- Pencarian --}}
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
+                    <div class="input-group input-group-sm input-group-focus rounded-3">
+                        <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari kode, nama, atau detail..." value="{{ request('search') }}">
+                    </div>
+                </div>
+
                 <div class="col-auto ms-auto">
-                    <div class="d-flex gap-2 align-items-center">
+                    <div class="d-flex gap-2">
+
+                        {{-- Import --}}
+                        <button type="button" class="btn btn-warning px-4 rounded-3 d-flex align-items-center text-dark" title="Import Data">
+                            <i class="fas fa-file-import me-1"></i> Import
+                        </button>
+
+                        {{-- Export --}}
+                        <button type="button" class="btn btn-success px-4 rounded-3 d-flex align-items-center text-white" title="Export Data">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </button>
+
+                        {{-- Tombol Tambah --}}
                         <button type="button" class="btn btn-primary px-4 rounded-3 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTambah">
-                            + Tambah Lokasi
+                            <i class="fas fa-plus me-1"></i> Tambah Lokasi Aset
                         </button>
                     </div>
                 </div>
@@ -105,43 +128,52 @@
 {{-- MODAL TAMBAH --}}
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('lokasi-aset.store') }}" method="POST" class="modal-content border-0 shadow" autocomplete="off">
+        <form action="{{ route('lokasi-aset.store') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
             @csrf
-            {{-- Input pelacak form --}}
             <input type="hidden" name="form_type" value="tambah">
 
-            <div class="modal-header bg-light">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-plus-circle text-primary me-2"></i> Tambah Lokasi Aset
+            <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-plus-circle me-2"></i> Tambah Lokasi Aset
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted text-uppercase">Kode Lokasi</label>
-                    <input type="text" name="kode_lokasi" class="form-control @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_lokasi') : '' }}" placeholder="Contoh: LOK-01"> 
+            <div class="modal-body p-4 bg-light">
+                <div class="mb-4">
+                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE LOKASI <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                        <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_lokasi') : '' }}" placeholder="Contoh: Keu"> 
+                    </div>
                     @if(old('form_type') == 'tambah')
-                        @error('kode_lokasi') <div class="invalid-feedback fw-bold">{{ $message }}</div> @enderror
+                        @error('kode_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
                     @endif
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted text-uppercase">Nama Lokasi</label>
-                    <input type="text" name="nama_lokasi" class="form-control @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_lokasi') : '' }}" placeholder="Contoh: Gedung Pusat">
+                <div class="mb-4">
+                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA LOKASI <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
+                        <input type="text" name="nama_lokasi" class="form-control border-start-0 fs-6 @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_lokasi') : '' }}" placeholder="Contoh: Ruang Keuangan">
+                    </div>
                     @if(old('form_type') == 'tambah')
-                        @error('nama_lokasi') <div class="invalid-feedback fw-bold">{{ $message }}</div> @enderror
+                        @error('nama_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
                     @endif
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted text-uppercase">Detail Lokasi</label>
-                    <textarea name="detail_lokasi" class="form-control" rows="3" placeholder="Contoh: Gedung A Lantai 2, Ruang Laboratorium">{{ old('form_type') == 'tambah' ? old('detail_lokasi') : '' }}</textarea>
+
+                <div class="mb-2">
+                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">DETAIL LOKASI</label>
+                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-start">
+                        <span class="input-group-text bg-white border-end-0 text-muted pt-3"><i class="fas fa-align-left"></i></span>
+                        <textarea name="detail_lokasi" class="form-control border-start-0 fs-6" rows="3" placeholder="Contoh: Gedung pusat, Lt.1 Ruang Keuangan">{{ old('form_type') == 'tambah' ? old('detail_lokasi') : '' }}</textarea>
+                    </div>
                 </div>
             </div>
 
-            <div class="modal-footer bg-light border-0">
-                <button type="button" class="btn btn-danger rounded-3 px-4" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold">
+            <div class="modal-footer bg-light border-top-0 pt-3 pb-4 px-4">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
                     <i class="fas fa-save me-1"></i> Simpan
                 </button>
             </div>
@@ -149,84 +181,91 @@
     </div>
 </div>
 
-{{-- MODAL DETAIL --}}
 @foreach($data as $row)
+    <!-- Modal Detail -->
     <div class="modal fade" id="modalDetail{{ $row->getKey() }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title fw-bold">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                    <h5 class="modal-title fw-bold text-white">
                         <i class="fas fa-info-circle me-2"></i> Detail Lokasi
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <table class="table table-borderless mb-0">
-                        <tr>
-                            <th width="35%" class="text-muted text-uppercase small align-middle">Kode Lokasi</th>
-                            <td width="5%" class="align-middle">:</td>
-                            <td><span class="badge bg-primary px-3 py-2 fs-6 shadow-sm">{{ $row->kode_lokasi }}</span></td>
-                        </tr>
-                        <tr>
-                            <th class="text-muted text-uppercase small pt-3 align-middle">Nama Lokasi</th>
-                            <td class="pt-3 align-middle">:</td>
-                            <td class="pt-3 fw-bold fs-6 text-dark">{{ $row->nama_lokasi }}</td>
-                        </tr>
-                        <tr>
-                            <th class="text-muted text-uppercase small pt-3 align-top">Detail Lokasi</th>
-                            <td class="pt-3 align-top">:</td>
-                            <td class="pt-3 text-muted italic">
-                                {{ $row->detail_lokasi ?? 'Tidak ada keterangan detail' }}
-                            </td>
-                        </tr>
-
-                    </table>
+                <div class="modal-body p-4 bg-light">
+                    <div class="bg-white rounded-4 p-4 shadow-sm border-0">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-5 text-muted small text-uppercase fw-bold"><i class="fas fa-barcode me-2 text-primary"></i>Kode Lokasi</div>
+                            <div class="col-7">
+                                <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm rounded-pill">{{ $row->kode_lokasi }}</span>
+                            </div>
+                        </div>
+                        <hr class="text-muted opacity-25">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-5 text-muted small text-uppercase fw-bold"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Nama Lokasi</div>
+                            <div class="col-7 fw-bold text-dark fs-6">{{ $row->nama_lokasi }}</div>
+                        </div>
+                        <hr class="text-muted opacity-25">
+                        <div class="row align-items-start">
+                            <div class="col-5 text-muted small text-uppercase fw-bold pt-1"><i class="fas fa-align-left me-2 text-primary"></i>Detail Lokasi</div>
+                            <div class="col-7 text-dark fw-medium">{{ $row->detail_lokasi ?? 'Tidak ada keterangan detail' }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-{{--  MODAL EDIT  --}}
+    <!-- Modal Edit -->
     <div class="modal fade" id="modalEdit{{ $row->getKey() }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form action="{{ route('lokasi-aset.update', $row->getKey()) }}" method="POST" class="modal-content border-0 shadow" autocomplete="off">
+            <form action="{{ route('lokasi-aset.update', $row->getKey()) }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
                 @csrf
                 @method('PUT')
-                {{-- Input pelacak form --}}
                 <input type="hidden" name="form_type" value="edit_{{ $row->getKey() }}">
 
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold text-warning">
+                <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                    <h5 class="modal-title fw-bold text-white">
                         <i class="fas fa-edit me-2"></i> Edit Lokasi Aset
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Kode Lokasi</label>
-                        <input type="text" name="kode_lokasi" class="form-control @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('kode_lokasi') : $row->kode_lokasi }}"> 
+                <div class="modal-body p-4 bg-light">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE LOKASI <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                            <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('kode_lokasi') : $row->kode_lokasi }}"> 
+                        </div>
                         @if(old('form_type') == 'edit_'.$row->getKey())
-                            @error('kode_lokasi') <div class="invalid-feedback fw-bold">{{ $message }}</div> @enderror
+                            @error('kode_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
                         @endif
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Nama Lokasi</label>
-                        <input type="text" name="nama_lokasi" class="form-control @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('nama_lokasi') : $row->nama_lokasi }}">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA LOKASI <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
+                            <input type="text" name="nama_lokasi" class="form-control border-start-0 fs-6 @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('nama_lokasi') : $row->nama_lokasi }}">
+                        </div>
                         @if(old('form_type') == 'edit_'.$row->getKey())
-                            @error('nama_lokasi') <div class="invalid-feedback fw-bold">{{ $message }}</div> @enderror
+                            @error('nama_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
                         @endif
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase">Detail Lokasi</label>
-                        <textarea name="detail_lokasi" class="form-control" rows="3" placeholder="Contoh: Gedung A Lantai 2, Ruang Laboratorium">{{ old('form_type') == 'edit_'.$row->getKey() ? old('detail_lokasi') : $row->detail_lokasi }}</textarea>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">DETAIL LOKASI</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-start">
+                            <span class="input-group-text bg-white border-end-0 text-muted pt-3"><i class="fas fa-align-left"></i></span>
+                            <textarea name="detail_lokasi" class="form-control border-start-0 fs-6" rows="3">{{ old('form_type') == 'edit_'.$row->getKey() ? old('detail_lokasi') : $row->detail_lokasi }}</textarea>
+                        </div>
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light border-0">
-                    <button type="button" class="btn btn-danger rounded-3 px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-warning rounded-3 px-4 text-white fw-bold">
+                <div class="modal-footer bg-light border-top-0 pt-3 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
                         <i class="fas fa-save me-1"></i> Simpan Perubahan
                     </button>
                 </div>
@@ -234,25 +273,27 @@
         </div>
     </div>
 
-{{-- MODAL HAPUS --}}
+    <!-- Modal Hapus -->
     <div class="modal fade" id="modalDelete{{ $row->getKey() }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center p-4">
-                    <i class="fas fa-trash-alt fa-4x text-danger mb-3"></i>
-                    <h5 class="fw-bold text-dark">Hapus Data Ini?</h5>
-                    <p class="text-muted mb-0">Anda yakin ingin menghapus <strong>{{ $row->kode_lokasi }} - {{ $row->nama_lokasi }}</strong>?</p>
-                </div>
-                <div class="modal-footer bg-light border-0 justify-content-center">
-                    <form action="{{ route('lokasi-aset.destroy', $row->getKey()) }}" method="POST" class="d-flex gap-2">
-                        @csrf @method('DELETE')
-                        <button type="button" class="btn btn-warning rounded-3 px-4 text-white" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-danger rounded-3 px-4 fw-bold">Ya, Hapus</button>
-                    </form>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-body p-5 text-center bg-light">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f1f3f5;">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
+                    <p class="text-muted mb-4" style="font-size: 1rem;">
+                        Anda yakin ingin menghapus data <br>
+                        <strong class="text-danger fs-5">{{ $row->kode_lokasi }} - {{ $row->nama_lokasi }}</strong>?
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <form action="{{ route('lokasi-aset.destroy', $row->getKey()) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                            @csrf 
+                            @method('DELETE')
+                            <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                            <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus Data</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,7 +309,7 @@
             const swalConfig = {
                 showConfirmButton: true,
                 confirmButtonText: 'OK',
-                confirmButtonColor: '#0d6efd',
+                confirmButtonColor: '#253070',
                 customClass: { popup: 'rounded-4 shadow' }
             };
 

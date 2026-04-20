@@ -11,7 +11,19 @@ class LokasiAsetController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $data = LokasiAset::oldest()->paginate($perPage);
+        $search  = $request->input('search');
+
+        $query = LokasiAset::query();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kode_lokasi', 'LIKE', "%{$search}%")
+                  ->orWhere('nama_lokasi', 'LIKE', "%{$search}%")
+                  ->orWhere('detail_lokasi', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $data = $query->oldest()->paginate($perPage)->withQueryString();
         
         return view('lokasi_aset.index', compact('data'));
     }
