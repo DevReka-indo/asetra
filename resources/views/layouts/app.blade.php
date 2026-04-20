@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/info.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/aset.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/modal.css') }}">
 
     @stack('styles')
 

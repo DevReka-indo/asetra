@@ -1,27 +1,91 @@
 .swal2-actions.swal2-actions-custom {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 12px !important;
-    width: 100%;
-    margin-top: 16px;
-  }
-  /* Samakan ukuran tombol agar konsisten */
-  .swal2-actions.swal2-actions-custom .btn {
-    min-width: 110px;
-    border-radius: .5rem;
-    font-weight: 600;
-  }
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  width: 100%;
+  margin-top: 16px;
+}
 
-  .swal2-actions-custom { display:flex; justify-content:center; gap:12px; }
-  .swal2-cancel.btn-warning {
-    background-color:#6c757d !important;
-    border-color:#6c757d !important;
-    color:#ffff !important;
-  }
-  .swal2-cancel.btn-warning:hover {
-    filter: brightness(0.95);
-  }
-  
+/* tombol */
+.swal2-actions.swal2-actions-custom .btn {
+  min-width: 110px;
+  border-radius: .5rem;
+  font-weight: 600;
+}
 
+.swal2-actions-custom {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
 
+.swal2-cancel.btn-warning {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffff !important;
+}
 
+.swal2-cancel.btn-warning:hover {
+  filter: brightness(0.95);
+}
+
+.input-group-focus {
+  border: 1px solid #ced4da !important;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.input-group-focus .input-group-text,
+.input-group-focus .form-control,
+.input-group-focus .form-select {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+/* dropdown */
+.input-group-focus .form-select {
+  background-color: transparent !important;
+}
+
+.input-group-focus:focus-within {
+  border-color: #86b7fe !important;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+  z-index: 10;
+}
+
+.input-group-focus:has(.is-invalid) {
+  border-color: #dc3545 !important;
+}
+
+.input-group-focus:has(.is-invalid):focus-within {
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.input-group-focus .form-control:focus,
+.input-group-focus .form-select:focus {
+  box-shadow: none !important;
+}
+
+/*dropdown  */
+.input-group-lg.input-group-focus .form-control,
+.input-group-lg.input-group-focus .form-select {
+  min-height: calc(1.5em + 1rem + 2px);
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.input-group-focus .form-select option {
+  padding: 12px 16px;
+  background-color: #f8f9fa; 
+  color: #253070; 
+  font-size: 1rem;
+}
+
+.input-group-focus .form-select option:hover,
+.input-group-focus .form-select option:focus,
+.input-group-focus .form-select option:active,
+.input-group-focus .form-select option:checked {
+  background-color: #e2e8f0 !important;
+  color: #253070 !important;
+  font-weight: 500;
+}

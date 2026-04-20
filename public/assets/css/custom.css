@@ -243,4 +243,3 @@ header .navbar-nav .nav-link.dropdown-toggle,
 .sidebar[data-background-color="white"] .nav-item > a[aria-expanded="true"]::before {
     display: none !important;
 }
-
