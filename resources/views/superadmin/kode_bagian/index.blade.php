@@ -103,7 +103,7 @@
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">
                                         @if ($row->trashed())
-                                            {{-- ♻️ RECOVERY --}}
+                                            {{-- Pemulihan --}}
                                             <form action="{{ route('kode-bagian.restore', $row->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 <button class="btn btn-sm btn-outline-success rounded-circle" style="width:32px; height:32px;" title="Pulihkan">

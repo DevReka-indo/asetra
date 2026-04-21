@@ -12,7 +12,18 @@ class JenisAsetController extends Controller
     public function indexUmum(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $dataUmum = JenisAsetUmum::latest()->paginate($perPage);
+        $search  = $request->input('search');
+
+        $query = JenisAsetUmum::query();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kode_umum', 'LIKE', "%{$search}%")
+                  ->orWhere('jenis_aset', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $dataUmum = $query->latest()->paginate($perPage)->withQueryString();
         
         return view('jenis_umum.index', compact('dataUmum'));
     }
@@ -74,9 +85,29 @@ class JenisAsetController extends Controller
     public function indexKhusus(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $dataKhusus = JenisAsetKhusus::with('jenisAsetUmum')->latest()->paginate($perPage);
+        $search  = $request->input('search');
+        $umumId  = $request->input('jenis_aset_umum_id');
 
-        $listUmum = JenisAsetUmum::select('id', 'jenis_aset')->get();
+        $query = JenisAsetKhusus::with('jenisAsetUmum');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kode_khusus', 'LIKE', "%{$search}%")
+                  ->orWhere('jenis_aset', 'LIKE', "%{$search}%")
+                  ->orWhereHas('jenisAsetUmum', function($qUmum) use ($search) {
+                      $qUmum->where('kode_umum', 'LIKE', "%{$search}%")
+                            ->orWhere('jenis_aset', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($umumId) {
+            $query->where('jenis_aset_umum_id', $umumId);
+        }
+
+        $dataKhusus = $query->latest()->paginate($perPage)->withQueryString();
+
+        $listUmum = JenisAsetUmum::select('id', 'kode_umum', 'jenis_aset')->get();
 
         return view('jenis_khusus.index', compact('dataKhusus', 'listUmum'));
     }
