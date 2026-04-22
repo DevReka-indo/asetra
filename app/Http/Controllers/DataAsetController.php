@@ -14,17 +14,41 @@ use Illuminate\Support\Facades\Storage;
 
 class DataAsetController extends Controller
 {
-    /**
-     * Menampilkan daftar semua aset.
-     */
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $asets   = DataAset::with(['jenisAsetKhusus', 'divisi', 'lokasi', 'pic', 'fotoPertama'])
-                    ->latest()
-                    ->paginate($perPage);
+        $search  = $request->input('search');
+        $kondisi = $request->input('kondisi');
+        $status  = $request->input('status_aset');
 
-        return view('aset.index', compact('asets'));
+        $query = DataAset::with(['jenisAsetKhusus', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_aset', 'LIKE', "%{$search}%")
+                  ->orWhere('nama_aset', 'LIKE', "%{$search}%")
+                  ->orWhereHas('jenisAsetKhusus', function($qj) use ($search) {
+                      $qj->where('jenis_aset', 'LIKE', "%{$search}%")
+                         ->orWhere('kode_khusus', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($kondisi) {
+            $query->where('status_kondisi', $kondisi);
+        }
+
+        if ($status) {
+            $query->where('status_aset', $status);
+        }
+
+        $asets = $query->latest()
+                       ->paginate($perPage)
+                       ->withQueryString();
+
+        $lokasiList = LokasiAset::all();
+
+        return view('aset.index', compact('asets', 'lokasiList'));
     }
 
     /**
@@ -58,7 +82,7 @@ class DataAsetController extends Controller
         $validatedData = $request->validate([
             'nama_aset'            => 'required|string|max:150',
             'jenis_aset_khusus_id' => 'required|integer',
-            'id_divisi'            => 'required|integer',
+            'kode_organisasi'      => 'required|string',
             'sumber_kepemilikan_id'=> 'required|integer',
             'lokasi_id'            => 'required|integer',
             'merek'                => 'nullable|string|max:100',
@@ -76,6 +100,16 @@ class DataAsetController extends Controller
 
         $jenis                    = JenisAsetKhusus::find($request->jenis_aset_khusus_id);
         $validatedData['kode_aset'] = $jenis ? $jenis->full_kode : 'XXXX';
+
+        if (isset($validatedData['kode_organisasi'])) {
+            $parts = explode('_', $validatedData['kode_organisasi']);
+            if (count($parts) === 2) {
+                $type = $parts[0];
+                $id = $parts[1];
+                $validatedData["id_{$type}"] = $id;
+            }
+            unset($validatedData['kode_organisasi']);
+        }
 
         $aset = DataAset::create($validatedData);
 
@@ -102,7 +136,7 @@ class DataAsetController extends Controller
     {
         $aset = DataAset::with([
             'jenisAsetKhusus',
-            'divisi',
+            'director', 'divisi', 'department', 'section', 'unit',
             'lokasi',
             'sumberKepemilikan',
             'pic',
@@ -110,7 +144,14 @@ class DataAsetController extends Controller
             'logAset' => fn($q) => $q->latest('tanggal_cek')->limit(10),
         ])->findOrFail($id);
 
-        return view('aset.show', compact('aset'));
+        $mainDirector = \App\Models\Director::with([
+            'subDirectors',
+            'divisi.department.section.unit'
+        ])->whereNull('parent_director_id')->first();
+
+        $lokasi = LokasiAset::all();
+
+        return view('aset.show', compact('aset', 'mainDirector', 'lokasi'));
     }
 
     /**
@@ -169,13 +210,17 @@ class DataAsetController extends Controller
         $aset = DataAset::with('foto')->findOrFail($id);
 
         $jenisKhusus       = JenisAsetKhusus::all();
-        $divisi            = Divisi::all();
         $lokasi            = LokasiAset::all();
         $sumberKepemilikan = SumberKepemilikan::all();
         $users             = User::all();
 
+        $mainDirector = \App\Models\Director::with([
+            'subDirectors',
+            'divisi.department.section.unit'
+        ])->whereNull('parent_director_id')->first();
+
         return view('aset.edit', compact(
-            'aset', 'jenisKhusus', 'divisi', 'lokasi', 'sumberKepemilikan', 'users'
+            'aset', 'jenisKhusus', 'lokasi', 'sumberKepemilikan', 'users', 'mainDirector'
         ));
     }
 
@@ -189,13 +234,14 @@ class DataAsetController extends Controller
         $validatedData = $request->validate([
             'nama_aset'            => 'required|string|max:150',
             'jenis_aset_khusus_id' => 'required|integer',
-            'id_divisi'            => 'required|integer',
+            'kode_organisasi'      => 'required|string',
             'lokasi_id'            => 'required|integer',
             'merek'                => 'nullable|string|max:100',
             'deskripsi'            => 'nullable|string',
             'tahun_kapitalisasi'   => 'nullable|integer|min:1900|max:' . date('Y'),
             'pic_id'               => 'nullable|integer',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
+            'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
             'keterangan_kondisi'   => 'nullable|string|max:255',
             'keterangan'           => 'nullable|string',
             // Tambah foto baru
@@ -205,6 +251,25 @@ class DataAsetController extends Controller
             'hapus_foto'           => 'nullable|array',
             'hapus_foto.*'         => 'integer|exists:aset_foto,id',
         ]);
+
+        if (isset($validatedData['kode_organisasi'])) {
+            $parts = explode('_', $validatedData['kode_organisasi']);
+            if (count($parts) === 2) {
+                $type = $parts[0];
+                $id = $parts[1];
+                
+                // Reset semua org ID ke null
+                $aset->id_director = null;
+                $aset->id_divisi = null;
+                $aset->id_department = null;
+                $aset->id_section = null;
+                $aset->id_unit = null;
+
+                // Assign id baru yang benar
+                $aset->{"id_{$type}"} = $id;
+            }
+            unset($validatedData['kode_organisasi']);
+        }
 
         $aset->update($validatedData);
 
@@ -253,5 +318,58 @@ class DataAsetController extends Controller
 
         return redirect()->route('aset.index')
             ->with('success', 'Data aset berhasil dihapus!');
+    }
+
+    /**
+     * Cetak Label Aset Tertentu (Multi-select)
+     */
+    public function cetakLabelSelected(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:data_aset,id'
+        ]);
+
+        $asets = DataAset::with(['jenisAsetKhusus', 'lokasi'])->whereIn('id', $request->ids)->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('aset.print_label_pdf', compact('asets'))
+                ->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Label_Aset_Selected.pdf');
+    }
+
+    /**
+     * Preview Aset Per Lokasi untuk Modal
+     */
+    public function previewAsetLokasi($lokasi_id)
+    {
+        $asets = DataAset::with('jenisAsetKhusus')
+            ->where('lokasi_id', $lokasi_id)
+            ->get();
+            
+        return response()->json($asets);
+    }
+
+    /**
+     * Cetak Label Aset Per Lokasi
+     */
+    public function cetakLabelPerLokasi(Request $request)
+    {
+        $request->validate([
+            'lokasi_id' => 'required|exists:lokasi_aset,lokasi_id'
+        ]);
+
+        $asets = DataAset::with(['jenisAsetKhusus', 'lokasi'])
+            ->where('lokasi_id', $request->lokasi_id)
+            ->get();
+            
+        if ($asets->isEmpty()) {
+            return back()->with('error', 'Tidak ada aset di ruangan ini.');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('aset.print_label_pdf', compact('asets'))
+                ->setPaper('a4', 'portrait');
+
+        return $pdf->stream("Label_Aset_Lokasi_{$request->lokasi_id}.pdf");
     }
 }

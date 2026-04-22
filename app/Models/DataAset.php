@@ -19,7 +19,11 @@ class DataAset extends Model
         'deskripsi',
         'merek',
         'tahun_kapitalisasi',
+        'id_director',
         'id_divisi',
+        'id_department',
+        'id_section',
+        'id_unit',
         'sumber_kepemilikan_id',
         'lokasi_id',
         'pic_id',
@@ -70,15 +74,54 @@ class DataAset extends Model
         return $this->logAset()->latest('tanggal_cek')->value('tanggal_cek');
     }
 
+    public function getOrganisasiTerikatAttribute(): string
+    {
+        if ($this->id_unit && $this->unit) return "Unit: " . $this->unit->name_unit;
+        if ($this->id_section && $this->section) return "Bagian: " . $this->section->name_section;
+        if ($this->id_department && $this->department) return "Departemen: " . $this->department->name_department;
+        if ($this->id_divisi && $this->divisi) return "Divisi: " . $this->divisi->nm_divisi;
+        if ($this->id_director && $this->director) return "Direktur: " . $this->director->name_director;
+        return 'Tanpa Organisasi';
+    }
+
+    public function getKodeOrganisasiAttribute(): ?string
+    {
+        if ($this->id_unit) return "unit_" . $this->id_unit;
+        if ($this->id_section) return "section_" . $this->id_section;
+        if ($this->id_department) return "department_" . $this->id_department;
+        if ($this->id_divisi) return "divisi_" . $this->id_divisi;
+        if ($this->id_director) return "director_" . $this->id_director;
+        return null;
+    }
 
     public function jenisAsetKhusus()
     {
         return $this->belongsTo(JenisAsetKhusus::class, 'jenis_aset_khusus_id', 'id');
     }
 
+    public function director()
+    {
+        return $this->belongsTo(Director::class, 'id_director', 'id_director');
+    }
+
     public function divisi()
     {
         return $this->belongsTo(Divisi::class, 'id_divisi', 'id_divisi');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'id_department', 'id_department');
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class, 'id_section', 'id_section');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'id_unit', 'id_unit');
     }
 
     public function lokasi()
@@ -129,5 +172,22 @@ class DataAset extends Model
     public function stockOpnameDetail()
     {
         return $this->hasMany(StockOpnameDetail::class, 'aset_id');
+    }
+
+    /**
+     * Semua pengajuan perbaikan untuk aset ini
+     */
+    public function pengajuanPerbaikan()
+    {
+        return $this->hasMany(PengajuanPerbaikan::class, 'aset_id');
+    }
+
+    /**
+     * Pengajuan perbaikan yang masih aktif (menunggu atau disetujui)
+     */
+    public function pengajuanPerbaikanAktif()
+    {
+        return $this->hasMany(PengajuanPerbaikan::class, 'aset_id')
+                    ->whereIn('status', ['menunggu', 'disetujui']);
     }
 }
