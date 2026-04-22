@@ -42,13 +42,17 @@ class DataAsetController extends Controller
             $query->where('status_aset', $status);
         }
 
+        if ($request->has('lokasi') && $request->input('lokasi') != '') {
+            $query->where('lokasi_id', $request->input('lokasi'));
+        }
+
         $asets = $query->latest()
                        ->paginate($perPage)
                        ->withQueryString();
 
-        $lokasiList = LokasiAset::all();
+        $lokasis = LokasiAset::all();
 
-        return view('aset.index', compact('asets', 'lokasiList'));
+        return view('aset.index', compact('asets', 'lokasis'));
     }
 
     /**

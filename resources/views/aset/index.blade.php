@@ -49,6 +49,17 @@
 
                 {{-- Form Filter, Pencarian & Reset --}}
                 <div class="row g-2 align-items-end">
+                    {{-- Entries --}}
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
+                        <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                        </select>
+                    </div>
+
                     {{-- Pencarian --}}
                     <div class="col-md-3">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
@@ -85,14 +96,14 @@
                         </select>
                     </div>
 
-                    {{-- Entries --}}
-                    <div class="col-md-1">
-                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
-                        <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
-                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                            <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                    {{-- Filter Lokasi --}}
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
+                        <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Lokasi</option>
+                            @foreach($lokasis as $lokasi)
+                                <option value="{{ $lokasi->id }}" {{ request('lokasi') == $lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -298,7 +309,7 @@
                             <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-door-open"></i></span>
                             <select class="form-select border-0 shadow-none fs-6" id="lokasiSelect" name="lokasi_id" required>
                                 <option value="">-- Pilih Lokasi --</option>
-                                @foreach ($lokasiList as $lok)
+                                @foreach ($lokasis as $lok)
                                     <option value="{{ $lok->lokasi_id }}">{{ $lok->nama_lokasi ?? $lok->nm_lokasi_aset }}</option>
                                 @endforeach
                             </select>

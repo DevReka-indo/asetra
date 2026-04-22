@@ -32,8 +32,8 @@ Route::get('/logout', function () {
     return redirect()->route('login');
 });
 
-// SEMUA
-Route::middleware(['auth', 'role:1,2,3'])->group(function () {
+// Semua Dashboard
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // dashboard per role 
@@ -49,6 +49,10 @@ Route::middleware(['auth', 'role:1,2,3'])->group(function () {
         ->middleware('role:3')
         ->name('staff.dashboard');
 });
+
+// General Affairs Dashboard
+Route::middleware('auth')->get('/dashboard/general-affairs', [DashboardController::class, 'generalAffairsDashboard'])
+    ->name('general-affairs.dashboard');
 
 Route::get('/edit-profile', [ProfileController::class, 'editProfile'])->name('edit-profile');
 Route::post('/delete-photo', [ProfileController::class, 'deletePhoto'])->name('superadmin.deletePhoto');
@@ -86,12 +90,42 @@ Route::post('organization-manage/add', [OrganizationController::class, 'store'])
     Route::get('/user-manage/{id}', [UserController::class, 'show'])->name('user.show');
 });
 
+// superadmin (role:1) and GA staff (section:12)
+Route::middleware(['auth', 'ga-admin'])->group(function () {
 
+// Data Aset
+Route::get('/aset', [DataAsetController::class, 'index'])->name('aset.index');
+Route::get('/aset/create', [DataAsetController::class, 'create'])->name('aset.create');
+Route::post('/aset', [DataAsetController::class, 'store'])->name('aset.store');
+Route::get('/aset/{id}', [DataAsetController::class, 'show'])->name('aset.show');
+Route::get('/aset/{id}/edit', [DataAsetController::class, 'edit'])->name('aset.edit');
+Route::put('/aset/{id}', [DataAsetController::class, 'update'])->name('aset.update');
+Route::delete('/aset/{id}', [DataAsetController::class, 'destroy'])->name('aset.destroy');
 
-Route::middleware(['auth', 'role:1,2'])->group(function () {
+//Scanner QR Code
+Route::get('/aset-scanner', [DataAsetController::class, 'scanner'])->name('aset.scanner');
+Route::post('/aset-scanner/proses', [DataAsetController::class, 'scanProses'])->name('aset.scanProses');
 
-Route::resource('sumber-kepemilikan', SumberKepemilikanController::class)->middleware('auth');
-Route::resource('lokasi-aset', LokasiAsetController::class)->middleware('auth');
+// Cetak Label Aset
+Route::post('/aset/cetak-label', [DataAsetController::class, 'cetakLabelSelected'])->name('aset.cetak-label');
+Route::get('/aset/lokasi/{lokasi_id}/preview', [DataAsetController::class, 'previewAsetLokasi'])->name('aset.preview-lokasi');
+Route::post('/aset/cetak-label-lokasi', [DataAsetController::class, 'cetakLabelPerLokasi'])->name('aset.cetak-label-lokasi');
+
+//Log Aset
+Route::get('/log-aset', [\App\Http\Controllers\LogAsetController::class, 'index'])->name('log-aset.index');
+Route::post('/log-aset', [\App\Http\Controllers\LogAsetController::class, 'store'])->name('log-aset.store');
+
+// Pengajuan Perbaikan Aset
+Route::get('/perbaikan-aset', [\App\Http\Controllers\PengajuanPerbaikanController::class, 'index'])->name('perbaikan.index');
+Route::post('/perbaikan-aset', [\App\Http\Controllers\PengajuanPerbaikanController::class, 'store'])->name('perbaikan.store');
+Route::get('/perbaikan-aset/{id}', [\App\Http\Controllers\PengajuanPerbaikanController::class, 'show'])->name('perbaikan.show');
+
+});
+
+// Sumber Kepemilikan & Lokasi Aset - superadmin (role:1) and GA staff (section:12)
+Route::middleware(['auth', 'ga-admin'])->group(function () {
+Route::resource('sumber-kepemilikan', SumberKepemilikanController::class);
+Route::resource('lokasi-aset', LokasiAsetController::class);
 
 // JENIS ASET UMUM
 Route::get('/jenis-umum', [JenisAsetController::class, 'indexUmum'])->name('jenis-umum.index');
@@ -104,13 +138,10 @@ Route::get('/jenis-khusus', [JenisAsetController::class, 'indexKhusus'])->name('
 Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name('jenis-aset.storeKhusus');
 Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
 Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
+});
 
-// Data Aset
-Route::get('/aset', [DataAsetController::class, 'index'])->name('aset.index');
-Route::get('/aset/create', [DataAsetController::class, 'create'])->name('aset.create');
-Route::post('/aset', [DataAsetController::class, 'store'])->name('aset.store');
-Route::get('/aset/{id}', [DataAsetController::class, 'show'])->name('aset.show');
-Route::get('/aset/{id}/edit', [DataAsetController::class, 'edit'])->name('aset.edit');
-Route::put('/aset/{id}', [DataAsetController::class, 'update'])->name('aset.update');
-Route::delete('/aset/{id}', [DataAsetController::class, 'destroy'])->name('aset.destroy');
-
+// Proses & Selesai Perbaikan
+Route::middleware(['auth', 'ga-admin'])->group(function () {
+Route::put('/perbaikan-aset/{id}/proses', [\App\Http\Controllers\PengajuanPerbaikanController::class, 'proses'])->name('perbaikan.proses');
+Route::put('/perbaikan-aset/{id}/selesai', [\App\Http\Controllers\PengajuanPerbaikanController::class, 'selesai'])->name('perbaikan.selesai');
+});

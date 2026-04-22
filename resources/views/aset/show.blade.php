@@ -253,13 +253,17 @@
 
             {{-- BAGIAN TABEL RIWAYAT MONITORING (LOG ASET) --}}
             <div class="mt-5">
-                <h5 class="fw-bold text-navy mb-3 border-bottom pb-2"><i class="fas fa-history me-2"></i> Riwayat Monitoring & Kondisi</h5>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h5 class="fw-bold text-navy mb-0"><i class="fas fa-history me-2"></i> Riwayat Monitoring & Kondisi</h5>
+                    <small class="text-muted">{{ $aset->logAset->count() }} catatan</small>
+                </div>
+                
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.375rem;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light sticky-top" style="top: 0; z-index: 10;">
                             <tr>
                                 <th>Tanggal Cek</th>
-                                <th>Kondisi Fisik / </th>
+                                <th>Kondisi Fisik </th>
                                 <th>Status Terkini</th>
                                 <th>Lokasi / Divisi Tercatat</th>
                                 <th>Dicatat Oleh</th>
