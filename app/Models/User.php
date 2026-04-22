@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, CanResetPassword;
 
     /**
@@ -89,4 +88,40 @@ class User extends Authenticatable
         return $this->belongsTo(Director::class, 'director_id_director', 'id_director');
     }
 
+    /**
+     * Mengecek kode_bagian
+     */
+    public function isBagianUmum(): bool
+    {
+        if ($this->kode_bagian) {
+            $kodes = array_filter(array_map('trim', explode(';', $this->kode_bagian)));
+            if (!empty($kodes)) {
+                $bagianUmumKodes = \App\Models\BagianKerja::where('nama_bagian', 'like', '%Umum%')
+                    ->pluck('kode_bagian')
+                    ->toArray();
+                if (!empty(array_intersect($kodes, $bagianUmumKodes))) {
+                    return true;
+                }
+            }
+        }
+
+        // --- Cek posisi dalam struktur organisasi ---
+        if ($this->department && str_contains(strtolower($this->department->name_department ?? ''), 'umum')) {
+            return true;
+        }
+        if ($this->section && str_contains(strtolower($this->section->name_section ?? ''), 'umum')) {
+            return true;
+        }
+        if ($this->unit && str_contains(strtolower($this->unit->name_unit ?? ''), 'umum')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Semua pengajuan perbaikan yang diajukan user */
+    public function pengajuanPerbaikan()
+    {
+        return $this->hasMany(PengajuanPerbaikan::class, 'diajukan_oleh');
+    }
 }

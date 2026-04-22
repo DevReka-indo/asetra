@@ -17,6 +17,23 @@ use App\Models\BagianKerja;
 
 class UserManageController extends Controller
 {
+    public function create()
+    {
+        $divisi = Divisi::all();
+        $roles = Role::all();
+        $positions = Position::all();
+
+        $mainDirector = Director::with(['subDirectors.divisi.department.section.unit', 
+            'subDirectors.divisi.department.unit', 'subDirectors.department.section.unit', 'subDirectors.department.unit', 
+            'divisi.department.section.unit', 'divisi.department.unit', 'department.section.unit', 'department.unit'])
+            ->where('is_main', 1)
+            ->first();
+
+        $bagianKerja = BagianKerja::orderBy('kode_bagian')->get();
+
+        return view('superadmin.user.create', compact('divisi', 'roles', 'positions', 'mainDirector', 'bagianKerja'));
+    }
+
     public function index(Request $request, $id = null)
     {
         $divisi = Divisi::all();
@@ -159,8 +176,8 @@ class UserManageController extends Controller
             $orgOptions = $this->buildOrgOptions($mainDirector);
         }
 
-        // Kirim data ke view user-manage
-        return view('superadmin.user-manage', compact('divisi', 'view', 'roles', 'positions', 'users', 'kodeItems', 'sortOrder', 'mainDirector', 'organisasi', 'bagianKerja', 'orgOptions'));
+        // Kirim data ke view user.index
+        return view('superadmin.user.index', compact('divisi', 'view', 'roles', 'positions', 'users', 'kodeItems', 'sortOrder', 'mainDirector', 'organisasi', 'bagianKerja', 'orgOptions'));
     }
 
     public function store(Request $request)
@@ -216,7 +233,7 @@ class UserManageController extends Controller
         $users = User::orderBy('firstname', $sortOrder)->paginate(6);
 
         // Mengirim data user ke view
-        return view('superadmin.user-manage', compact('users', 'sortOrder'));
+        return view('superadmin.user.index', compact('users', 'sortOrder'));
     }
 
     private function buildOrgOptions($node, &$result = [], $level = 0, &$seen = [])
@@ -249,7 +266,7 @@ class UserManageController extends Controller
             $label = "Unit: {$node->name_unit}";
         }
 
-        // ✅ dedup key (type+id)
+        // dedup key (type+id)
         if ($value !== null && $type !== null) {
             $key = $type . ':' . $value;
 

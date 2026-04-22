@@ -36,7 +36,7 @@ Route::get('/logout', function () {
 Route::middleware(['auth', 'role:1,2,3'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // ALIAS dashboard per role (buat tombol "kembali ke dashboard" sesuai role)
+    // dashboard per role 
     Route::get('/dashboard/superadmin', [DashboardController::class, 'index'])
         ->middleware('role:1')
         ->name('superadmin.dashboard');
@@ -71,19 +71,20 @@ Route::post('organization-manage/add', [OrganizationController::class, 'store'])
     Route::put('/kode-bagian/{id}', [KodeBagianController::class, 'update'])->name('kode-bagian.update');
     Route::delete('/kode-bagian/{id}', [KodeBagianController::class, 'destroy'])->name('kode-bagian.destroy');
     Route::post('{id}/restore', [KodeBagianController::class, 'restore'])->name('kode-bagian.restore');
-});
 
-// manage user
+    // manage user (rute spesifik didefinisikan terlebih dahulu)
+    Route::get('/user-manage/create', [UserManageController::class, 'create'])->name('user.create');
+    Route::get('/user-manage/paginate', [UserManageController::class, 'paginateUsers'])->name('user-manage.paginate');
     Route::get('/user-manage/edit/{id}', [UserController::class, 'edit'])->name('user-manage.edit');
+    Route::get('/role-management', [UserController::class, 'showRole'])->name('user.role');
+    Route::post('/user-manage/add', [RegisteredUserController::class, 'store'])->name('user-manage/add');
+    Route::post('/user-manage/import', [RegisteredUserController::class, 'import_ajax'])->name('user-manage.import');
     Route::delete('/user-manage/delete/{id}', [UserController::class, 'destroy'])->name('user-manage.destroy');
     Route::put('/user-manage/restore/{id}', [UserController::class, 'restore'])->name('user-manage.restore');
     Route::put('/user-manage/update/{id}', [UserController::class, 'update'])->name('user-manage/update');
-    Route::get('/role-management', [UserController::class, 'showRole'])->name('user.role');
-    Route::get('/user-manage/paginate', [UserManageController::class, 'paginateUsers'])->name('user-manage.paginate');
     Route::get('/user-manage', [UserManageController::class, 'index'])->name('user.manage');
-    // Route::get('user-manage/add', [RegisteredUserController::class, 'create'])->name('user-manage/add');
-    Route::post('user-manage/add', [RegisteredUserController::class, 'store'])->name('user-manage/add');
-    Route::post('user-manage/import', [RegisteredUserController::class, 'import_ajax'])->name('user-manage.import');
+    Route::get('/user-manage/{id}', [UserController::class, 'show'])->name('user.show');
+});
 
 
 
@@ -104,7 +105,7 @@ Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name(
 Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
 Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
 
-
+// Data Aset
 Route::get('/aset', [DataAsetController::class, 'index'])->name('aset.index');
 Route::get('/aset/create', [DataAsetController::class, 'create'])->name('aset.create');
 Route::post('/aset', [DataAsetController::class, 'store'])->name('aset.store');
@@ -113,7 +114,3 @@ Route::get('/aset/{id}/edit', [DataAsetController::class, 'edit'])->name('aset.e
 Route::put('/aset/{id}', [DataAsetController::class, 'update'])->name('aset.update');
 Route::delete('/aset/{id}', [DataAsetController::class, 'destroy'])->name('aset.destroy');
 
-//Scanner QR Code
-Route::get('/aset-scanner', [DataAsetController::class, 'scanner'])->name('aset.scanner');
-Route::post('/aset-scanner/proses', [DataAsetController::class, 'scanProses'])->name('aset.scanProses');
-});

@@ -19,6 +19,18 @@ class UserController extends Controller
         $role = Role::all();
         return view('user.role', compact('role'));
     }
+    // Menampilkan halaman detail user
+    public function show($id)
+    {
+        $user = User::withTrashed()
+            ->with(['role', 'position', 'divisi', 'department', 'section', 'unit', 'director'])
+            ->findOrFail($id);
+
+        $bagianKerja = \App\Models\BagianKerja::orderBy('kode_bagian')->get();
+
+        return view('superadmin.user.show', compact('user', 'bagianKerja'));
+    }
+
     // Menampilkan form edit dengan data user
     public function edit($id)
     {
@@ -26,12 +38,13 @@ class UserController extends Controller
         $divisi = Divisi::all();
         $roles = Role::all();
         $positions = Position::all();
+        $bagianKerja = \App\Models\BagianKerja::orderBy('kode_bagian')->get();
 
         $mainDirector = Director::with(['subDirectors.divisi.department.section.unit', 'subDirectors.divisi.department.unit', 'subDirectors.department.section.unit', 'subDirectors.department.unit', 'divisi.department.section.unit', 'divisi.department.unit', 'department.section.unit', 'department.unit'])
             ->where('is_main', 1)
             ->first();
 
-        return view('user.manage', compact('mainDirector', 'user', 'divisi', 'roles', 'positions'));
+        return view('superadmin.user.edit', compact('mainDirector', 'user', 'divisi', 'roles', 'positions', 'bagianKerja'));
     }
 
     // Menangani update data user
