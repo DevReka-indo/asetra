@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Data Aset')
+@section('title', 'Edit Data Aset - ' . $aset->nomor_aset)
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     {{-- HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold mb-0">Tambah Data Aset Baru</h3>
+        <h3 class="fw-bold mb-0">Edit Data Aset: {{ $aset->nomor_aset }}</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
                 <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
@@ -27,7 +27,7 @@
             </li>
             
             <li class="nav-item d-flex align-items-center">
-                <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Tambah Data Aset</span>
+                <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Edit Data Aset</span>
             </li>
         </ul>
     </div>
@@ -44,8 +44,9 @@
                 </div>
             @endif
             
-            <form action="{{ route('aset.store') }}" method="POST" enctype="multipart/form-data" id="formAset" autocomplete="off">
+            <form action="{{ route('aset.update', $aset->id) }}" method="POST" enctype="multipart/form-data" id="formAset" autocomplete="off">
                 @csrf
+                @method('PUT')
 
                 {{-- INFORMASI DATA ASET --}}
                 <div class="card border-0 shadow-sm mb-4">
@@ -59,16 +60,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Nomor Aset (Otomatis)</label>
                                 <input type="text" id="nomor_aset_display" name="nomor_aset" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
-                                       value="Mencari format..." disabled style="cursor: not-allowed; opacity: 0.8;">
-                                <small class="text-muted" style="font-size: 0.7rem;">Format: [ID]/[KEPEMILIKAN]/[KODE]/[LOKASI]/[TAHUN]</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Nama Aset <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-box-open"></i></span>
-                                    <input type="text" name="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset') }}" placeholder="Contoh: Gedung Kantor Utama" required>
-                                </div>
+                                       value="{{ $aset->nomor_aset }}" disabled style="cursor: not-allowed; opacity: 0.8;">
+                                <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">Nomor ini tergenerate otomatis</small>
                             </div>
 
                             <div class="col-md-6">
@@ -76,12 +69,12 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
                                     <select name="jenis_aset_khusus_id" id="id_jenis_aset" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Jenis Aset --</option>
+                                        <option value="" disabled>-- Pilih Jenis Aset --</option>
                                         @foreach($jenisKhusus as $jenis)
                                             <option value="{{ $jenis->id }}" 
                                                     data-kode="{{ $jenis->full_kode }}" 
                                                     data-nama="{{ $jenis->jenis_aset }}" 
-                                                    {{ old('jenis_aset_khusus_id') == $jenis->id ? 'selected' : '' }}>
+                                                    {{ old('jenis_aset_khusus_id', $aset->jenis_aset_khusus_id) == $jenis->id ? 'selected' : '' }}>
                                                 {{ $jenis->full_kode }} - {{ $jenis->jenis_aset }} 
                                             </option>
                                         @endforeach
@@ -90,15 +83,10 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi</label>
+                                <label class="form-label fw-bold text-navy mb-1 small">Nama Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
-                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none">
-                                        <option value="" selected disabled>-- Pilih Tahun --</option>
-                                        @for ($year = date('Y'); $year >= 1900; $year--)
-                                            <option value="{{ $year }}" {{ old('tahun_kapitalisasi') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                                        @endfor
-                                    </select>
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-box-open"></i></span>
+                                    <input type="text" name="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset', $aset->nama_aset) }}" placeholder="Contoh: Gedung Kantor Utama" required>
                                 </div>
                             </div>
 
@@ -106,16 +94,28 @@
                                 <label class="form-label fw-bold text-navy mb-1 small">Merk Aset</label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
-                                    <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek') }}" placeholder="Contoh: Lenovo / Honda">
+                                    <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek', $aset->merek) }}" placeholder="Contoh: Lenovo / Honda">
                                 </div>
                             </div>
 
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi</label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
+                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none">
+                                        <option value="" disabled>-- Pilih Tahun --</option>
+                                        @for ($year = date('Y'); $year >= 1900; $year--)
+                                            <option value="{{ $year }}" {{ old('tahun_kapitalisasi', $aset->tahun_kapitalisasi) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Deskripsi Aset</label>
+                                <label class="form-label fw-bold text-navy mb-1 small">Deskripsi Singkat</label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-align-left"></i></span>
-                                    <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="1" placeholder="Opsional detail aset...">{{ old('deskripsi') }}</textarea>
+                                    <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="1" placeholder="Opsional detail aset...">{{ old('deskripsi', $aset->deskripsi) }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -136,11 +136,11 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-hand-holding-usd"></i></span>
                                     <select name="sumber_kepemilikan_id" id="sumber_kepemilikan_id" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Sumber Kepemilikan --</option>
+                                        <option value="" disabled>-- Pilih Sumber Kepemilikan --</option>
                                         @foreach($sumberKepemilikan as $sk)
                                             <option value="{{ $sk->id }}"
                                                     data-kode="{{ $sk->kode ?? 'REKA' }}"
-                                                    {{ old('sumber_kepemilikan_id') == $sk->id ? 'selected' : '' }}>
+                                                    {{ old('sumber_kepemilikan_id', $aset->sumber_kepemilikan_id) == $sk->id ? 'selected' : '' }}>
                                                 {{ $sk->kode }} — {{ $sk->nama }}
                                             </option>
                                         @endforeach
@@ -153,12 +153,12 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
                                     <select name="lokasi_id" id="dropdown_lokasi" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Lokasi --</option>
+                                        <option value="" disabled>-- Pilih Lokasi --</option>
                                         @foreach($lokasi as $lok)
                                             <option value="{{ $lok->lokasi_id }}" 
                                                     data-detail="{{ $lok->detail_lokasi ?? '' }}"
                                                     data-kode="{{ $lok->kode_lokasi ?? 'LOK' }}"
-                                                    {{ old('lokasi_id') == $lok->lokasi_id ? 'selected' : '' }}>
+                                                    {{ old('lokasi_id', $aset->lokasi_id) == $lok->lokasi_id ? 'selected' : '' }}>
                                                 {{ $lok->nama_lokasi ?? $lok->nm_lokasi_aset }}
                                             </option>
                                         @endforeach
@@ -187,14 +187,14 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-info-circle"></i></span>
                                     <select name="status_kondisi" id="status_kondisi" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Kondisi --</option>
-                                        <option value="Baik" {{ old('status_kondisi') == 'Baik' ? 'selected' : '' }}>Baik</option>
-                                        <option value="Rusak" {{ old('status_kondisi') == 'Rusak' ? 'selected' : '' }}>Rusak</option>
-                                        <option value="Bongkar" {{ old('status_kondisi') == 'Bongkar' ? 'selected' : '' }}>Bongkar</option>
-                                        <option value="Tidak Terpakai" {{ old('status_kondisi') == 'Tidak Terpakai' ? 'selected' : '' }}>Tidak Terpakai</option>
-                                        <option value="Hilang" {{ old('status_kondisi') == 'Hilang' ? 'selected' : '' }}>Hilang</option>
-                                        <option value="Tidak Teridentifikasi" {{ old('status_kondisi') == 'Tidak Teridentifikasi' ? 'selected' : '' }}>Tidak Teridentifikasi</option>
-                                        <option value="Lainnya" {{ old('status_kondisi') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                        <option value="" disabled>-- Pilih Kondisi --</option>
+                                        <option value="Baik" {{ old('status_kondisi', $aset->status_kondisi) == 'Baik' ? 'selected' : '' }}>Baik</option>
+                                        <option value="Rusak" {{ old('status_kondisi', $aset->status_kondisi) == 'Rusak' ? 'selected' : '' }}>Rusak</option>
+                                        <option value="Bongkar" {{ old('status_kondisi', $aset->status_kondisi) == 'Bongkar' ? 'selected' : '' }}>Bongkar</option>
+                                        <option value="Tidak Terpakai" {{ old('status_kondisi', $aset->status_kondisi) == 'Tidak Terpakai' ? 'selected' : '' }}>Tidak Terpakai</option>
+                                        <option value="Hilang" {{ old('status_kondisi', $aset->status_kondisi) == 'Hilang' ? 'selected' : '' }}>Hilang</option>
+                                        <option value="Tidak Teridentifikasi" {{ old('status_kondisi', $aset->status_kondisi) == 'Tidak Teridentifikasi' ? 'selected' : '' }}>Tidak Teridentifikasi</option>
+                                        <option value="Lainnya" {{ old('status_kondisi', $aset->status_kondisi) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                                     </select>
                                 </div>
                             </div>
@@ -204,7 +204,7 @@
                                 <label class="form-label fw-bold text-navy mb-1 small">Spesifikasikan Kondisi Lainnya <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-pen"></i></span>
-                                    <input type="text" name="keterangan_kondisi" id="keterangan_kondisi" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('keterangan_kondisi') }}" placeholder="Tulis rincian kondisinya disini...">
+                                    <input type="text" name="keterangan_kondisi" id="keterangan_kondisi" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('keterangan_kondisi', $aset->keterangan_kondisi) }}" placeholder="Tulis rincian kondisinya disini...">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -212,12 +212,12 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-cog"></i></span>
                                     <select name="status_aset" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Status --</option>
-                                        <option value="Aktif" {{ old('status_aset') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                                        <option value="Dalam Perbaikan" {{ old('status_aset') == 'Dalam Perbaikan' ? 'selected' : '' }}>Dalam Perbaikan</option>
-                                        <option value="Tidak Aktif" {{ old('status_aset') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                                        <option value="Dipinjam" {{ old('status_aset') == 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                                        <option value="Hilang" {{ old('status_aset') == 'Hilang' ? 'selected' : '' }}>Hilang</option>
+                                        <option value="" disabled>-- Pilih Status --</option>
+                                        <option value="Aktif" {{ old('status_aset', $aset->status_aset) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                        <option value="Dalam Perbaikan" {{ old('status_aset', $aset->status_aset) == 'Dalam Perbaikan' ? 'selected' : '' }}>Dalam Perbaikan</option>
+                                        <option value="Tidak Aktif" {{ old('status_aset', $aset->status_aset) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                        <option value="Dipinjam" {{ old('status_aset', $aset->status_aset) == 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+                                        <option value="Hilang" {{ old('status_aset', $aset->status_aset) == 'Hilang' ? 'selected' : '' }}>Hilang</option>
                                     </select>
                                 </div>
                             </div>
@@ -226,9 +226,9 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-tie"></i></span>
                                     <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none">
-                                        <option value="" selected disabled>-- Pilih User --</option>
+                                        <option value="">-- Kosong / Tidak Ada --</option>
                                         @foreach($users as $user)
-                                            <option value="{{ $user->id }}">{{ $user->firstname }} {{ $user->lastname }}</option>
+                                            <option value="{{ $user->id }}" {{ old('pic_id', $aset->pic_id) == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -238,10 +238,11 @@
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-sitemap"></i></span>
                                     <select class="form-select border-start-0 ps-0 shadow-none" id="kode_organisasi" name="kode_organisasi" required>
-                                        <option value="" selected disabled>-- Pilih Organisasi --</option>
+                                        <option value="" disabled>-- Pilih Organisasi --</option>
                                         @php
-                                            if (!function_exists('renderOrgOptions')) {
-                                                function renderOrgOptions($node, &$seen = [], $level = 0) {
+                                            $currentOrgKode = $aset->getKodeOrganisasiAttribute();
+                                            if (!function_exists('renderOrgOptionsEdit')) {
+                                                function renderOrgOptionsEdit($node, $currentVal, &$seen = [], $level = 0) {
                                                     $indent = str_repeat('&nbsp;', $level * 4);
                                                     $prefix = $level > 0 ? '→ ' : '';
                                                     
@@ -281,18 +282,19 @@
                                                         if (isset($seen[$key])) return; // Skip duplicate
                                                         $seen[$key] = true;
 
-                                                        echo "<option value='{$key}' data-label='{$label}'>{$indent}{$printLabel}</option>";
+                                                        $sel = ($key == $currentVal) ? 'selected' : '';
+                                                        echo "<option value='{$key}' data-label='{$label}' {$sel}>{$indent}{$printLabel}</option>";
                                                     }
 
-                                                    if (isset($node->subDirectors)) foreach ($node->subDirectors as $s) renderOrgOptions($s, $seen, $level + 1);
-                                                    if (isset($node->divisi)) foreach ($node->divisi as $d) renderOrgOptions($d, $seen, $level + 1);
-                                                    if (isset($node->department)) foreach ($node->department as $dp) renderOrgOptions($dp, $seen, $level + 1);
-                                                    if (isset($node->section)) foreach ($node->section as $sc) renderOrgOptions($sc, $seen, $level + 1);
-                                                    if (isset($node->unit)) foreach ($node->unit as $u) renderOrgOptions($u, $seen, $level + 1);
+                                                    if (isset($node->subDirectors)) foreach ($node->subDirectors as $s) renderOrgOptionsEdit($s, $currentVal, $seen, $level + 1);
+                                                    if (isset($node->divisi)) foreach ($node->divisi as $d) renderOrgOptionsEdit($d, $currentVal, $seen, $level + 1);
+                                                    if (isset($node->department)) foreach ($node->department as $dp) renderOrgOptionsEdit($dp, $currentVal, $seen, $level + 1);
+                                                    if (isset($node->section)) foreach ($node->section as $sc) renderOrgOptionsEdit($sc, $currentVal, $seen, $level + 1);
+                                                    if (isset($node->unit)) foreach ($node->unit as $u) renderOrgOptionsEdit($u, $currentVal, $seen, $level + 1);
                                                 }
                                             }
                                             $seenArray = [];
-                                            if (isset($mainDirector)) renderOrgOptions($mainDirector, $seenArray);
+                                            if (isset($mainDirector)) renderOrgOptionsEdit($mainDirector, old('kode_organisasi', $currentOrgKode), $seenArray);
                                         @endphp
                                     </select>
                                 </div>
@@ -304,22 +306,67 @@
                 {{-- DOKUMENTASI MULTI FOTO --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                        <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-camera me-2"></i> Foto Aset</h6>
+                        <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-camera me-2"></i> Edit Foto Aset</h6>
                     </div>
                     <div class="card-body">
-                        <div class="input-group input-group-focus rounded-3">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-image"></i></span>
-                            <input type="file" name="foto[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple>
+                        @if($aset->foto->count() > 0)
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Foto Saat Ini (Centang untuk menghapus)</label>
+                                <div class="row g-3">
+                                    @foreach($aset->foto as $f)
+                                        <div class="col-md-3 col-sm-4 text-center">
+                                            <div class="position-relative d-inline-block border rounded p-1 mb-2">
+                                                <img src="{{ asset('storage/' . $f->path_foto) }}" 
+                                                     class="img-fluid rounded" 
+                                                     style="max-height: 120px; cursor: zoom-in;" 
+                                                     alt="Aset Foto"
+                                                     data-bs-toggle="modal"
+                                                     data-bs-target="#imagePreviewModal"
+                                                     onclick="document.getElementById('previewImage').src=this.src;">
+                                            </div>
+                                            <br>
+                                            <div class="form-check d-inline-block">
+                                                <input class="form-check-input" type="checkbox" name="hapus_foto[]" value="{{ $f->id }}" id="hapus_{{ $f->id }}">
+                                                <label class="form-check-label text-danger" for="hapus_{{ $f->id }}">
+                                                    Hapus
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="mt-2">
+                            <label class="form-label fw-bold text-navy mb-1 small">Tambah Foto Baru</label>
+                            <div class="input-group input-group-focus rounded-3">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-image"></i></span>
+                                <input type="file" name="foto_baru[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple>
+                            </div>
+                            <small class="text-muted mt-2 d-block">Bisa upload lebih dari 1 foto sekaligus. Format: JPG, PNG. Maks 4MB per foto.</small>
                         </div>
-                        <small class="text-muted mt-2 d-block">Bisa upload lebih dari 1 foto sekaligus. Format: JPG, PNG. Maks 4MB per foto.</small>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="reset" class="btn btn-outline-secondary px-4 bg-white">Batal</button>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Simpan Data Aset</button>
+                    <a href="{{ route('aset.index') }}" class="btn btn-outline-secondary px-4 bg-white">Batal</a>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Simpan Perubahan</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL PREVIEW FOTO --}}
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-header border-0 p-0 justify-content-end" style="position: absolute; right: 0; top: -40px; z-index: 1055;">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 50%; opacity: 1;"></button>
+            </div>
+            <div class="modal-body text-center p-0 position-relative">
+                <img id="previewImage" src="" class="img-fluid rounded shadow-lg" style="max-height: 85vh; width: auto; object-fit: contain;">
+            </div>
         </div>
     </div>
 </div>
@@ -335,28 +382,20 @@
         const selectJen = document.getElementById('id_jenis_aset');
         const selectLok = document.getElementById('dropdown_lokasi');
         const selectThn = document.getElementById('id_tahun');
-        const orgSelect = document.getElementById('id_divisi');
+        
         const statusKondisi = document.getElementById('status_kondisi');
         const keteranganWrapper = document.getElementById('keterangan_kondisi_wrapper');
         const inputKeterangan = document.getElementById('keterangan_kondisi');
         
-        const nextId = "{{ $nextId }}"; 
+        const currentAsetId = "{{ str_pad($aset->id, 3, '0', STR_PAD_LEFT) }}";
 
         function updateNomor() {
-            // Ambil ID 3 Digit
-            const nextId = "{{ $nextId }}"; 
-
             // Helper untuk ambil data-kode
             const getK = (id, fallback) => {
                 const el = document.getElementById(id);
                 if (!el || el.selectedIndex < 0) return fallback;
                 const opt = el.options[el.selectedIndex];
-                
                 const kodeAttr = opt.getAttribute('data-kode');
-                
-                // DEBUG
-                console.log(`Pengecekan ID ${id}: terpilih ${opt.text}, kode: ${kodeAttr}`);
-
                 return (opt.value !== "" && kodeAttr) ? kodeAttr : fallback;
             };
 
@@ -364,45 +403,39 @@
             const kJen = getK('id_jenis_aset', 'XXXX');
             const kLok = getK('dropdown_lokasi', 'LOK');
             
-            // Ambil tahun dari dropdown atau default ke tahun sekarang
+            // Ambil tahun
             const selectThn = document.getElementById('id_tahun');
             const thn = (selectThn && selectThn.value) ? selectThn.value : new Date().getFullYear();
 
             // Set hasil akhir
-            const finalResult = `${nextId}/${kKep}/${kJen}/${kLok}/${thn}`;
+            const finalResult = `${currentAsetId}/${kKep}/${kJen}/${kLok}/${thn}`;
             document.getElementById('nomor_aset_display').value = finalResult;
         }
 
+        // Listener Perubahan
         [selectKep, selectJen, selectLok, selectThn].forEach(el => {
             if(el) el.addEventListener('change', updateNomor);
         });
 
-        // Detail Lokasi 
+        // Detail Lokasi Fill
         if(selectLok) {
             selectLok.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
                 inputDetail.value = (opt && opt.value !== "") ? (opt.getAttribute('data-detail') || '') : '';
             });
+            // trigger first time
+            selectLok.dispatchEvent(new Event('change'));
         }
-        
-        // Auto-fill Nama Aset
+
+        // Auto-fill Nama Aset (jika merubah dropdown jenis)
         if(selectJen) {
             selectJen.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
                 const inputNamaAset = document.querySelector('input[name="nama_aset"]');
                 if(opt && opt.value !== "") {
                     inputNamaAset.value = opt.getAttribute('data-nama') || '';
-                    // Trigger input event to simulate typing (if there are other listeners)
                     inputNamaAset.dispatchEvent(new Event('input'));
                 }
-            });
-        }
-
-        if(orgSelect) {
-            orgSelect.addEventListener('change', function() {
-                const opt = this.options[this.selectedIndex];
-                const lbl = opt.getAttribute('data-label');
-                if(lbl) opt.text = lbl;
             });
         }
 
@@ -418,18 +451,13 @@
                     inputKeterangan.value = '';
                 }
             });
-            // initial check for old() value
+            // initial check for old() or database value
             if(statusKondisi.value === 'Lainnya') {
                 keteranganWrapper.style.display = 'block';
                 inputKeterangan.setAttribute('required', 'required');
             }
         }
 
-        setTimeout(updateNomor, 200);
     });
-
-    window.onpageshow = function(event) {
-        if (event.persisted) window.location.reload();
-    };
 </script>
 @endpush
