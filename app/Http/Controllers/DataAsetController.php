@@ -177,6 +177,7 @@ class DataAsetController extends Controller
         ]);
 
         $inputData = trim($request->nomor_aset);
+        $displayId = $inputData;
 
         // Cek hasil scan berupa URL
         if (filter_var($inputData, FILTER_VALIDATE_URL)) {
@@ -186,6 +187,7 @@ class DataAsetController extends Controller
             
             // Ambil ID aset
             $id = end($segments);
+            $displayId = $id;
 
             $aset = DataAset::find($id);
             if ($aset) {
@@ -196,14 +198,18 @@ class DataAsetController extends Controller
 
         //input manual nomor aset
         $aset = DataAset::where('nomor_aset', $inputData)->first();
+        
+        if (!$aset && filter_var($inputData, FILTER_VALIDATE_URL)) {
+            $aset = DataAset::where('nomor_aset', $displayId)->first();
+        }
 
         if ($aset) {
             return redirect()->route('aset.show', $aset->id)
-                ->with('success', 'Aset berhasil ditemukan dari input manual.');
+                ->with('success', 'Aset berhasil ditemukan.');
         }
 
         return redirect()->route('aset.scanner')
-            ->with('error', 'Aset dengan identitas "' . $inputData . '" tidak ditemukan.');
+            ->with('error', 'Aset dengan nomor aset "' . $displayId . '" tidak ditemukan.');
     }
 
     /**

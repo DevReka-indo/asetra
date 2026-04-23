@@ -2,6 +2,7 @@
 
 @section('title', 'Scan Barcode Aset')
 
+
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -31,37 +32,75 @@
     </div>
 
     <div class="row pt-2">
-        <div class="col-md-8 mx-auto">
+        <div class="col-lg-6 col-md-8 mx-auto">
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-3 border-0 shadow-sm" role="alert">
                     <i class="fas fa-exclamation-triangle me-2"></i> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white pt-3 pb-2 text-center">
-                    <h5 class="fw-bold text-primary mb-0"><i class="fas fa-camera me-2"></i> Arahkan Barcode ke Kamera</h5>
+            <div class="scanner-card">
+                <div class="scanner-header">
+                    <div class="scanner-header-left">
+                        <div class="scanner-icon-box">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div>
+                            <h4 class="scanner-title">Scan Barcode Aset</h4>
+                            <p class="scanner-subtitle">Arahkan kamera ke barcode untuk memindai aset secara otomatis</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4 text-center">
-                    <div id="reader" style="width: 100%; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden;" class="shadow-sm border"></div>
+                
+                <div class="scanner-body text-center">
+                    <!-- Scanner Reader -->
+                    <div class="scanner-wrapper" id="scanner-wrapper">
+                        <div id="reader"></div>
+                        <div class="scanner-overlay d-none" id="scanner-overlay">
+                            <div class="scanner-overlay-corners"></div>
+                            <div class="scanner-laser"></div>
+                        </div>
+                    </div>
+                    
                     <form id="scanForm" action="{{ route('aset.scanProses') }}" method="POST" class="d-none">
                         @csrf
                         <input type="hidden" name="nomor_aset" id="nomor_aset_input">
                     </form>
-                    <div class="mt-4">
-                        <p class="text-muted small">Pastikan pencahayaan cukup dan izinkan akses kamera pada browser Anda.</p>
-                        <button type="button" id="manualInputBtn" class="btn btn-outline-secondary btn-sm mt-2">
-                            <i class="fas fa-keyboard me-1"></i> Input Manual Nomor Aset
+
+                    <!-- Info Box -->
+                    <div class="info-box text-start">
+                        <div class="info-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <p class="info-text">Pastikan pencahayaan cukup dan izinkan akses kamera pada browser Anda. Jaga jarak kamera sekitar 15-30 cm dari barcode.</p>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="divider-container">
+                        <span>ATAU INPUT MANUAL</span>
+                    </div>
+
+                    <!-- Manual Input -->
+                    <div class="text-center mt-3">
+                        <button type="button" id="manualInputBtn" class="btn-manual-primary">
+                            <i class="fas fa-keyboard"></i> Input Manual Nomor Aset
                         </button>
                     </div>
-                    
-                    {{-- Form Manual (Hidden by default) --}}
-                    <div id="manualInputContainer" class="mt-3 d-none">
-                        <form action="{{ route('aset.scanProses') }}" method="POST" class="d-flex justify-content-center">
+
+                    {{-- Form Manual --}}
+                    <div id="manualInputContainer" class="manual-input-box d-none">
+                        <div class="manual-input-title">
+                            <i class="fas fa-barcode"></i> NOMOR ASET
+                        </div>
+                        <form action="{{ route('aset.scanProses') }}" method="POST">
                             @csrf
-                            <input type="text" name="nomor_aset" class="form-control form-control-sm w-50 me-2" placeholder="Masukkan nomor aset..." required>
-                            <button type="submit" class="btn btn-primary btn-sm">Cari</button>
+                            <div class="manual-input-group">
+                                <input type="text" name="nomor_aset" class="manual-input-field" placeholder="Contoh: 0001/REKA/IT-A/MONITOR/SERVER/2026" required>
+                                <button type="submit" class="btn-search-manual">
+                                    <i class="fas fa-search"></i> Cari Aset
+                                </button>
+                            </div>
                         </form>
                     </div>
 
@@ -73,18 +112,38 @@
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const html5QrCode = new Html5Qrcode("reader");
         const scanForm = document.getElementById('scanForm');
         const inputSet = document.getElementById('nomor_aset_input');
+        const statusBadge = document.getElementById('scannerStatusBadge');
+        const statusText = document.getElementById('scannerStatusText');
+        const statusDot = document.querySelector('.status-dot');
+        const scannerOverlay = document.getElementById('scanner-overlay');
         
         let isScanned = false; 
 
         const qrCodeSuccessCallback = (decodedText, decodedResult) => {
             if(!isScanned) {
                 isScanned = true;
+                
+                if(statusBadge && statusText && statusDot) {
+                    statusText.innerText = "Barcode Terdeteksi!";
+                    statusBadge.style.backgroundColor = "rgba(34, 197, 94, 0.2)";
+                    statusBadge.style.borderColor = "rgba(34, 197, 94, 0.4)";
+                }
+
+                if(scannerOverlay) {
+                    // Turn laser
+                    const laser = scannerOverlay.querySelector('.scanner-laser');
+                    if(laser) {
+                        laser.style.animation = 'none';
+                        laser.style.top = '50%';
+                        laser.style.opacity = '1';
+                    }
+                }
+
                 html5QrCode.stop().then(() => {
                     inputSet.value = decodedText;
                     scanForm.submit();
@@ -94,18 +153,49 @@
             }
         };
         
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        const config = { 
+            fps: 20, 
+            disableFlip: false,
+            qrbox: function(viewfinderWidth, viewfinderHeight) {
+                return {
+                    width: viewfinderWidth * 0.85,
+                    height: viewfinderHeight * 0.85
+                };
+            }
+        };
 
         html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+        .then(() => {
+            // Show overlay 
+            if(scannerOverlay) {
+                scannerOverlay.classList.remove('d-none');
+            }
+        })
         .catch(err => {
             console.error("Camera access failed:", err);
+            
+            if(statusBadge && statusText && statusDot) {
+                statusText.innerText = "Kamera Tidak Aktif";
+                statusBadge.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+                statusBadge.style.borderColor = "rgba(239, 68, 68, 0.4)";
+                statusDot.style.backgroundColor = "#ef4444";
+                statusDot.style.boxShadow = "0 0 8px rgba(239, 68, 68, 0.6)";
+            }
+            
             document.getElementById('manualInputContainer').classList.remove('d-none');
-            alert("Tidak dapat mengakses kamera. Pastikan memberikan izin kamera atau URL menggunakan HTTPS/localhost.");
         });
 
         document.getElementById('manualInputBtn').addEventListener('click', function() {
             const manualContainer = document.getElementById('manualInputContainer');
-            manualContainer.classList.toggle('d-none');
+            if(manualContainer.classList.contains('d-none')) {
+                manualContainer.classList.remove('d-none');
+                manualContainer.classList.add('fade-in');
+                this.classList.add('active');
+            } else {
+                manualContainer.classList.add('d-none');
+                manualContainer.classList.remove('fade-in');
+                this.classList.remove('active');
+            }
         });
     });
 </script>

@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/aset.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/modal.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/scanner.css') }}">
     @stack('styles')
 
     <style>
@@ -141,6 +142,7 @@
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     @stack('scripts')
 
