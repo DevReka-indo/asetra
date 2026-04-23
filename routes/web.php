@@ -36,7 +36,7 @@ Route::get('/logout', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // dashboard per role 
+    // dashboard per role
     Route::get('/dashboard/superadmin', [DashboardController::class, 'index'])
         ->middleware('role:1')
         ->name('superadmin.dashboard');
