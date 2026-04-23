@@ -231,24 +231,27 @@
                                         </button>
                                     </div>
 
-                                    {{-- Modal Konfirmasi Hapus --}}
-                                    <div class="modal fade" id="deleteAsetModal{{ $aset->id }}" tabindex="-1" aria-labelledby="deleteAsetModalLabel{{ $aset->id }}" aria-hidden="true">
+                                    <!-- Modal Konfirmasi Hapus -->
+                                    <div class="modal fade" id="deleteAsetModal{{ $aset->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="deleteAsetModalLabel{{ $aset->id }}">Konfirmasi Hapus</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Apakah Anda yakin ingin menghapus aset <strong>{{ $aset->nomor_aset }}</strong>? Tindakan ini tidak dapat dibatalkan.
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <form action="{{ route('aset.destroy', $aset->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger">Hapus</button>
-                                                    </form>
+                                            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                                <div class="modal-body p-5 text-center bg-light">
+                                                    <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f1f3f5;">
+                                                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                                                    </div>
+                                                    <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
+                                                    <p class="text-muted mb-4" style="font-size: 1rem;">
+                                                        Anda yakin ingin menghapus aset <br>
+                                                        <strong class="text-danger fs-5">{{ $aset->nomor_aset }}</strong>?
+                                                    </p>
+                                                    <div class="d-flex justify-content-center gap-3">
+                                                        <form action="{{ route('aset.destroy', $aset->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                                                            <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
