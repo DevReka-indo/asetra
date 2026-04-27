@@ -105,6 +105,11 @@ class User extends Authenticatable
             }
         }
 
+        // --- section = 12 (GA Admin) ---
+        if ($this->section_id_section == 12) {
+            return true;
+        }
+
         // --- Cek posisi dalam struktur organisasi ---
         if ($this->department && str_contains(strtolower($this->department->name_department ?? ''), 'umum')) {
             return true;

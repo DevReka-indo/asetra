@@ -23,6 +23,25 @@ class DataAsetController extends Controller
 
         $query = DataAset::with(['jenisAsetKhusus', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
 
+        $user = auth()->user();
+        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+
+        if (!$isAdmin) {
+            if ($user->unit_id_unit) {
+                $query->where('id_unit', $user->unit_id_unit);
+            } elseif ($user->section_id_section) {
+                $query->where('id_section', $user->section_id_section);
+            } elseif ($user->department_id_department) {
+                $query->where('id_department', $user->department_id_department);
+            } elseif ($user->divisi_id_divisi) {
+                $query->where('id_divisi', $user->divisi_id_divisi);
+            } elseif ($user->director_id_director) {
+                $query->where('id_director', $user->director_id_director);
+            } else {
+                $query->where('id', 0);
+            }
+        }
+
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nomor_aset', 'LIKE', "%{$search}%")
@@ -51,8 +70,56 @@ class DataAsetController extends Controller
                        ->withQueryString();
 
         $lokasis = LokasiAset::all();
+        $pageTitle = "Data Aset Departemen";
 
-        return view('aset.index', compact('asets', 'lokasis'));
+        return view('aset.index', compact('asets', 'lokasis', 'pageTitle'));
+    }
+
+    public function picIndex(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+        $kondisi = $request->input('kondisi');
+        $status  = $request->input('status_aset');
+
+        $query = DataAset::with(['jenisAsetKhusus', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
+
+        $user = auth()->user();
+
+        // Hanya tampilkan aset yang PIC-nya adalah user login
+        $query->where('pic_id', $user->id);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_aset', 'LIKE', "%{$search}%")
+                  ->orWhere('nama_aset', 'LIKE', "%{$search}%")
+                  ->orWhereHas('jenisAsetKhusus', function($qj) use ($search) {
+                      $qj->where('jenis_aset', 'LIKE', "%{$search}%")
+                         ->orWhere('kode_khusus', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($kondisi) {
+            $query->where('status_kondisi', $kondisi);
+        }
+
+        if ($status) {
+            $query->where('status_aset', $status);
+        }
+
+        if ($request->has('lokasi') && $request->input('lokasi') != '') {
+            $query->where('lokasi_id', $request->input('lokasi'));
+        }
+
+        $asets = $query->latest()
+                       ->paginate($perPage)
+                       ->withQueryString();
+
+        $lokasis = LokasiAset::all();
+        $pageTitle = "Data Aset PIC Saya";
+
+        return view('aset.index', compact('asets', 'lokasis', 'pageTitle'));
     }
 
     /**
@@ -134,7 +201,7 @@ class DataAsetController extends Controller
     }
 
     /**
-     * Menampilkan detail satu aset secara spesifik.
+     * Menampilkan detail.
      */
     public function show($id)
     {
@@ -147,6 +214,23 @@ class DataAsetController extends Controller
             'foto',
             'logAset' => fn($q) => $q->latest('tanggal_cek')->limit(10),
         ])->findOrFail($id);
+
+        $user = auth()->user();
+        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+
+        if (!$isAdmin) {
+            $isAuthorized = false;
+            if ($user->unit_id_unit && $aset->id_unit == $user->unit_id_unit) $isAuthorized = true;
+            elseif ($user->section_id_section && $aset->id_section == $user->section_id_section) $isAuthorized = true;
+            elseif ($user->department_id_department && $aset->id_department == $user->department_id_department) $isAuthorized = true;
+            elseif ($user->divisi_id_divisi && $aset->id_divisi == $user->divisi_id_divisi) $isAuthorized = true;
+            elseif ($user->director_id_director && $aset->id_director == $user->director_id_director) $isAuthorized = true;
+            elseif ($aset->pic_id == $user->id) $isAuthorized = true;
+
+            if (!$isAuthorized) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat detail aset dari departemen lain.');
+            }
+        }
 
         $mainDirector = \App\Models\Director::with([
             'subDirectors',

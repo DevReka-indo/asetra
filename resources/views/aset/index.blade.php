@@ -1,50 +1,54 @@
 @extends('layouts.app')
 
-@section('title', 'Data Aset Perusahaan')
+@section('title', isset($pageTitle) ? $pageTitle : 'Data Aset Perusahaan')
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold mb-0">Data Aset Perusahaan</h3>
+        <h3 class="fw-bold mb-0">{{ isset($pageTitle) ? $pageTitle : 'Data Aset Perusahaan' }}</h3>
     </div>
 
     {{-- FILTER --}}
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <form method="GET" action="{{ route('aset.index') }}">
+            <form method="GET" action="{{ url()->current() }}">
                 
                 {{-- Tombol-Tombol Action Utama --}}
                 <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center mb-3 pb-3 border-bottom">
-                    {{-- Tombol Cetak Label Terpilih --}}
-                    <button type="button" id="btnCetakLabelSelected" class="btn btn-dark px-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Terpilih">
-                        <i class="fas fa-tags me-1"></i> Cetak Label 
-                    </button>
+                    @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                        {{-- Tombol Cetak Label Terpilih --}}
+                        <button type="button" id="btnCetakLabelSelected" class="btn btn-dark px-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Terpilih">
+                            <i class="fas fa-tags me-1"></i> Cetak Label 
+                        </button>
 
-                    {{-- Tombol Cetak Label Per Ruangan --}}
-                    <button type="button" class="btn btn-secondary px-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Per Ruangan" data-bs-toggle="modal" data-bs-target="#modalCetakPerRuangan">
-                        <i class="fas fa-building me-1"></i> Cetak Per Ruangan
-                    </button>
+                        {{-- Tombol Cetak Label Per Ruangan --}}
+                        <button type="button" class="btn btn-secondary px-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Per Ruangan" data-bs-toggle="modal" data-bs-target="#modalCetakPerRuangan">
+                            <i class="fas fa-building me-1"></i> Cetak Per Ruangan
+                        </button>
 
-                    {{-- Tombol Import --}}
-                    <button type="button" class="btn btn-warning px-3 rounded-3 d-flex align-items-center text-dark" title="Import Data">
-                        <i class="fas fa-file-import me-1"></i> Import
-                    </button>
+                        {{-- Tombol Import --}}
+                        <button type="button" class="btn btn-warning px-3 rounded-3 d-flex align-items-center text-dark" title="Import Data">
+                            <i class="fas fa-file-import me-1"></i> Import
+                        </button>
 
-                    {{-- Tombol Export --}}
-                    <button type="button" class="btn btn-success px-3 rounded-3 d-flex align-items-center text-white" title="Export Data">
-                        <i class="fas fa-file-excel me-1"></i> Export
-                    </button>
+                        {{-- Tombol Export --}}
+                        <button type="button" class="btn btn-success px-3 rounded-3 d-flex align-items-center text-white" title="Export Data">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </button>
+                    @endif
 
                     {{-- Tombol Scan --}}
                     <a href="{{ route('aset.scanner') }}" class="btn btn-navy px-3 rounded-3 d-flex align-items-center text-white" style="background-color: #253070;">
                         <i class="fas fa-qrcode me-1"></i> Scan Barcode
                     </a>
 
-                    {{-- Button Tambah --}}
-                    <a href="{{ route('aset.create') }}" class="btn btn-primary px-3 rounded-3 d-flex align-items-center">
-                        <i class="fas fa-plus me-1"></i> Tambah Data Aset
-                    </a>
+                    @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                        {{-- Button Tambah --}}
+                        <a href="{{ route('aset.create') }}" class="btn btn-primary px-3 rounded-3 d-flex align-items-center">
+                            <i class="fas fa-plus me-1"></i> Tambah Data Aset
+                        </a>
+                    @endif
                 </div>
 
                 {{-- Form Filter, Pencarian & Reset --}}
@@ -102,7 +106,7 @@
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Lokasi</option>
                             @foreach($lokasis as $lokasi)
-                                <option value="{{ $lokasi->id }}" {{ request('lokasi') == $lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
+                                <option value="{{ $lokasi->lokasi_id }}" {{ request()->filled('lokasi') && request('lokasi') == $lokasi->lokasi_id ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -126,9 +130,11 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
+                            @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
                             <th width="40" class="text-center border-end">
                                 <input class="form-check-input" type="checkbox" id="checkAllAset">
                             </th>
+                            @endif
                             <th width="80" class="text-center">Kode QR</th>
                             <th>Kode Aset</th>
                             <th>Nama Aset</th>
@@ -142,10 +148,12 @@
                     <tbody>
                         @forelse ($asets as $aset)
                             <tr>
+                                @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
                                 {{-- Checkbox --}}
                                 <td class="text-center border-end">
                                     <input class="form-check-input aset-checkbox" type="checkbox" name="ids[]" value="{{ $aset->id }}" form="formCetakLabelSelected">
                                 </td>
+                                @endif
 
                                 {{-- QR Code --}}
                                 <td class="text-center">
@@ -215,20 +223,22 @@
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
 
-                                        {{-- TOMBOL EDIT --}}
-                                        <a href="{{ route('aset.edit', $aset->id) }}" 
-                                        class="btn btn-warning btn-sm rounded-circle text-white border-0"
-                                        style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
-                                        title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
+                                        @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                                            {{-- TOMBOL EDIT --}}
+                                            <a href="{{ route('aset.edit', $aset->id) }}" 
+                                            class="btn btn-warning btn-sm rounded-circle text-white border-0"
+                                            style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                            title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
 
-                                        {{-- TOMBOL HAPUS --}}
-                                        <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0" 
-                                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
-                                                title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteAsetModal{{ $aset->id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                            {{-- TOMBOL HAPUS --}}
+                                            <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0" 
+                                                    style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                                    title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteAsetModal{{ $aset->id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endif
                                     </div>
 
                                     <!-- Modal Konfirmasi Hapus -->
@@ -384,7 +394,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Pilih minimal satu aset untuk dicetak!');
                 return;
             }
-            document.getElementById('formCetakLabelSelected').submit();
+            
+            const form = document.getElementById('formCetakLabelSelected');
+            // Hapus input hidden sebelumnya
+            form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
+            
+            // Tambahkan input hidden untuk setiap checkbox yang dipilih
+            checkedBoxes.forEach(cb => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'ids[]';
+                hiddenInput.value = cb.value;
+                form.appendChild(hiddenInput);
+            });
+            
+            form.submit();
         });
     }
 
@@ -444,6 +468,27 @@ document.addEventListener('DOMContentLoaded', function() {
             if (btnProsesCetakLokasi) btnProsesCetakLokasi.disabled = true;
         });
     }
+
+    // Konfigurasi SweetAlert
+    const swalConfig = {
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#253070',
+        customClass: { popup: 'rounded-4 shadow' }
+    };
+
+    // Modal Success / Error / Warning
+    @if(session('success'))
+        Swal.fire({ ...swalConfig, icon: 'success', title: 'Berhasil!', text: '{{ session('success') }}' });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({ ...swalConfig, icon: 'error', title: 'Gagal!', text: '{{ session('error') }}' });
+    @endif
+
+    @if(session('warning'))
+        Swal.fire({ ...swalConfig, icon: 'warning', title: 'Perhatian!', text: '{{ session('warning') }}' });
+    @endif
 });
 </script>
 @endsection
