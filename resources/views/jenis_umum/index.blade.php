@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
-        <h3 class="fw-bold mb-0">Kelola Jenis Aset Tetap Umum</h3>
+        <h3 class="fw-bold mb-0">Kelola Kode Aset Umum</h3>
     </div>
 
     {{-- FILTER --}}
@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    {{-- TABEL JENIS ASET TETAP UMUM   --}}
+    {{-- TABEL JENIS ASET UMUM   --}}
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="table-responsive">
@@ -61,8 +61,8 @@
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th>Kode Umum</th>
-                            <th>Jenis Aset Tetap</th>
+                            <th>Kode Aset Umum</th>
+                            <th>Nama Aset Umum</th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
                     </thead>

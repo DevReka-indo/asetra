@@ -134,6 +134,43 @@
                         <p>Pengajuan Perbaikan</p>
                     </a>
                 </li>
+
+                <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
+                    <a href="#pemulihanDrop"
+                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse"
+                        aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
+                            <i class="fas fa-trash-restore"></i>
+                            <p>Pemulihan</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
+                        id="pemulihanDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+                            <li class="{{ request()->routeIs('pemulihan.jenis-umum') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.jenis-umum') }}">
+                                    <span class="sub-item">Kode Umum</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="#">
+                                    <span class="sub-item">Kode Khusus</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="#">
+                                    <span class="sub-item">Kategori Aset</span>
+                                </a>
+                            </li>
+                            <li class="">
+                                <a href="#">
+                                    <span class="sub-item">Data Aset</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
             @endif
 
             <!-- SUPERADMIN ONLY MENU -->

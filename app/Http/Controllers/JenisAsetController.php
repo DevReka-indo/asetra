@@ -44,7 +44,7 @@ class JenisAsetController extends Controller
         JenisAsetUmum::create($request->only('kode_umum', 'jenis_aset'));
 
         return redirect()->route('jenis-umum.index')
-            ->with('success', 'Jenis aset tetap umum berhasil ditambahkan.');
+            ->with('success', 'Jenis aset umum berhasil ditambahkan.');
     }
 
     public function updateUmum(Request $request, $id)
@@ -70,7 +70,7 @@ class JenisAsetController extends Controller
         $umum->update($request->only('kode_umum', 'jenis_aset'));
 
         return redirect()->route('jenis-umum.index')
-            ->with('success', 'Jenis aset tetap umum berhasil diperbarui.');
+            ->with('success', 'Jenis aset umum berhasil diperbarui.');
     }
 
     public function destroyUmum($id)
@@ -79,7 +79,7 @@ class JenisAsetController extends Controller
         $asetUmum->delete();
 
         return redirect()->route('jenis-umum.index')
-            ->with('success', 'Jenis aset tetap umum beserta seluruh data khususnya berhasil dihapus.');
+            ->with('success', 'Jenis aset umum berhasil dipindahkan ke menu Pemulihan.');
     }
 
     public function indexKhusus(Request $request)

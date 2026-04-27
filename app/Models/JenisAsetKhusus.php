@@ -22,7 +22,7 @@ class JenisAsetKhusus extends Model
      */
     public function jenisAsetUmum()
     {
-        return $this->belongsTo(JenisAsetUmum::class, 'jenis_aset_umum_id', 'id');
+        return $this->belongsTo(JenisAsetUmum::class, 'jenis_aset_umum_id', 'id')->withTrashed();
     }
 
     

@@ -1,0 +1,170 @@
+@extends('layouts.app')
+
+@section('title', 'Pemulihan Jenis Aset Umum')
+
+@section('content')
+<div class="container-fluid px-1 py-0 mt-0">
+    <div class="mb-4">
+        <h3 class="fw-bold mb-0">Pemulihan Kode Aset Umum</h3>
+        <p class="text-muted small">Data di bawah ini adalah data yang telah dihapus. Anda dapat memulihkannya atau menghapusnya secara permanen.</p>
+    </div>
+
+    {{-- FILTER --}}
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('pemulihan.jenis-umum') }}" class="row g-2 align-items-end">
+                {{-- Entries --}}
+                <div class="col-md-1">
+                    <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
+                    <select name="per_page" class="form-select form-select-sm rounded-3" onchange="this.form.submit()">
+                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+                </div>
+                {{-- Pencarian --}}
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
+                    <div class="input-group input-group-sm input-group-focus rounded-3">
+                        <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari kode atau jenis aset..." value="{{ request('search') }}">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- TABEL PEMULIHAN --}}
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="60" class="text-center">No</th>
+                            <th>Kode Aset Umum</th>
+                            <th>Nama Aset Umum</th>
+                            <th>Tgl Dihapus</th>
+                            <th width="150" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($dataUmum as $i => $umum)
+                            <tr>
+                                <td class="text-center">{{ $dataUmum->firstItem() + $i }}</td>
+                                <td class="fw-bold text-primary">{{ $umum->kode_umum }}</td>
+                                <td>{{ $umum->jenis_aset }}</td>
+                                <td>{{ $umum->deleted_at ? $umum->deleted_at->format('d/m/Y H:i') : '-' }}</td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        {{-- RESTORE BUTTON --}}
+                                        <button type="button" class="btn btn-success btn-sm rounded-circle text-white border-0" 
+                                            style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                            title="Pulihkan" data-bs-toggle="modal" data-bs-target="#restoreUmumModal{{ $umum->id }}">
+                                            <i class="fas fa-refresh"></i>
+                                        </button>
+                                        {{-- FORCE DELETE BUTTON --}}
+                                        <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0" 
+                                            style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                            title="Hapus Permanen" data-bs-toggle="modal" data-bs-target="#forceDeleteUmumModal{{ $umum->id }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="fas fa-info-circle mb-2 d-block fa-2x"></i>
+                                    Tidak ada data di pemulihan.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Menampilkan {{ $dataUmum->firstItem() ?? 0 }} sampai {{ $dataUmum->lastItem() ?? 0 }} dari {{ $dataUmum->total() }} data
+                </div>
+                <div>
+                    {{ $dataUmum->appends(request()->query())->links('pagination::bootstrap-5') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach($dataUmum as $umum)
+{{-- MODAL RESTORE --}}
+<div class="modal fade" id="restoreUmumModal{{ $umum->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-body p-5 text-center bg-light">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #d1e7dd;">
+                    <i class="fas fa-refresh fa-3x text-success"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Konfirmasi Pulihkan</h4>
+                <p class="text-muted mb-3" style="font-size: 1rem;">
+                    Anda yakin ingin memulihkan data <strong class="text-success fs-5">{{ $umum->kode_umum }} - {{ $umum->jenis_aset }}</strong>?
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <form action="{{ route('pemulihan.jenis-umum.restore', $umum->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                        @csrf 
+                        @method('PUT')
+                        <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                        <button type="submit" class="btn btn-success rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Pulihkan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL FORCE DELETE --}}
+<div class="modal fade" id="forceDeleteUmumModal{{ $umum->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-body p-5 text-center bg-light">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f1f3f5;">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">Hapus Permanen</h4>
+                <p class="text-muted mb-3" style="font-size: 1rem;">
+                    Hapus data <strong class="text-danger fs-5">{{ $umum->kode_umum }} - {{ $umum->jenis_aset }}</strong> secara permanen?
+                </p>
+                
+                <div class="alert alert-danger mb-4 text-start small border-0 shadow-sm rounded-3">
+                    <i class="fas fa-info-circle me-1"></i><strong>Peringatan Keras:</strong> Tindakan ini tidak dapat dibatalkan. Semua data terkait berpotensi kehilangan referensi.
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <form action="{{ route('pemulihan.jenis-umum.force-delete', $umum->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                        @csrf 
+                        @method('DELETE')
+                        <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                        <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 160px;">Hapus Permanen</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+@endsection
+
+@push('scripts')
+<script>
+    window.addEventListener('load', function() {
+        const swalConfig = {
+            showConfirmButton: true, confirmButtonText: 'OK', confirmButtonColor: '#253070', customClass: { popup: 'rounded-4 shadow' }
+        };
+
+        @if (session('success')) Swal.fire({ ...swalConfig, icon: 'success', title: 'Berhasil!', text: '{{ session('success') }}' }); @endif
+        @if (session('error')) Swal.fire({ ...swalConfig, icon: 'error', title: 'Gagal!', text: '{{ session('error') }}' }); @endif
+        @if (session('warning')) Swal.fire({ ...swalConfig, icon: 'warning', title: 'Perhatian!', text: '{{ session('warning') }}' }); @endif
+    });
+</script>
+@endpush

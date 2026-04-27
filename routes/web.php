@@ -13,6 +13,7 @@ use App\Http\Controllers\SumberKepemilikanController;
 use App\Http\Controllers\LokasiAsetController;
 use App\Http\Controllers\JenisAsetController;
 use App\Http\Controllers\DataAsetController;
+use App\Http\Controllers\PemulihanController;
 
 
 
@@ -145,6 +146,11 @@ Route::get('/jenis-khusus', [JenisAsetController::class, 'indexKhusus'])->name('
 Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name('jenis-aset.storeKhusus');
 Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
 Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
+
+// PEMULIHAN
+Route::get('/pemulihan/jenis-umum', [PemulihanController::class, 'jenisUmumIndex'])->name('pemulihan.jenis-umum');
+Route::put('/pemulihan/jenis-umum/{id}/restore', [PemulihanController::class, 'jenisUmumRestore'])->name('pemulihan.jenis-umum.restore');
+Route::delete('/pemulihan/jenis-umum/{id}/force-delete', [PemulihanController::class, 'jenisUmumForceDelete'])->name('pemulihan.jenis-umum.force-delete');
 });
 
 // Proses & Selesai Perbaikan
