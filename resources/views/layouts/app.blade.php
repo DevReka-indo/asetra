@@ -8,6 +8,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title')</title>
 
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('assets/img/icon.png') }}" type="image/png">
+
     {{-- WebFont harus di head --}}
     <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
@@ -36,70 +39,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/scanner.css') }}">
     @stack('styles')
 
-    <style>
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"],
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"]:hover,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"]:focus {
-            background-color: #253070 !important;
-            transition: 0s !important;
-            animation: none !important;
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link *,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link p,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link i,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link i::before,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link span.caret,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"] *,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"] p,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"] i,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"] i::before,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"] span.caret,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"]:hover p,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"]:focus p {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-            transition: 0s !important;
-            animation: none !important;
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item.active_ > a.nav-link::before,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item > a.nav-link[aria-expanded="true"]::before {
-            display: none !important;
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item:not(.active_) > a.nav-link:focus i,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item:not(.active_) > a.nav-link:focus i::before,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item:not(.active_) > a.nav-link:focus p,
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item:not(.active_) > a.nav-link:focus span.caret {
-            color: #253070 !important; 
-            fill: #253070 !important;
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav.nav-secondary .nav-item:not(.active_) > a.nav-link:focus {
-            background-color: rgba(37, 48, 112, 0.05) !important; 
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav-collapse li.active > a,
-        html body .wrapper .sidebar[data-background-color="white"] .nav-collapse li.active > a *,
-        html body .wrapper .sidebar[data-background-color="white"] .nav-collapse li.active > a .sub-item {
-            color: #253070 !important; 
-            font-weight: 600 !important;
-            transition: 0s !important;
-            animation: none !important;
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav-collapse li.active > a {
-            background-color: rgba(37, 48, 112, 0.05) !important; 
-        }
-
-        html body .wrapper .sidebar[data-background-color="white"] .nav-collapse li.active > a::before,
-        html body .wrapper .sidebar[data-background-color="white"] .nav-collapse li.active .sub-item::before {
-            transition: 0s !important;
-            animation: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('assets/css/sidebar-theme.css') }}">
 
     
 </head>
