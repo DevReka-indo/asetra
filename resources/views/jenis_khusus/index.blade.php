@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
-        <h3 class="fw-bold mb-0">Kelola Jenis Aset Tetap Khusus</h3>
+        <h3 class="fw-bold mb-0">Kelola Kode Aset Khusus</h3>
     </div>
 
     {{-- FILTER --}}
@@ -79,9 +79,9 @@
                     <thead class="table-light">
                         <tr>
                             <th width="5%" class="text-center">No</th>
-                            <th width="15%">Kode Umum</th>
-                            <th width="15%">Kode Khusus</th>
-                            <th width="20%">Jenis Aset Khusus</th>
+                            <th width="15%">Kode Aset Umum</th>
+                            <th width="15%">Kode Aset Khusus</th>
+                            <th width="20%">Nama Aset Khusus</th>
                             <th width="15%">Kode Gabungan</th>
                             <th width="15%" class="text-center">Aksi</th>
                         </tr>

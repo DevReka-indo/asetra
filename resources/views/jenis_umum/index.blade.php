@@ -244,12 +244,8 @@
                 </div>
                 <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
                 <p class="text-muted mb-3" style="font-size: 1rem;">
-                    Hapus data <strong class="text-danger fs-5">{{ $umum->kode_umum }} - {{ $umum->jenis_aset }}</strong>?
+                    Hapus data <br><strong class="text-danger fs-5">{{ $umum->kode_umum }} - {{ $umum->jenis_aset }}</strong>?
                 </p>
-                
-                <div class="alert alert-warning mb-4 text-start small border-0 shadow-sm rounded-3">
-                    <i class="fas fa-info-circle me-1"></i><strong>Perhatian:</strong> Menghapus Aset Umum ini akan ikut menghapus <strong>semua data aset khusus</strong> di bawahnya!
-                </div>
 
                 <div class="d-flex justify-content-center gap-3">
                     <form action="{{ route('jenis-aset.destroyUmum', $umum->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">

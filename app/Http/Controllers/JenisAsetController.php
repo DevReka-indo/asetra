@@ -180,6 +180,6 @@ class JenisAsetController extends Controller
         $asetKhusus->delete();
 
         return redirect()->route('jenis-khusus.index')
-            ->with('success', 'Jenis aset tetap khusus berhasil dihapus.');
+            ->with('success', 'Jenis aset khusus berhasil dipindahkan ke menu Pemulihan.');
     }
 }

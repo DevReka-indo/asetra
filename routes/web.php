@@ -147,10 +147,15 @@ Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name(
 Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
 Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
 
-// PEMULIHAN
+// PEMULIHAN JENIS ASET UMUM
 Route::get('/pemulihan/jenis-umum', [PemulihanController::class, 'jenisUmumIndex'])->name('pemulihan.jenis-umum');
 Route::put('/pemulihan/jenis-umum/{id}/restore', [PemulihanController::class, 'jenisUmumRestore'])->name('pemulihan.jenis-umum.restore');
 Route::delete('/pemulihan/jenis-umum/{id}/force-delete', [PemulihanController::class, 'jenisUmumForceDelete'])->name('pemulihan.jenis-umum.force-delete');
+
+// PEMULIHAN JENIS ASET KHUSUS
+Route::get('/pemulihan/jenis-khusus', [PemulihanController::class, 'jenisKhususIndex'])->name('pemulihan.jenis-khusus');
+Route::put('/pemulihan/jenis-khusus/{id}/restore', [PemulihanController::class, 'jenisKhususRestore'])->name('pemulihan.jenis-khusus.restore');
+Route::delete('/pemulihan/jenis-khusus/{id}/force-delete', [PemulihanController::class, 'jenisKhususForceDelete'])->name('pemulihan.jenis-khusus.force-delete');
 });
 
 // Proses & Selesai Perbaikan

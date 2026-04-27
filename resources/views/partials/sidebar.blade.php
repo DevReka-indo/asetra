@@ -153,8 +153,8 @@
                                     <span class="sub-item">Kode Umum</span>
                                 </a>
                             </li>
-                            <li class="">
-                                <a href="#">
+                            <li class="{{ request()->routeIs('pemulihan.jenis-khusus') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.jenis-khusus') }}">
                                     <span class="sub-item">Kode Khusus</span>
                                 </a>
                             </li>
