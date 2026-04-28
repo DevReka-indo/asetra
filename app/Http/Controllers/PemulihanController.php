@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisAsetUmum;
 use App\Models\JenisAsetKhusus;
+use App\Models\KategoriAset;
 use Illuminate\Http\Request;
 
 class PemulihanController extends Controller
@@ -100,5 +101,52 @@ class PemulihanController extends Controller
 
         return redirect()->route('pemulihan.jenis-khusus')
             ->with('success', 'Jenis aset khusus berhasil dihapus secara permanen.');
+    }
+
+    /**
+     * Menampilkan daftar Kategori Aset yang dihapus.
+     */
+    public function kategoriAsetIndex(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+
+        $query = KategoriAset::onlyTrashed();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('kode', 'LIKE', "%{$search}%")
+                  ->orWhere('nama_kategori', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $dataKategori = $query->latest('deleted_at')->paginate($perPage)->withQueryString();
+        
+        return view('pemulihan.kategori_aset', compact('dataKategori'));
+    }
+
+    /**
+     * Memulihkan Kategori Aset.
+     */
+    public function kategoriAsetRestore($id)
+    {
+        $kategori = KategoriAset::onlyTrashed()->findOrFail($id);
+        $kategori->restore();
+
+        return redirect()->route('pemulihan.kategori-aset')
+            ->with('success', 'Kategori aset berhasil dipulihkan.');
+    }
+
+    /**
+     * Menghapus secara permanen Kategori Aset.
+     */
+    public function kategoriAsetForceDelete($id)
+    {
+        $kategori = KategoriAset::onlyTrashed()->findOrFail($id);
+        
+        $kategori->forceDelete();
+
+        return redirect()->route('pemulihan.kategori-aset')
+            ->with('success', 'Kategori aset berhasil dihapus secara permanen.');
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SumberKepemilikanController;
 use App\Http\Controllers\LokasiAsetController;
 use App\Http\Controllers\JenisAsetController;
+use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\DataAsetController;
 use App\Http\Controllers\PemulihanController;
 
@@ -147,6 +148,12 @@ Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name(
 Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
 Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
 
+// KATEGORI ASET
+Route::get('/kategori-aset', [KategoriAsetController::class, 'index'])->name('kategori-aset.index');
+Route::post('/kategori-aset', [KategoriAsetController::class, 'store'])->name('kategori-aset.store');
+Route::put('/kategori-aset/{id}', [KategoriAsetController::class, 'update'])->name('kategori-aset.update');
+Route::delete('/kategori-aset/{id}', [KategoriAsetController::class, 'destroy'])->name('kategori-aset.destroy');
+
 // PEMULIHAN JENIS ASET UMUM
 Route::get('/pemulihan/jenis-umum', [PemulihanController::class, 'jenisUmumIndex'])->name('pemulihan.jenis-umum');
 Route::put('/pemulihan/jenis-umum/{id}/restore', [PemulihanController::class, 'jenisUmumRestore'])->name('pemulihan.jenis-umum.restore');
@@ -156,6 +163,11 @@ Route::delete('/pemulihan/jenis-umum/{id}/force-delete', [PemulihanController::c
 Route::get('/pemulihan/jenis-khusus', [PemulihanController::class, 'jenisKhususIndex'])->name('pemulihan.jenis-khusus');
 Route::put('/pemulihan/jenis-khusus/{id}/restore', [PemulihanController::class, 'jenisKhususRestore'])->name('pemulihan.jenis-khusus.restore');
 Route::delete('/pemulihan/jenis-khusus/{id}/force-delete', [PemulihanController::class, 'jenisKhususForceDelete'])->name('pemulihan.jenis-khusus.force-delete');
+
+// PEMULIHAN KATEGORI ASET
+Route::get('/pemulihan/kategori-aset', [PemulihanController::class, 'kategoriAsetIndex'])->name('pemulihan.kategori-aset');
+Route::put('/pemulihan/kategori-aset/{id}/restore', [PemulihanController::class, 'kategoriAsetRestore'])->name('pemulihan.kategori-aset.restore');
+Route::delete('/pemulihan/kategori-aset/{id}/force-delete', [PemulihanController::class, 'kategoriAsetForceDelete'])->name('pemulihan.kategori-aset.force-delete');
 });
 
 // Proses & Selesai Perbaikan

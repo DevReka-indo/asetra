@@ -75,31 +75,38 @@
                     </div>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? 'active_' : '' }}">
+                <li class="nav-item {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') || request()->routeIs('kategori-aset.*') ? 'active_' : '' }}">
                     <a href="#jenisAsetDrop"
-                        class="nav-link {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? '' : 'collapsed' }}" 
+                        class="nav-link {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') || request()->routeIs('kategori-aset.*') ? '' : 'collapsed' }}" 
                         data-toggle="collapse"
-                        aria-expanded="{{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? 'true' : 'false' }}">
+                        aria-expanded="{{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') || request()->routeIs('kategori-aset.*') ? 'true' : 'false' }}">
                             <i class="fas fa-boxes"></i>
-                            <p>Jenis Aset</p>
+                            <p>Kode Aset</p>
                             <span class="caret"></span>
                     </a>
 
-                    <div class="collapse {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') ? 'show' : '' }}" 
+                    <div class="collapse {{ request()->routeIs('jenis-umum.*') || request()->routeIs('jenis-khusus.*') || request()->routeIs('kategori-aset.*') ? 'show' : '' }}" 
                         id="jenisAsetDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
 
-                            {{-- Sub-menu 1: Jenis Aset Umum --}}
+                            {{-- Sub-menu 1: Kode Aset Umum --}}
                             <li class="{{ request()->routeIs('jenis-umum.*') ? 'active' : '' }}">
                                 <a href="{{ route('jenis-umum.index') }}">
-                                    <span class="sub-item">Aset Umum</span>
+                                    <span class="sub-item">Kode Aset Umum</span>
                                 </a>
                             </li>
 
-                            {{-- Sub-menu 2: Jenis Aset Khusus --}}
+                            {{-- Sub-menu 2: Kode Aset Khusus --}}
                             <li class="{{ request()->routeIs('jenis-khusus.*') ? 'active' : '' }}">
                                 <a href="{{ route('jenis-khusus.index') }}">
-                                    <span class="sub-item">Aset Khusus</span>
+                                    <span class="sub-item">Kode Aset Khusus</span>
+                                </a>
+                            </li>
+
+                            {{-- Sub-menu 3: Kategori Aset --}}
+                            <li class="{{ request()->routeIs('kategori-aset.*') ? 'active' : '' }}">
+                                <a href="{{ route('kategori-aset.index') }}">
+                                    <span class="sub-item">Kode Kategori Aset</span>
                                 </a>
                             </li>
 
@@ -158,8 +165,8 @@
                                     <span class="sub-item">Kode Khusus</span>
                                 </a>
                             </li>
-                            <li class="">
-                                <a href="#">
+                            <li class="{{ request()->routeIs('pemulihan.kategori-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.kategori-aset') }}">
                                     <span class="sub-item">Kategori Aset</span>
                                 </a>
                             </li>
