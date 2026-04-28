@@ -103,7 +103,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-body p-5 text-center bg-light">
-                <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #d1e7dd;">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f1f3f5;">
                     <i class="fas fa-refresh fa-3x text-success"></i>
                 </div>
                 <h4 class="fw-bold text-dark mb-2">Konfirmasi Pulihkan</h4>
