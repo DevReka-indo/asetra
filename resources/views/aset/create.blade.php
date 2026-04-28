@@ -60,7 +60,41 @@
                                 <label class="form-label fw-bold text-navy mb-1 small">Nomor Aset (Otomatis)</label>
                                 <input type="text" id="nomor_aset_display" name="nomor_aset" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
                                        value="Mencari format..." disabled style="cursor: not-allowed; opacity: 0.8;">
-                                <small class="text-muted" style="font-size: 0.7rem;">Format: [ID]/[KEPEMILIKAN]/[KODE]/[LOKASI]/[TAHUN]</small>
+                                <small class="text-muted" style="font-size: 0.7rem;">Format: [ID]/[SUMBER]/[UMUM]-[KHUSUS]/[LOKASI]/[KATEGORI]/[TAHUN]</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset Umum <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
+                                    <select id="id_jenis_aset_umum" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Pilih Jenis Aset Umum --</option>
+                                        @foreach($jenisUmum as $umum)
+                                            <option value="{{ $umum->id }}" data-kode="{{ $umum->kode_umum }}">
+                                                {{ $umum->kode_umum }} - {{ $umum->jenis_aset }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset Khusus <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
+                                    <select name="jenis_aset_khusus_id" id="id_jenis_aset" class="form-select border-start-0 ps-0 shadow-none" required disabled>
+                                        <option value="" selected disabled>-- Pilih Jenis Umum Dahulu --</option>
+                                        @foreach($jenisKhusus as $jenis)
+                                            <option value="{{ $jenis->id }}" 
+                                                    data-parent="{{ $jenis->jenis_aset_umum_id }}"
+                                                    data-kode="{{ $jenis->kode_khusus }}" 
+                                                    data-nama="{{ $jenis->jenis_aset }}" 
+                                                    {{ old('jenis_aset_khusus_id') == $jenis->id ? 'selected' : '' }}>
+                                                {{ $jenis->kode_khusus }} - {{ $jenis->jenis_aset }} 
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
@@ -71,18 +105,19 @@
                                 </div>
                             </div>
 
+                            
+
+                            
+
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold text-navy mb-1 small">Kategori Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
-                                    <select name="jenis_aset_khusus_id" id="id_jenis_aset" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Jenis Aset --</option>
-                                        @foreach($jenisKhusus as $jenis)
-                                            <option value="{{ $jenis->id }}" 
-                                                    data-kode="{{ $jenis->full_kode }}" 
-                                                    data-nama="{{ $jenis->jenis_aset }}" 
-                                                    {{ old('jenis_aset_khusus_id') == $jenis->id ? 'selected' : '' }}>
-                                                {{ $jenis->full_kode }} - {{ $jenis->jenis_aset }} 
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tags"></i></span>
+                                    <select name="kategori_id" id="id_kategori" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Pilih Kategori --</option>
+                                        @foreach($kategori as $kat)
+                                            <option value="{{ $kat->kategori_id }}" data-kode="{{ $kat->kode }}" {{ old('kategori_id') == $kat->kategori_id ? 'selected' : '' }}>
+                                                {{ $kat->kode }} - {{ $kat->nama_kategori }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -332,7 +367,9 @@
         const inputDetail = document.getElementById('input_detail_lokasi');
         
         const selectKep = document.getElementById('sumber_kepemilikan_id');
+        const selectUmum = document.getElementById('id_jenis_aset_umum');
         const selectJen = document.getElementById('id_jenis_aset');
+        const selectKat = document.getElementById('id_kategori');
         const selectLok = document.getElementById('dropdown_lokasi');
         const selectThn = document.getElementById('id_tahun');
         const orgSelect = document.getElementById('id_divisi');
@@ -361,21 +398,60 @@
             };
 
             const kKep = getK('sumber_kepemilikan_id', 'XXXX');
-            const kJen = getK('id_jenis_aset', 'XXXX');
+            
+            const optUmum = selectUmum.options[selectUmum.selectedIndex];
+            const kUmum = (selectUmum.value && optUmum.getAttribute('data-kode')) ? optUmum.getAttribute('data-kode') : 'XX';
+            
+            const optKhusus = selectJen.options[selectJen.selectedIndex];
+            const kKhusus = (selectJen.value && optKhusus.getAttribute('data-kode')) ? optKhusus.getAttribute('data-kode') : 'XXX';
+            
+            const kJen = `${kUmum}-${kKhusus}`;
+            
             const kLok = getK('dropdown_lokasi', 'LOK');
+            const kKat = getK('id_kategori', 'XX');
             
             // Ambil tahun dari dropdown atau default ke tahun sekarang
             const selectThn = document.getElementById('id_tahun');
             const thn = (selectThn && selectThn.value) ? selectThn.value : new Date().getFullYear();
 
             // Set hasil akhir
-            const finalResult = `${nextId}/${kKep}/${kJen}/${kLok}/${thn}`;
+            const finalResult = `${nextId}/${kKep}/${kJen}/${kLok}/${kKat}/${thn}`;
             document.getElementById('nomor_aset_display').value = finalResult;
         }
 
-        [selectKep, selectJen, selectLok, selectThn].forEach(el => {
+        [selectKep, selectUmum, selectJen, selectKat, selectLok, selectThn].forEach(el => {
             if(el) el.addEventListener('change', updateNomor);
         });
+
+        // Chained Dropdown Logic
+        if(selectUmum) {
+            selectUmum.addEventListener('change', function() {
+                const umumId = this.value;
+                const options = selectJen.querySelectorAll('option');
+                
+                let hasVisible = false;
+                options.forEach(opt => {
+                    if(opt.value === "") return;
+                    if(opt.getAttribute('data-parent') === umumId) {
+                        opt.style.display = 'block';
+                        hasVisible = true;
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+
+                selectJen.value = "";
+                selectJen.disabled = false;
+                if(!hasVisible) {
+                    selectJen.innerHTML = '<option value="" selected disabled>-- Tidak ada data khusus --</option>';
+                } else {
+                    // Reset to first option
+                    selectJen.innerHTML = '<option value="" selected disabled>-- Pilih Jenis Aset Khusus --</option>' + 
+                                         Array.from(options).filter(o => o.getAttribute('data-parent') === umumId || o.value === "").map(o => o.outerHTML).join('');
+                }
+                updateNomor();
+            });
+        }
 
         // Detail Lokasi 
         if(selectLok) {

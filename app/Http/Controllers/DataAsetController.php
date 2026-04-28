@@ -10,6 +10,8 @@ use App\Models\Divisi;
 use App\Models\LokasiAset;
 use App\Models\SumberKepemilikan;
 use App\Models\User;
+use App\Models\JenisAsetUmum;
+use App\Models\KategoriAset;
 use Illuminate\Support\Facades\Storage;
 
 class DataAsetController extends Controller
@@ -135,13 +137,15 @@ class DataAsetController extends Controller
             'divisi.department.section.unit'
         ])->whereNull('parent_director_id')->first();
 
+        $jenisUmum            = JenisAsetUmum::all();
         $jenisKhusus          = JenisAsetKhusus::all();
+        $kategori             = KategoriAset::all();
         $lokasi               = LokasiAset::all();
         $sumberKepemilikan    = SumberKepemilikan::all();
         $users                = User::all();
 
         return view('aset.create', compact(
-            'mainDirector', 'jenisKhusus', 'lokasi', 'sumberKepemilikan', 'users', 'nextId'
+            'mainDirector', 'jenisUmum', 'jenisKhusus', 'kategori', 'lokasi', 'sumberKepemilikan', 'users', 'nextId'
         ));
     }
 
@@ -159,6 +163,7 @@ class DataAsetController extends Controller
             'merek'                => 'nullable|string|max:100',
             'deskripsi'            => 'nullable|string',
             'tahun_kapitalisasi'   => 'nullable|integer|min:1900|max:' . date('Y'),
+            'kategori_id'          => 'required|integer|exists:kategori_aset,kategori_id',
             'pic_id'               => 'nullable|integer',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
@@ -303,7 +308,9 @@ class DataAsetController extends Controller
     {
         $aset = DataAset::with('foto')->findOrFail($id);
 
+        $jenisUmum         = JenisAsetUmum::all();
         $jenisKhusus       = JenisAsetKhusus::all();
+        $kategori          = KategoriAset::all();
         $lokasi            = LokasiAset::all();
         $sumberKepemilikan = SumberKepemilikan::all();
         $users             = User::all();
@@ -314,7 +321,7 @@ class DataAsetController extends Controller
         ])->whereNull('parent_director_id')->first();
 
         return view('aset.edit', compact(
-            'aset', 'jenisKhusus', 'lokasi', 'sumberKepemilikan', 'users', 'mainDirector'
+            'aset', 'jenisUmum', 'jenisKhusus', 'kategori', 'lokasi', 'sumberKepemilikan', 'users', 'mainDirector'
         ));
     }
 
@@ -333,6 +340,7 @@ class DataAsetController extends Controller
             'merek'                => 'nullable|string|max:100',
             'deskripsi'            => 'nullable|string',
             'tahun_kapitalisasi'   => 'nullable|integer|min:1900|max:' . date('Y'),
+            'kategori_id'          => 'required|integer|exists:kategori_aset,kategori_id',
             'pic_id'               => 'nullable|integer',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',

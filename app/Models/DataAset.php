@@ -26,6 +26,7 @@ class DataAset extends Model
         'id_unit',
         'sumber_kepemilikan_id',
         'lokasi_id',
+        'kategori_id',
         'pic_id',
         'status_kondisi',
         'status_aset',
@@ -54,6 +55,10 @@ class DataAset extends Model
             $lokAset   = \App\Models\LokasiAset::find($aset->lokasi_id);
             $kodeLokasi = $lokAset ? ($lokAset->kode_lokasi ?? 'LOK') : 'LOK';
 
+            //Kode kategori aset
+            $katAset   = \App\Models\KategoriAset::find($aset->kategori_id);
+            $kodeKategori = $katAset ? ($katAset->kode ?? 'XX') : 'XX';
+
             //Kode jenis aset
             $kodeJenis = $aset->kode_aset;
             if (!$kodeJenis) {
@@ -61,7 +66,7 @@ class DataAset extends Model
                 $kodeJenis = $jenis ? $jenis->full_kode : 'XXXX';
             }
 
-            $aset->nomor_aset = "{$idFormatted}/{$kodeKepemilikan}/{$kodeJenis}/{$kodeLokasi}/{$tahun}";
+            $aset->nomor_aset = "{$idFormatted}/{$kodeKepemilikan}/{$kodeJenis}/{$kodeLokasi}/{$kodeKategori}/{$tahun}";
             $aset->saveQuietly();
         });
     }
@@ -127,6 +132,11 @@ class DataAset extends Model
     public function lokasi()
     {
         return $this->belongsTo(LokasiAset::class, 'lokasi_id', 'lokasi_id');
+    }
+
+    public function kategoriAset()
+    {
+        return $this->belongsTo(KategoriAset::class, 'kategori_id', 'kategori_id');
     }
 
     /**

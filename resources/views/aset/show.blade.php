@@ -2,6 +2,42 @@
 
 @section('title', 'Detail Aset - ' . $aset->nomor_aset)
 
+@push('styles')
+<style>
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 2px;
+    }
+    .info-value {
+        font-size: 0.95rem;
+        color: #253070;
+        word-break: break-word;
+    }
+    .icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: rgba(37, 48, 112, 0.05);
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        color: #253070;
+    }
+    .card-header-custom {
+        background-color: #fff;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+        padding: 1rem 1.25rem;
+    }
+    .text-navy {
+        color: #253070 !important;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     {{-- HEADER --}}
@@ -50,9 +86,13 @@
                             <p class="text-muted small mb-0">{{ $aset->nama_aset }}</p>
                         </div>
                         <div class="card-footer bg-light border-0">
-                            <button class="btn btn-sm btn-primary w-100" onclick="window.print()">
-                                <i class="fas fa-print me-2"></i>Cetak Label Aset
-                            </button>
+                            <form action="{{ route('aset.cetak-label') }}" method="POST" target="_blank">
+                                @csrf
+                                <input type="hidden" name="ids[]" value="{{ $aset->id }}">
+                                <button type="submit" class="btn btn-sm btn-dark w-100 rounded-3">
+                                    <i class="fas fa-tags me-2"></i>Cetak Label Aset
+                                </button>
+                            </form>
                         </div>
                     </div>
 
@@ -86,23 +126,33 @@
                     <div class="card border-0 shadow-sm mb-4">
                         
                         {{-- HEADER DISAMAKAN PERSIS DENGAN SISI KIRI --}}
-                        <div class="card-header bg-white pt-3 pb-2">
-                            <h6 class="fw-bold text-primary mb-0 text-center">Informasi Aset</h6>
+                        <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
+                            <h6 class="fw-bold text-primary mb-0"><i class="fas fa-info-circle me-2"></i> Detail Informasi Aset</h6>
                         </div>
                         
                         <div class="card-body px-4 pb-4 pt-3">
                             {{-- Row 1: Highlight Data Utama --}}
-                            <div class="row g-3 mb-4">
+                            <div class="row g-3 mb-4 border-bottom pb-3">
                                 <div class="col-md-6">
-                                    <div class="info-box">
-                                        <span class="info-label">Nama Aset</span>
-                                        <span class="info-value">{{ $aset->nama_aset }}</span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-wrapper text-primary me-3" style="width: 40px; height: 40px; background: rgba(37, 48, 112, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-box-open fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <span class="info-label d-block text-muted small fw-bold">Nama Aset</span>
+                                            <h5 class="info-value fw-bold text-navy mb-0">{{ $aset->nama_aset }}</h5>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="info-box ">
-                                        <span class="info-label">Merk / Model</span>
-                                        <span class="info-value">{{ $aset->merek ?? 'Tidak ada data' }}</span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-wrapper text-primary me-3" style="width: 40px; height: 40px; background: rgba(37, 48, 112, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-tag fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <span class="info-label d-block text-muted small fw-bold">Merk / Model</span>
+                                            <h5 class="info-value fw-bold text-navy mb-0">{{ $aset->merek ?? '-' }}</h5>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -111,105 +161,135 @@
 
                             {{-- Row 2: Detail --}}
                             <div class="row g-4">
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-tags"></i>
+                                {{-- Kolom Kiri --}}
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-hand-holding-usd"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Sumber Kepemilikan</span>
+                                            <span class="info-value fw-semibold">{{ $aset->sumberKepemilikan->nama ?? '-' }}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="info-label">Sumber Kepemilikan</span>
-                                        <span class="info-value">{{ $aset->sumberKepemilikan->nama ?? '-' }}</span>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-tags"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Kategori Aset</span>
+                                            <span class="info-value fw-semibold">{{ $aset->kategoriAset->kode ?? '-' }} — {{ $aset->kategoriAset->nama_kategori ?? '-' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-layer-group"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Jenis Aset Umum</span>
+                                            <span class="info-value fw-semibold">
+                                                {{ $aset->jenisAsetKhusus->jenisAsetUmum->kode_umum ?? '??' }} - {{ $aset->jenisAsetKhusus->jenisAsetUmum->jenis_aset ?? '-' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-list-ul"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Jenis Aset Khusus</span>
+                                            <span class="info-value fw-semibold">
+                                                {{ $aset->jenisAsetKhusus->kode_khusus ?? '???' }} - {{ $aset->jenisAsetKhusus->jenis_aset ?? '-' }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Tahun Kapitalisasi</span>
+                                            <span class="info-value fw-semibold">{{ $aset->tahun_kapitalisasi ?? '-' }}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-tags"></i>
+                                {{-- Kolom Kanan --}}
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Lokasi Penempatan</span>
+                                            <span class="info-value fw-semibold">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="info-label">Jenis Aset</span>
-                                        <span class="badge bg-navy text-white px-3 py-2 rounded-pill">
-                                            {{ $aset->jenisAsetKhusus->jenis_aset ?? '-' }}
-                                        </span>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-calendar-alt"></i>
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Kondisi Aset</span>
+                                            @if($aset->status_kondisi == 'Baik')
+                                                <span class="badge bg-success px-2 py-1 rounded-pill"><i class="fas fa-check-circle me-1"></i> {{ $aset->status_kondisi }}</span>
+                                            @else
+                                                <span class="badge bg-danger px-2 py-1 rounded-pill"><i class="fas fa-exclamation-triangle me-1"></i> {{ $aset->status_kondisi ?? '-' }}</span>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="info-label">Tahun Kapitalisasi</span>
-                                        <span class="info-value">{{ $aset->tahun_kapitalisasi ?? '-' }}</span>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-map-marker-alt"></i>
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-cog"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Status Aset</span>
+                                            @if($aset->status_aset == 'Aktif')
+                                                <span class="badge bg-success px-2 py-1 rounded-pill"><i class="fas fa-check-circle me-1"></i> {{ $aset->status_aset }}</span>
+                                            @else
+                                                <span class="badge bg-secondary px-2 py-1 rounded-pill"><i class="fas fa-times-circle me-1"></i> {{ $aset->status_aset ?? '-' }}</span>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="info-label">Lokasi Penempatan</span>
-                                        <span class="info-value">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-info-circle"></i>
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Penanggung Jawab (PIC)</span>
+                                            <span class="info-value fw-semibold">{{ $aset->pic ? $aset->pic->firstname . ' ' . $aset->pic->lastname : '-' }}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="info-label">Kondisi Aset</span>
-                                        @if($aset->status_kondisi == 'Baik')
-                                            <span class="badge bg-success px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i> {{ $aset->status_kondisi }}</span>
-                                        @else
-                                            <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="fas fa-exclamation-triangle me-1"></i> {{ $aset->status_kondisi ?? '-' }}</span>
-                                        @endif
-                                    </div>
-                                </div>
 
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-info-circle"></i>
-                                    </div>
-                                    <div>
-                                        <span class="info-label">Status Aset</span>
-                                        @if($aset->status_aset == 'Aktif')
-                                            <span class="badge bg-success px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i> {{ $aset->status_aset }}</span>
-                                        @else
-                                            <span class="badge bg-secondary px-3 py-2 rounded-pill"><i class="fas fa-times-circle me-1"></i> {{ $aset->status_aset ?? '-' }}</span>
-                                        @endif
-                                    </div>
-                                </div>  
-                                
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-sitemap"></i>
-                                    </div>
-                                    <div>
-                                        <span class="info-label">Penempatan Organisasi</span>
-                                        <span class="info-value">{{ $aset->organisasi_terikat }}</span>
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-sitemap"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Unit Kerja / Organisasi</span>
+                                            <span class="info-value fw-semibold">{{ $aset->organisasi_terikat }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 d-flex align-items-start">
-                                    <div class="icon-wrapper text-navy me-3">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div>
-                                        <span class="info-label">Penanggung Jawab</span>
-                                        <span class="info-value">{{ $aset->pic ? $aset->pic->firstname . ' ' . $aset->pic->lastname : '-' }}</span>
-                                    </div>
-                                </div>
+                            </div>
 
                             {{-- Row 3: Deskripsi Full Width --}}
-                            <div class="row mt-4 pt-3 border-top">
+                            <div class="row mt-2 pt-3 border-top">
                                 <div class="col-12">
                                     <div class="d-flex align-items-start">
-                                        <div class="icon-wrapper text-navy me-3">
+                                        <div class="icon-wrapper me-3">
                                             <i class="fas fa-align-left"></i>
                                         </div>
-                                        <div>
-                                            <span class="info-label">Deskripsi Aset</span>
-                                            <p class="text-secondary mb-0 mt-1" style="line-height: 1.6;">
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Deskripsi Tambahan</span>
+                                            <p class="info-value mb-0 mt-1" style="line-height: 1.6;">
                                                 {{ $aset->deskripsi ?? 'Tidak ada deskripsi tambahan untuk aset ini.' }}
                                             </p>
                                         </div>
