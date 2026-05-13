@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Data Aset - ' . $aset->nomor_aset)
+@section('title', 'Edit Data Aset')
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     {{-- HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold mb-0">Edit Data Aset: {{ $aset->nomor_aset }}</h3>
+        <h3 class="fw-bold mb-0">Edit Data Aset</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
                 <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
@@ -25,7 +25,6 @@
                 <li class="separator text-muted d-flex align-items-center px-2">
                 <span style="font-size: 14px; position: relative; top: 2px;">-</span>
             </li>
-            
             <li class="nav-item d-flex align-items-center">
                 <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Edit Data Aset</span>
             </li>
@@ -35,8 +34,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
             @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
+                <div class="alert alert-danger border-0 shadow-sm rounded-3">
+                    <ul class="mb-0 small">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -58,58 +57,35 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Nomor Aset (Otomatis)</label>
-                                <input type="text" id="nomor_aset_display" name="nomor_aset" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
-                                       value="{{ $aset->nomor_aset }}" disabled style="cursor: not-allowed; opacity: 0.8;">
-                                <small class="text-muted mt-1 d-block" style="font-size: 0.7rem;">Format: [ID]/[SUMBER]/[UMUM]-[KHUSUS]/[LOKASI]/[KATEGORI]/[TAHUN]</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset Umum <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
-                                    <select id="id_jenis_aset_umum" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" disabled>-- Pilih Jenis Aset Umum --</option>
-                                        @foreach($jenisUmum as $umum)
-                                            <option value="{{ $umum->id }}" data-kode="{{ $umum->kode_umum }}"
-                                                {{ (old('jenis_aset_umum_id', $aset->jenisAsetKhusus->jenis_aset_umum_id ?? '') == $umum->id) ? 'selected' : '' }}>
-                                                {{ $umum->kode_umum }} - {{ $umum->jenis_aset }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <label class="form-label fw-bold text-navy mb-1 small">Nomor Aset Saat Ini</label>
+                                <div class="input-group">
+                                    <input type="text" id="nomor_aset_display" class="form-control bg-light text-primary fw-bold border-0 shadow-none rounded-3 px-3 py-2" 
+                                           value="{{ $aset->nomor_aset }}" disabled style="cursor: not-allowed; opacity: 1;">
+                                    <span class="input-group-text bg-light border-0 rounded-3 text-muted small"><i class="fas fa-info-circle"></i></span>
                                 </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset Khusus <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
-                                    <select name="jenis_aset_khusus_id" id="id_jenis_aset" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" disabled>-- Pilih Jenis Umum Dahulu --</option>
-                                        @foreach($jenisKhusus as $jenis)
-                                            <option value="{{ $jenis->id }}" 
-                                                    data-parent="{{ $jenis->jenis_aset_umum_id }}"
-                                                    data-kode="{{ $jenis->kode_khusus }}" 
-                                                    data-nama="{{ $jenis->jenis_aset }}" 
-                                                    {{ old('jenis_aset_khusus_id', $aset->jenis_aset_khusus_id) == $jenis->id ? 'selected' : '' }}>
-                                                {{ $jenis->kode_khusus }} - {{ $jenis->jenis_aset }} 
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <small class="text-muted" style="font-size: 0.7rem;">Nomor aset akan diperbarui otomatis jika klasifikasi, lokasi, atau tahun diubah.</small>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Kategori Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tags"></i></span>
-                                    <select name="kategori_id" id="id_kategori" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" disabled>-- Pilih Kategori --</option>
-                                        @foreach($kategori as $kat)
-                                            <option value="{{ $kat->kategori_id }}" data-kode="{{ $kat->kode }}" {{ old('kategori_id', $aset->kategori_id) == $kat->kategori_id ? 'selected' : '' }}>
-                                                {{ $kat->kode }} - {{ $kat->nama_kategori }}
-                                            </option>
-                                        @endforeach
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
+                                    <select name="kategori_id" id="kategori_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" disabled>-- Pilih Kategori Aset --</option>
+                                        <optgroup label="KATEGORI ASET TETAP">
+                                            @foreach($kategoriTetap as $kt)
+                                                <option value="{{ $kt->id }}" data-kode="{{ $kt->kode }}" {{ (old('kategori_id', $aset->kategori_id) == $kt->id) ? 'selected' : '' }}>
+                                                    {{ $kt->kode }} - {{ $kt->nama }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                        <optgroup label="KATEGORI ASET EC">
+                                            @foreach($kategoriInventaris as $ki)
+                                                <option value="{{ $ki->id }}" data-kode="{{ $ki->kode }}" {{ (old('kategori_id', $aset->kategori_id) == $ki->id) ? 'selected' : '' }}>
+                                                    {{ $ki->kode }} - {{ $ki->nama }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
                                     </select>
                                 </div>
                             </div>
@@ -122,20 +98,12 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Merk Aset</label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
-                                    <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek', $aset->merek) }}" placeholder="Contoh: Lenovo / Honda">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi</label>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
-                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none">
-                                        <option value="" disabled>-- Pilih Tahun --</option>
+                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" disabled>-- Tahun --</option>
                                         @for ($year = date('Y'); $year >= 1900; $year--)
                                             <option value="{{ $year }}" {{ old('tahun_kapitalisasi', $aset->tahun_kapitalisasi) == $year ? 'selected' : '' }}>{{ $year }}</option>
                                         @endfor
@@ -143,11 +111,27 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Deskripsi Singkat</label>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">Merk Aset <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
+                                    <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek', $aset->merek) }}" placeholder="Lenovo / Honda" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-navy mb-1 small">Nomor BAST (Opsional)</label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-file-signature"></i></span>
+                                    <input type="text" name="bast" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('bast', $aset->bast) }}" placeholder="Contoh: 001/BAST/2023">
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-navy mb-1 small">Deskripsi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-align-left"></i></span>
-                                    <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="1" placeholder="Opsional detail aset...">{{ old('deskripsi', $aset->deskripsi) }}</textarea>
+                                    <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="2" placeholder="Rincian detail aset..." required>{{ old('deskripsi', $aset->deskripsi) }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -163,23 +147,6 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Sumber Kepemilikan <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-hand-holding-usd"></i></span>
-                                    <select name="sumber_kepemilikan_id" id="sumber_kepemilikan_id" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" disabled>-- Pilih Sumber Kepemilikan --</option>
-                                        @foreach($sumberKepemilikan as $sk)
-                                            <option value="{{ $sk->id }}"
-                                                    data-kode="{{ $sk->kode ?? 'REKA' }}"
-                                                    {{ old('sumber_kepemilikan_id', $aset->sumber_kepemilikan_id) == $sk->id ? 'selected' : '' }}>
-                                                {{ $sk->kode }} — {{ $sk->nama }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Lokasi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
@@ -198,10 +165,11 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small text-muted">Detail Lokasi</label>
                                 <input type="text" id="input_detail_lokasi" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
-                                       disabled placeholder="Otomatis dari lokasi terpilih" style="cursor: not-allowed; opacity: 0.8;">
+                                       disabled placeholder="Otomatis dari lokasi terpilih" style="cursor: not-allowed; opacity: 0.8;"
+                                       value="{{ $aset->lokasi->detail_lokasi ?? '' }}">
                             </div>
                         </div>
                     </div>
@@ -214,7 +182,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">Kondisi Saat Ini <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-info-circle"></i></span>
@@ -232,14 +200,15 @@
                             </div>
                             
                             {{-- Field Keterangan Lainnya --}}
-                            <div class="col-md-12 mt-2" id="keterangan_kondisi_wrapper" style="display: none;">
+                            <div class="col-md-12 mt-2" id="keterangan_kondisi_wrapper" style="{{ old('status_kondisi', $aset->status_kondisi) == 'Lainnya' ? 'display: block;' : 'display: none;' }}">
                                 <label class="form-label fw-bold text-navy mb-1 small">Spesifikasikan Kondisi Lainnya <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-pen"></i></span>
                                     <input type="text" name="keterangan_kondisi" id="keterangan_kondisi" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('keterangan_kondisi', $aset->keterangan_kondisi) }}" placeholder="Tulis rincian kondisinya disini...">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">Status Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-cog"></i></span>
@@ -253,18 +222,33 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-navy mb-1 small">PIC Aset</label>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">PIC Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-tie"></i></span>
-                                    <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none">
-                                        <option value="">-- Kosong / Tidak Ada --</option>
+                                    <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Pilih User --</option>
                                         @foreach($users as $user)
                                             <option value="{{ $user->id }}" {{ old('pic_id', $aset->pic_id) == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">Penanggung Jawab Aset <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-shield"></i></span>
+                                    <select name="penanggung_jawab_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Pilih User --</option>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}" {{ old('penanggung_jawab_id', $aset->penanggung_jawab_id) == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="col-md-12">
                                 <label class="form-label fw-bold text-navy mb-1 small">Struktur Organisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
@@ -272,9 +256,8 @@
                                     <select class="form-select border-start-0 ps-0 shadow-none" id="kode_organisasi" name="kode_organisasi" required>
                                         <option value="" disabled>-- Pilih Organisasi --</option>
                                         @php
-                                            $currentOrgKode = $aset->getKodeOrganisasiAttribute();
-                                            if (!function_exists('renderOrgOptionsEdit')) {
-                                                function renderOrgOptionsEdit($node, $currentVal, &$seen = [], $level = 0) {
+                                            if (!function_exists('renderOrgOptions')) {
+                                                function renderOrgOptions($node, $currentKey, &$seen = [], $level = 0) {
                                                     $indent = str_repeat('&nbsp;', $level * 4);
                                                     $prefix = $level > 0 ? '→ ' : '';
                                                     
@@ -282,51 +265,39 @@
                                                     $type = null;
                                                     $label = null;
 
-                                                    if (isset($node->name_director)) {
-                                                        $val = $node->id_director;
-                                                        $type = 'director';
-                                                        $label = "Direktur: {$node->name_director}";
-                                                        $printLabel = "Direktur: {$node->name_director}";
-                                                    } elseif (isset($node->nm_divisi)) {
-                                                        $val = $node->id_divisi;
-                                                        $type = 'divisi';
-                                                        $label = "Divisi: {$node->nm_divisi}";
-                                                        $printLabel = "{$prefix}Divisi: {$node->nm_divisi}";
-                                                    } elseif (isset($node->name_department)) {
-                                                        $val = $node->id_department;
-                                                        $type = 'department';
-                                                        $label = "Departemen: {$node->name_department}";
-                                                        $printLabel = "{$prefix}Departemen: {$node->name_department}";
-                                                    } elseif (isset($node->name_section)) {
-                                                        $val = $node->id_section;
-                                                        $type = 'section';
-                                                        $label = "Bagian: {$node->name_section}";
-                                                        $printLabel = "{$prefix}Bagian: {$node->name_section}";
-                                                    } elseif (isset($node->name_unit)) {
-                                                        $val = $node->id_unit;
-                                                        $type = 'unit';
-                                                        $label = "Unit: {$node->name_unit}";
-                                                        $printLabel = "{$prefix}Unit: {$node->name_unit}";
-                                                    }
+                                                    if (isset($node->name_director)) { $val = $node->id_director; $type = 'director'; $label = "Direktur: {$node->name_director}"; }
+                                                    elseif (isset($node->nm_divisi)) { $val = $node->id_divisi; $type = 'divisi'; $label = "Divisi: {$node->nm_divisi}"; }
+                                                    elseif (isset($node->name_department)) { $val = $node->id_department; $type = 'department'; $label = "Departemen: {$node->name_department}"; }
+                                                    elseif (isset($node->name_section)) { $val = $node->id_section; $type = 'section'; $label = "Bagian: {$node->name_section}"; }
+                                                    elseif (isset($node->name_unit)) { $val = $node->id_unit; $type = 'unit'; $label = "Unit: {$node->name_unit}"; }
 
                                                     if ($type && $val) {
                                                         $key = $type . '_' . $val;
-                                                        if (isset($seen[$key])) return; // Skip duplicate
+                                                        if (isset($seen[$key])) return;
                                                         $seen[$key] = true;
 
-                                                        $sel = ($key == $currentVal) ? 'selected' : '';
-                                                        echo "<option value='{$key}' data-label='{$label}' {$sel}>{$indent}{$printLabel}</option>";
+                                                        $selected = ($currentKey == $key) ? 'selected' : '';
+                                                        echo "<option value='{$key}' data-label='{$label}' {$selected}>{$indent}{$prefix}{$label}</option>";
                                                     }
 
-                                                    if (isset($node->subDirectors)) foreach ($node->subDirectors as $s) renderOrgOptionsEdit($s, $currentVal, $seen, $level + 1);
-                                                    if (isset($node->divisi)) foreach ($node->divisi as $d) renderOrgOptionsEdit($d, $currentVal, $seen, $level + 1);
-                                                    if (isset($node->department)) foreach ($node->department as $dp) renderOrgOptionsEdit($dp, $currentVal, $seen, $level + 1);
-                                                    if (isset($node->section)) foreach ($node->section as $sc) renderOrgOptionsEdit($sc, $currentVal, $seen, $level + 1);
-                                                    if (isset($node->unit)) foreach ($node->unit as $u) renderOrgOptionsEdit($u, $currentVal, $seen, $level + 1);
+                                                    if (isset($node->subDirectors)) foreach ($node->subDirectors as $s) renderOrgOptions($s, $currentKey, $seen, $level + 1);
+                                                    if (isset($node->divisi)) foreach ($node->divisi as $d) renderOrgOptions($d, $currentKey, $seen, $level + 1);
+                                                    if (isset($node->department)) foreach ($node->department as $dp) renderOrgOptions($dp, $currentKey, $seen, $level + 1);
+                                                    if (isset($node->section)) foreach ($node->section as $sc) renderOrgOptions($sc, $currentKey, $seen, $level + 1);
+                                                    if (isset($node->unit)) foreach ($node->unit as $u) renderOrgOptions($u, $currentKey, $seen, $level + 1);
                                                 }
                                             }
+                                            
+                                            // Tentukan key saat ini
+                                            $currentOrgKey = null;
+                                            if ($aset->id_unit) $currentOrgKey = "unit_{$aset->id_unit}";
+                                            elseif ($aset->id_section) $currentOrgKey = "section_{$aset->id_section}";
+                                            elseif ($aset->id_department) $currentOrgKey = "department_{$aset->id_department}";
+                                            elseif ($aset->id_divisi) $currentOrgKey = "divisi_{$aset->id_divisi}";
+                                            elseif ($aset->id_director) $currentOrgKey = "director_{$aset->id_director}";
+
                                             $seenArray = [];
-                                            if (isset($mainDirector)) renderOrgOptionsEdit($mainDirector, old('kode_organisasi', $currentOrgKode), $seenArray);
+                                            if (isset($mainDirector)) renderOrgOptions($mainDirector, old('kode_organisasi', $currentOrgKey), $seenArray);
                                         @endphp
                                     </select>
                                 </div>
@@ -335,70 +306,48 @@
                     </div>
                 </div>
 
-                {{-- DOKUMENTASI MULTI FOTO --}}
+                {{-- DOKUMENTASI FOTO --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                        <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-camera me-2"></i> Edit Foto Aset</h6>
+                        <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-camera me-2"></i> Foto Aset</h6>
                     </div>
                     <div class="card-body">
+                        {{-- List foto saat ini --}}
                         @if($aset->foto->count() > 0)
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Foto Saat Ini (Centang untuk menghapus)</label>
-                                <div class="row g-3">
-                                    @foreach($aset->foto as $f)
-                                        <div class="col-md-3 col-sm-4 text-center">
-                                            <div class="position-relative d-inline-block border rounded p-1 mb-2">
-                                                <img src="{{ asset('storage/' . $f->path_foto) }}" 
-                                                     class="img-fluid rounded" 
-                                                     style="max-height: 120px; cursor: zoom-in;" 
-                                                     alt="Aset Foto"
-                                                     data-bs-toggle="modal"
-                                                     data-bs-target="#imagePreviewModal"
-                                                     onclick="document.getElementById('previewImage').src=this.src;">
-                                            </div>
-                                            <br>
-                                            <div class="form-check d-inline-block">
-                                                <input class="form-check-input" type="checkbox" name="hapus_foto[]" value="{{ $f->id }}" id="hapus_{{ $f->id }}">
-                                                <label class="form-check-label text-danger" for="hapus_{{ $f->id }}">
-                                                    Hapus
-                                                </label>
-                                            </div>
+                            <div class="row g-2 mb-3">
+                                @foreach($aset->foto as $f)
+                                    <div class="col-md-2 position-relative">
+                                        <div class="rounded-3 overflow-hidden shadow-sm" style="height: 100px;">
+                                            <img src="{{ asset('storage/' . $f->path) }}" class="w-100 h-100 object-fit-cover" alt="Foto Aset">
                                         </div>
-                                    @endforeach
-                                </div>
+                                        <div class="form-check position-absolute top-0 end-0 m-1 bg-white rounded px-1 shadow-sm">
+                                            <input class="form-check-input" type="checkbox" name="hapus_foto[]" value="{{ $f->id }}" id="f{{ $f->id }}">
+                                            <label class="form-check-label text-danger small cursor-pointer" for="f{{ $f->id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
+                            <p class="text-muted small"><i class="fas fa-info-circle me-1"></i> Centang foto yang ingin dihapus.</p>
                         @endif
 
-                        <div class="mt-2">
-                            <label class="form-label fw-bold text-navy mb-1 small">Tambah Foto Baru</label>
-                            <div class="input-group input-group-focus rounded-3">
-                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-image"></i></span>
-                                <input type="file" name="foto_baru[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple>
-                            </div>
-                            <small class="text-muted mt-2 d-block">Bisa upload lebih dari 1 foto sekaligus. Format: JPG, PNG. Maks 4MB per foto.</small>
+                        <label class="form-label fw-bold text-navy mb-1 small">Tambah Foto Baru</label>
+                        <div class="input-group input-group-focus rounded-3">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-plus"></i></span>
+                            <input type="file" name="foto_baru[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple>
                         </div>
+                        <small class="text-muted mt-2 d-block">Maks 4MB per foto.</small>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{{ route('aset.index') }}" class="btn btn-outline-secondary px-4 bg-white">Batal</a>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Simpan Perubahan</button>
+                    <a href="{{ route('aset.index') }}" class="btn btn-outline-secondary px-4 bg-white rounded-pill border">Batal</a>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
+                        <i class="fas fa-save me-1"></i> Simpan Perubahan
+                    </button>
                 </div>
             </form>
-        </div>
-    </div>
-</div>
-
-{{-- MODAL PREVIEW FOTO --}}
-<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-transparent border-0 shadow-none">
-            <div class="modal-header border-0 p-0 justify-content-end" style="position: absolute; right: 0; top: -40px; z-index: 1055;">
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 50%; opacity: 1;"></button>
-            </div>
-            <div class="modal-body text-center p-0 position-relative">
-                <img id="previewImage" src="" class="img-fluid rounded shadow-lg" style="max-height: 85vh; width: auto; object-fit: contain;">
-            </div>
         </div>
     </div>
 </div>
@@ -410,123 +359,44 @@
         const inputDisplay = document.getElementById('nomor_aset_display');
         const inputDetail = document.getElementById('input_detail_lokasi');
         
-        const selectKep = document.getElementById('sumber_kepemilikan_id');
-        const selectUmum = document.getElementById('id_jenis_aset_umum');
-        const selectJen = document.getElementById('id_jenis_aset');
-        const selectKat = document.getElementById('id_kategori');
+        const selectKategori = document.getElementById('kategori_id');
         const selectLok = document.getElementById('dropdown_lokasi');
         const selectThn = document.getElementById('id_tahun');
-        
         const statusKondisi = document.getElementById('status_kondisi');
         const keteranganWrapper = document.getElementById('keterangan_kondisi_wrapper');
         const inputKeterangan = document.getElementById('keterangan_kondisi');
         
-        const currentAsetId = "{{ str_pad($aset->id, 3, '0', STR_PAD_LEFT) }}";
+        // No Urut tetap dari ID aset (diformat 5 digit)
+        const assetIdFormatted = "{{ str_pad($aset->id, 5, '0', STR_PAD_LEFT) }}"; 
 
         function updateNomor() {
-            // Helper untuk ambil data-kode
-            const getK = (id, fallback) => {
-                const el = document.getElementById(id);
-                if (!el || el.selectedIndex < 0) return fallback;
-                const opt = el.options[el.selectedIndex];
-                const kodeAttr = opt.getAttribute('data-kode');
-                return (opt.value !== "" && kodeAttr) ? kodeAttr : fallback;
-            };
-
-            const kKep = getK('sumber_kepemilikan_id', 'XXXX');
+            // Kode Kategori
+            const optKat = selectKategori.options[selectKategori.selectedIndex];
+            const kKat = (selectKategori.value && optKat.getAttribute('data-kode')) ? optKat.getAttribute('data-kode') : 'XXX';
             
-            const optUmum = selectUmum.options[selectUmum.selectedIndex];
-            const kUmum = (selectUmum.value && optUmum.getAttribute('data-kode')) ? optUmum.getAttribute('data-kode') : 'XX';
+            // Kode Lokasi
+            const optLok = selectLok.options[selectLok.selectedIndex];
+            const kLok = (selectLok.value && optLok.getAttribute('data-kode')) ? optLok.getAttribute('data-kode') : 'LOK';
             
-            const optKhusus = selectJen.options[selectJen.selectedIndex];
-            const kKhusus = (selectJen.value && optKhusus.getAttribute('data-kode')) ? optKhusus.getAttribute('data-kode') : 'XXX';
-            
-            const kJen = `${kUmum}-${kKhusus}`;
-            
-            const kLok = getK('dropdown_lokasi', 'LOK');
-            const kKat = getK('id_kategori', 'XX');
-            
-            // Ambil tahun
-            const selectThn = document.getElementById('id_tahun');
+            // Tahun
             const thn = (selectThn && selectThn.value) ? selectThn.value : new Date().getFullYear();
 
-            // Set hasil akhir
-            const finalResult = `${currentAsetId}/${kKep}/${kJen}/${kLok}/${kKat}/${thn}`;
-            document.getElementById('nomor_aset_display').value = finalResult;
+            // Hasil: [KODE]/[ID]/[LOKASI]/[TAHUN]
+            const finalResult = `${kKat}/${assetIdFormatted}/${kLok}/${thn}`;
+            inputDisplay.value = finalResult;
         }
 
-        // Listener Perubahan
-        [selectKep, selectUmum, selectJen, selectKat, selectLok, selectThn].forEach(el => {
+        [selectKategori, selectLok, selectThn].forEach(el => {
             if(el) el.addEventListener('change', updateNomor);
         });
 
-        // Chained Dropdown Logic
-        if(selectUmum) {
-            function filterKhusus() {
-                const umumId = selectUmum.value;
-                const options = selectJen.querySelectorAll('option');
-                
-                let hasVisible = false;
-                options.forEach(opt => {
-                    if(opt.value === "") return;
-                    if(opt.getAttribute('data-parent') === umumId) {
-                        opt.style.display = 'block';
-                        hasVisible = true;
-                    } else {
-                        opt.style.display = 'none';
-                    }
-                });
-
-                if(!hasVisible && umumId !== "") {
-                    // Do not reset value if we are initial loading and it matches
-                    // Actually, for edit, we should keep the value if it's correct
-                }
-            }
-
-            selectUmum.addEventListener('change', function() {
-                const umumId = this.value;
-                const options = selectJen.querySelectorAll('option');
-                
-                options.forEach(opt => {
-                    if(opt.value === "") return;
-                    if(opt.getAttribute('data-parent') === umumId) {
-                        opt.style.display = 'block';
-                    } else {
-                        opt.style.display = 'none';
-                    }
-                });
-
-                selectJen.value = "";
-                updateNomor();
-            });
-
-            // Initial Filter
-            filterKhusus();
-        }
-
-        // Detail Lokasi Fill
         if(selectLok) {
             selectLok.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
                 inputDetail.value = (opt && opt.value !== "") ? (opt.getAttribute('data-detail') || '') : '';
             });
-            // trigger first time
-            selectLok.dispatchEvent(new Event('change'));
         }
 
-        // Auto-fill Nama Aset (jika merubah dropdown jenis)
-        if(selectJen) {
-            selectJen.addEventListener('change', function() {
-                const opt = this.options[this.selectedIndex];
-                const inputNamaAset = document.querySelector('input[name="nama_aset"]');
-                if(opt && opt.value !== "") {
-                    inputNamaAset.value = opt.getAttribute('data-nama') || '';
-                    inputNamaAset.dispatchEvent(new Event('input'));
-                }
-            });
-        }
-
-        // Logic Keterangan Kondisi
         if(statusKondisi) {
             statusKondisi.addEventListener('change', function() {
                 if(this.value === 'Lainnya') {
@@ -538,13 +408,7 @@
                     inputKeterangan.value = '';
                 }
             });
-            // initial check for old() or database value
-            if(statusKondisi.value === 'Lainnya') {
-                keteranganWrapper.style.display = 'block';
-                inputKeterangan.setAttribute('required', 'required');
-            }
         }
-
     });
 </script>
 @endpush

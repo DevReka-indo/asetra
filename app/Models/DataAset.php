@@ -4,18 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DataAset extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'data_aset';
 
     protected $fillable = [
         'nama_aset',
         'nomor_aset',
-        'kode_aset',
-        'jenis_aset_khusus_id',
+        'kategori_id',
         'deskripsi',
         'merek',
         'tahun_kapitalisasi',
@@ -24,14 +24,15 @@ class DataAset extends Model
         'id_department',
         'id_section',
         'id_unit',
-        'sumber_kepemilikan_id',
         'lokasi_id',
-        'kategori_id',
         'pic_id',
+        'penanggung_jawab_id',
+        'bast',
         'status_kondisi',
         'status_aset',
         'keterangan_kondisi',
         'keterangan',
+        'dokumen_penghapusan',
     ];
 
     protected $casts = [
@@ -39,34 +40,28 @@ class DataAset extends Model
     ];
 
     /**
-     * Generate nomor_aset.
+     * Generate nomor_aset format baru: [KODE_KLASIFIKASI]/[ID_5DIGIT]/[KODE_LOKASI]/[TAHUN]
+     * Contoh: 101/00001/SDU/2019
      */
     protected static function booted()
     {
         static::created(function ($aset) {
-            $idFormatted = str_pad($aset->id, 3, '0', STR_PAD_LEFT);
-            $tahun       = $aset->tahun_kapitalisasi ?? date('Y');
+            // No urut: ID aset diformat 5 digit
+            $noUrut = str_pad($aset->id, 5, '0', STR_PAD_LEFT);
 
-            //Kode sumber kepemilikan
-            $sumber          = \App\Models\SumberKepemilikan::find($aset->sumber_kepemilikan_id);
-            $kodeKepemilikan = $sumber ? ($sumber->kode ?? 'REKA') : 'REKA';
+            // Tahun kapitalisasi
+            $tahun = $aset->tahun_kapitalisasi ?? date('Y');
 
-            //Kode lokasi aset
-            $lokAset   = \App\Models\LokasiAset::find($aset->lokasi_id);
+            // Kode kategori aset (101, 102, 201, ...)
+            $kategori = \App\Models\KategoriAset::find($aset->kategori_id);
+            $kodeKategori = $kategori ? $kategori->kode : 'XXX';
+
+            // Kode lokasi aset
+            $lokAset    = \App\Models\LokasiAset::find($aset->lokasi_id);
             $kodeLokasi = $lokAset ? ($lokAset->kode_lokasi ?? 'LOK') : 'LOK';
 
-            //Kode kategori aset
-            $katAset   = \App\Models\KategoriAset::find($aset->kategori_id);
-            $kodeKategori = $katAset ? ($katAset->kode ?? 'XX') : 'XX';
-
-            //Kode jenis aset
-            $kodeJenis = $aset->kode_aset;
-            if (!$kodeJenis) {
-                $jenis     = \App\Models\JenisAsetKhusus::find($aset->jenis_aset_khusus_id);
-                $kodeJenis = $jenis ? $jenis->full_kode : 'XXXX';
-            }
-
-            $aset->nomor_aset = "{$idFormatted}/{$kodeKepemilikan}/{$kodeJenis}/{$kodeLokasi}/{$kodeKategori}/{$tahun}";
+            // Susun nomor aset
+            $aset->nomor_aset = "{$kodeKategori}/{$noUrut}/{$kodeLokasi}/{$tahun}";
             $aset->saveQuietly();
         });
     }
@@ -99,9 +94,12 @@ class DataAset extends Model
         return null;
     }
 
-    public function jenisAsetKhusus()
+    /**
+     * Kategori aset (menggantikan jenis aset umum/khusus dan kategori lama)
+     */
+    public function kategoriAset()
     {
-        return $this->belongsTo(JenisAsetKhusus::class, 'jenis_aset_khusus_id', 'id');
+        return $this->belongsTo(KategoriAset::class, 'kategori_id');
     }
 
     public function director()
@@ -134,22 +132,30 @@ class DataAset extends Model
         return $this->belongsTo(LokasiAset::class, 'lokasi_id', 'lokasi_id');
     }
 
-    public function kategoriAset()
+    /**
+     * Helper: apakah aset ini bertipe aset tetap?
+     */
+    public function getIsAsetTetapAttribute(): bool
     {
-        return $this->belongsTo(KategoriAset::class, 'kategori_id', 'kategori_id');
+        return $this->kategoriAset && $this->kategoriAset->tipe === 'aset_tetap';
     }
 
     /**
-     * Sumber kepemilikan aset
+     * Helper: apakah aset ini bertipe inventaris/EC?
      */
-    public function sumberKepemilikan()
+    public function getIsInventarisAttribute(): bool
     {
-        return $this->belongsTo(SumberKepemilikan::class, 'sumber_kepemilikan_id', 'id');
+        return $this->kategoriAset && $this->kategoriAset->tipe === 'inventaris';
     }
 
     public function pic()
     {
         return $this->belongsTo(User::class, 'pic_id', 'id');
+    }
+
+    public function penanggungJawab()
+    {
+        return $this->belongsTo(User::class, 'penanggung_jawab_id', 'id');
     }
 
     /**

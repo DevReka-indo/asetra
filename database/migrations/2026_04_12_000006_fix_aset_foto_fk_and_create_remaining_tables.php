@@ -28,10 +28,10 @@ return new class extends Migration
         }
 
         Schema::table('aset_foto', function (Blueprint $table) {
-            $table->unsignedInteger('aset_id')->change();
+            $table->unsignedBigInteger('aset_id')->change();
         });
 
-        // Tambahkan FK 
+        // Tambahkan FK
         Schema::table('aset_foto', function (Blueprint $table) {
             $table->foreign('aset_id')
                   ->references('id')
@@ -39,16 +39,16 @@ return new class extends Migration
                   ->onDelete('cascade');
         });
 
-        //  tabel log_aset 
+        //  tabel log_aset
         if (!Schema::hasTable('log_aset')) {
             Schema::create('log_aset', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('aset_id');
+                $table->unsignedBigInteger('aset_id');
                 $table->date('tanggal_cek');
                 $table->string('kondisi', 50);
                 $table->string('status_aset', 50)->nullable();
                 $table->text('keterangan')->nullable();
-                $table->unsignedInteger('dicatat_oleh')->nullable();
+                $table->unsignedBigInteger('dicatat_oleh')->nullable();
                 $table->timestamps();
 
                 $table->foreign('aset_id')->references('id')->on('data_aset')->onDelete('cascade');
@@ -64,7 +64,7 @@ return new class extends Migration
                 $table->date('tanggal');
                 $table->string('periode', 20);
                 $table->text('keterangan')->nullable();
-                $table->unsignedInteger('created_by');
+                $table->unsignedBigInteger('created_by');
                 $table->timestamps();
 
                 $table->foreign('created_by')->references('id')->on('users')->onDelete('restrict');
@@ -76,8 +76,8 @@ return new class extends Migration
             Schema::create('stock_opname_detail', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('stock_opname_id'); 
-                $table->unsignedInteger('aset_id');
-                $table->unsignedInteger('dicek_oleh');
+                $table->unsignedBigInteger('aset_id');
+                $table->unsignedBigInteger('dicek_oleh');
                 $table->date('tanggal_cek');
                 $table->string('kondisi_temuan', 50);
                 $table->string('lokasi_temuan', 150)->nullable();

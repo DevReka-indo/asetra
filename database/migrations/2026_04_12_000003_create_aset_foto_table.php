@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('aset_foto', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('aset_id');
+            $table->unsignedBigInteger('aset_id');
             $table->string('path_foto', 500);
             $table->string('keterangan', 150)->nullable();
             $table->tinyInteger('urutan')->default(1)->unsigned();

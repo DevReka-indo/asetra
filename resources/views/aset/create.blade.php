@@ -35,8 +35,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-body">
             @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
+                <div class="alert alert-danger border-0 shadow-sm rounded-3">
+                    <ul class="mb-0 small">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -57,42 +57,35 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Nomor Aset (Otomatis)</label>
-                                <input type="text" id="nomor_aset_display" name="nomor_aset" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
-                                       value="Mencari format..." disabled style="cursor: not-allowed; opacity: 0.8;">
-                                <small class="text-muted" style="font-size: 0.7rem;">Format: [ID]/[SUMBER]/[UMUM]-[KHUSUS]/[LOKASI]/[KATEGORI]/[TAHUN]</small>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset Umum <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
-                                    <select id="id_jenis_aset_umum" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Jenis Aset Umum --</option>
-                                        @foreach($jenisUmum as $umum)
-                                            <option value="{{ $umum->id }}" data-kode="{{ $umum->kode_umum }}">
-                                                {{ $umum->kode_umum }} - {{ $umum->jenis_aset }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <label class="form-label fw-bold text-navy mb-1 small">Pratinjau Nomor Aset</label>
+                                <div class="input-group">
+                                    <input type="text" id="nomor_aset_display" class="form-control bg-light text-primary fw-bold border-0 shadow-none rounded-3 px-3 py-2" 
+                                           value="Memuat..." disabled style="cursor: not-allowed; opacity: 1;">
+                                    <span class="input-group-text bg-light border-0 rounded-3 text-muted small"><i class="fas fa-info-circle"></i></span>
                                 </div>
+                                <small class="text-muted" style="font-size: 0.7rem;">Format Baru: [KODE]/[NO_URUT]/[LOKASI]/[TAHUN]</small>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Jenis Aset Khusus <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold text-navy mb-1 small">Kategori Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
-                                    <select name="jenis_aset_khusus_id" id="id_jenis_aset" class="form-select border-start-0 ps-0 shadow-none" required disabled>
-                                        <option value="" selected disabled>-- Pilih Jenis Umum Dahulu --</option>
-                                        @foreach($jenisKhusus as $jenis)
-                                            <option value="{{ $jenis->id }}" 
-                                                    data-parent="{{ $jenis->jenis_aset_umum_id }}"
-                                                    data-kode="{{ $jenis->kode_khusus }}" 
-                                                    data-nama="{{ $jenis->jenis_aset }}" 
-                                                    {{ old('jenis_aset_khusus_id') == $jenis->id ? 'selected' : '' }}>
-                                                {{ $jenis->kode_khusus }} - {{ $jenis->jenis_aset }} 
-                                            </option>
-                                        @endforeach
+                                    <select name="kategori_id" id="kategori_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Pilih Kategori Aset --</option>
+                                        <optgroup label="KATEGORI ASET TETAP">
+                                            @foreach($kategoriTetap as $kt)
+                                                <option value="{{ $kt->id }}" data-kode="{{ $kt->kode }}" data-nama="{{ $kt->nama }}" {{ old('kategori_id') == $kt->id ? 'selected' : '' }}>
+                                                    {{ $kt->kode }} - {{ $kt->nama }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                        <optgroup label="KATEGORI ASET EC">
+                                            @foreach($kategoriInventaris as $ki)
+                                                <option value="{{ $ki->id }}" data-kode="{{ $ki->kode }}" data-nama="{{ $ki->nama }}" {{ old('kategori_id') == $ki->id ? 'selected' : '' }}>
+                                                    {{ $ki->kode }} - {{ $ki->nama }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
                                     </select>
                                 </div>
                             </div>
@@ -101,35 +94,16 @@
                                 <label class="form-label fw-bold text-navy mb-1 small">Nama Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-box-open"></i></span>
-                                    <input type="text" name="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset') }}" placeholder="Contoh: Gedung Kantor Utama" required>
+                                    <input type="text" name="nama_aset" id="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset') }}" placeholder="Contoh: Gedung Kantor Utama" required>
                                 </div>
                             </div>
 
-                            
-
-                            
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Kategori Aset <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tags"></i></span>
-                                    <select name="kategori_id" id="id_kategori" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Kategori --</option>
-                                        @foreach($kategori as $kat)
-                                            <option value="{{ $kat->kategori_id }}" data-kode="{{ $kat->kode }}" {{ old('kategori_id') == $kat->kategori_id ? 'selected' : '' }}>
-                                                {{ $kat->kode }} - {{ $kat->nama_kategori }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi</label>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
-                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none">
-                                        <option value="" selected disabled>-- Pilih Tahun --</option>
+                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Tahun --</option>
                                         @for ($year = date('Y'); $year >= 1900; $year--)
                                             <option value="{{ $year }}" {{ old('tahun_kapitalisasi') == $year ? 'selected' : '' }}>{{ $year }}</option>
                                         @endfor
@@ -137,20 +111,27 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Merk Aset</label>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">Merk Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
-                                    <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek') }}" placeholder="Contoh: Lenovo / Honda">
+                                    <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek') }}" placeholder="Lenovo / Honda" required>
                                 </div>
                             </div>
 
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-navy mb-1 small">Nomor BAST (Opsional)</label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-file-signature"></i></span>
+                                    <input type="text" name="bast" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('bast') }}" placeholder="Contoh: 001/BAST/2023">
+                                </div>
+                            </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Deskripsi Aset</label>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold text-navy mb-1 small">Deskripsi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-align-left"></i></span>
-                                    <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="1" placeholder="Opsional detail aset...">{{ old('deskripsi') }}</textarea>
+                                    <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="2" placeholder="Rincian detail aset..." required>{{ old('deskripsi') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -166,23 +147,6 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-navy mb-1 small">Sumber Kepemilikan <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-hand-holding-usd"></i></span>
-                                    <select name="sumber_kepemilikan_id" id="sumber_kepemilikan_id" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" selected disabled>-- Pilih Sumber Kepemilikan --</option>
-                                        @foreach($sumberKepemilikan as $sk)
-                                            <option value="{{ $sk->id }}"
-                                                    data-kode="{{ $sk->kode ?? 'REKA' }}"
-                                                    {{ old('sumber_kepemilikan_id') == $sk->id ? 'selected' : '' }}>
-                                                {{ $sk->kode }} — {{ $sk->nama }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Lokasi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
@@ -201,7 +165,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small text-muted">Detail Lokasi</label>
                                 <input type="text" id="input_detail_lokasi" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
                                        disabled placeholder="Otomatis dari lokasi terpilih" style="cursor: not-allowed; opacity: 0.8;">
@@ -217,7 +181,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">Kondisi Saat Ini <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-info-circle"></i></span>
@@ -242,7 +206,8 @@
                                     <input type="text" name="keterangan_kondisi" id="keterangan_kondisi" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('keterangan_kondisi') }}" placeholder="Tulis rincian kondisinya disini...">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+
+                            <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">Status Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-cog"></i></span>
@@ -256,18 +221,33 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-navy mb-1 small">PIC Aset</label>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">PIC Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-tie"></i></span>
-                                    <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none">
+                                    <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none" required>
                                         <option value="" selected disabled>-- Pilih User --</option>
                                         @foreach($users as $user)
-                                            <option value="{{ $user->id }}">{{ $user->firstname }} {{ $user->lastname }}</option>
+                                            <option value="{{ $user->id }}" {{ old('pic_id') == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-navy mb-1 small">Penanggung Jawab Aset <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-shield"></i></span>
+                                    <select name="penanggung_jawab_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                        <option value="" selected disabled>-- Pilih User --</option>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}" {{ old('penanggung_jawab_id') == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="col-md-12">
                                 <label class="form-label fw-bold text-navy mb-1 small">Struktur Organisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
@@ -316,7 +296,8 @@
                                                         if (isset($seen[$key])) return; // Skip duplicate
                                                         $seen[$key] = true;
 
-                                                        echo "<option value='{$key}' data-label='{$label}'>{$indent}{$printLabel}</option>";
+                                                        $selected = old('kode_organisasi') == $key ? 'selected' : '';
+                                                        echo "<option value='{$key}' data-label='{$label}' {$selected}>{$indent}{$printLabel}</option>";
                                                     }
 
                                                     if (isset($node->subDirectors)) foreach ($node->subDirectors as $s) renderOrgOptions($s, $seen, $level + 1);
@@ -344,15 +325,17 @@
                     <div class="card-body">
                         <div class="input-group input-group-focus rounded-3">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-image"></i></span>
-                            <input type="file" name="foto[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple>
+                            <input type="file" name="foto[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple required>
                         </div>
                         <small class="text-muted mt-2 d-block">Bisa upload lebih dari 1 foto sekaligus. Format: JPG, PNG. Maks 4MB per foto.</small>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="reset" class="btn btn-outline-secondary px-4 bg-white">Batal</button>
-                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Simpan Data Aset</button>
+                    <button type="reset" class="btn btn-outline-secondary px-4 bg-white rounded-pill border">Batal</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
+                        <i class="fas fa-save me-1"></i> Simpan Data Aset
+                    </button>
                 </div>
             </form>
         </div>
@@ -366,94 +349,38 @@
         const inputDisplay = document.getElementById('nomor_aset_display');
         const inputDetail = document.getElementById('input_detail_lokasi');
         
-        const selectKep = document.getElementById('sumber_kepemilikan_id');
-        const selectUmum = document.getElementById('id_jenis_aset_umum');
-        const selectJen = document.getElementById('id_jenis_aset');
-        const selectKat = document.getElementById('id_kategori');
+        const selectKategori = document.getElementById('kategori_id');
         const selectLok = document.getElementById('dropdown_lokasi');
         const selectThn = document.getElementById('id_tahun');
-        const orgSelect = document.getElementById('id_divisi');
         const statusKondisi = document.getElementById('status_kondisi');
         const keteranganWrapper = document.getElementById('keterangan_kondisi_wrapper');
         const inputKeterangan = document.getElementById('keterangan_kondisi');
+        const inputNamaAset = document.getElementById('nama_aset');
         
         const nextId = "{{ $nextId }}"; 
 
         function updateNomor() {
-            // Ambil ID 3 Digit
-            const nextId = "{{ $nextId }}"; 
-
-            // Helper untuk ambil data-kode
-            const getK = (id, fallback) => {
-                const el = document.getElementById(id);
-                if (!el || el.selectedIndex < 0) return fallback;
-                const opt = el.options[el.selectedIndex];
-                
-                const kodeAttr = opt.getAttribute('data-kode');
-                
-                // DEBUG
-                console.log(`Pengecekan ID ${id}: terpilih ${opt.text}, kode: ${kodeAttr}`);
-
-                return (opt.value !== "" && kodeAttr) ? kodeAttr : fallback;
-            };
-
-            const kKep = getK('sumber_kepemilikan_id', 'XXXX');
+            // Kode Kategori
+            const optKat = selectKategori.options[selectKategori.selectedIndex];
+            const kKat = (selectKategori.value && optKat.getAttribute('data-kode')) ? optKat.getAttribute('data-kode') : 'XXX';
             
-            const optUmum = selectUmum.options[selectUmum.selectedIndex];
-            const kUmum = (selectUmum.value && optUmum.getAttribute('data-kode')) ? optUmum.getAttribute('data-kode') : 'XX';
+            // Kode Lokasi
+            const optLok = selectLok.options[selectLok.selectedIndex];
+            const kLok = (selectLok.value && optLok.getAttribute('data-kode')) ? optLok.getAttribute('data-kode') : 'LOK';
             
-            const optKhusus = selectJen.options[selectJen.selectedIndex];
-            const kKhusus = (selectJen.value && optKhusus.getAttribute('data-kode')) ? optKhusus.getAttribute('data-kode') : 'XXX';
-            
-            const kJen = `${kUmum}-${kKhusus}`;
-            
-            const kLok = getK('dropdown_lokasi', 'LOK');
-            const kKat = getK('id_kategori', 'XX');
-            
-            // Ambil tahun dari dropdown atau default ke tahun sekarang
-            const selectThn = document.getElementById('id_tahun');
+            // Tahun
             const thn = (selectThn && selectThn.value) ? selectThn.value : new Date().getFullYear();
 
-            // Set hasil akhir
-            const finalResult = `${nextId}/${kKep}/${kJen}/${kLok}/${kKat}/${thn}`;
-            document.getElementById('nomor_aset_display').value = finalResult;
+            // Set hasil akhir: [KODE]/[ID]/[LOKASI]/[TAHUN]
+            const finalResult = `${kKat}/${nextId}/${kLok}/${thn}`;
+            inputDisplay.value = finalResult;
         }
 
-        [selectKep, selectUmum, selectJen, selectKat, selectLok, selectThn].forEach(el => {
+        [selectKategori, selectLok, selectThn].forEach(el => {
             if(el) el.addEventListener('change', updateNomor);
         });
 
-        // Chained Dropdown Logic
-        if(selectUmum) {
-            selectUmum.addEventListener('change', function() {
-                const umumId = this.value;
-                const options = selectJen.querySelectorAll('option');
-                
-                let hasVisible = false;
-                options.forEach(opt => {
-                    if(opt.value === "") return;
-                    if(opt.getAttribute('data-parent') === umumId) {
-                        opt.style.display = 'block';
-                        hasVisible = true;
-                    } else {
-                        opt.style.display = 'none';
-                    }
-                });
-
-                selectJen.value = "";
-                selectJen.disabled = false;
-                if(!hasVisible) {
-                    selectJen.innerHTML = '<option value="" selected disabled>-- Tidak ada data khusus --</option>';
-                } else {
-                    // Reset to first option
-                    selectJen.innerHTML = '<option value="" selected disabled>-- Pilih Jenis Aset Khusus --</option>' + 
-                                         Array.from(options).filter(o => o.getAttribute('data-parent') === umumId || o.value === "").map(o => o.outerHTML).join('');
-                }
-                updateNomor();
-            });
-        }
-
-        // Detail Lokasi 
+        // Detail Lokasi & Auto-fill Nama Aset
         if(selectLok) {
             selectLok.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
@@ -461,24 +388,13 @@
             });
         }
         
-        // Auto-fill Nama Aset
-        if(selectJen) {
-            selectJen.addEventListener('change', function() {
+        if(selectKategori) {
+            selectKategori.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
-                const inputNamaAset = document.querySelector('input[name="nama_aset"]');
-                if(opt && opt.value !== "") {
+                if(opt && opt.value !== "" && inputNamaAset.value === "") {
                     inputNamaAset.value = opt.getAttribute('data-nama') || '';
-                    // Trigger input event to simulate typing (if there are other listeners)
-                    inputNamaAset.dispatchEvent(new Event('input'));
                 }
-            });
-        }
-
-        if(orgSelect) {
-            orgSelect.addEventListener('change', function() {
-                const opt = this.options[this.selectedIndex];
-                const lbl = opt.getAttribute('data-label');
-                if(lbl) opt.text = lbl;
+                updateNomor();
             });
         }
 
@@ -494,18 +410,14 @@
                     inputKeterangan.value = '';
                 }
             });
-            // initial check for old() value
             if(statusKondisi.value === 'Lainnya') {
                 keteranganWrapper.style.display = 'block';
                 inputKeterangan.setAttribute('required', 'required');
             }
         }
 
-        setTimeout(updateNomor, 200);
+        // Jalankan pratinjau pertama kali
+        setTimeout(updateNomor, 100);
     });
-
-    window.onpageshow = function(event) {
-        if (event.persisted) window.location.reload();
-    };
 </script>
 @endpush

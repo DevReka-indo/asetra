@@ -165,47 +165,16 @@
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-start mb-3">
                                         <div class="icon-wrapper me-3">
-                                            <i class="fas fa-hand-holding-usd"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Sumber Kepemilikan</span>
-                                            <span class="info-value fw-semibold">{{ $aset->sumberKepemilikan->nama ?? '-' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="icon-wrapper me-3">
-                                            <i class="fas fa-tags"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Kategori Aset</span>
-                                            <span class="info-value fw-semibold">{{ $aset->kategoriAset->kode ?? '-' }} — {{ $aset->kategoriAset->nama_kategori ?? '-' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="icon-wrapper me-3">
                                             <i class="fas fa-layer-group"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Jenis Aset Umum</span>
+                                            <span class="info-label d-block fw-bold">Kategori Aset</span>
                                             <span class="info-value fw-semibold">
-                                                {{ $aset->jenisAsetKhusus->jenisAsetUmum->kode_umum ?? '??' }} - {{ $aset->jenisAsetKhusus->jenisAsetUmum->jenis_aset ?? '-' }}
+                                                {{ $aset->kategoriAset->kode ?? '???' }} - {{ $aset->kategoriAset->nama ?? '-' }}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="icon-wrapper me-3">
-                                            <i class="fas fa-list-ul"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Jenis Aset Khusus</span>
-                                            <span class="info-value fw-semibold">
-                                                {{ $aset->jenisAsetKhusus->kode_khusus ?? '???' }} - {{ $aset->jenisAsetKhusus->jenis_aset ?? '-' }}
-                                            </span>
-                                        </div>
-                                    </div>
 
                                     <div class="d-flex align-items-start mb-3">
                                         <div class="icon-wrapper me-3">
@@ -214,6 +183,16 @@
                                         <div class="flex-grow-1">
                                             <span class="info-label d-block fw-bold">Tahun Kapitalisasi</span>
                                             <span class="info-value fw-semibold">{{ $aset->tahun_kapitalisasi ?? '-' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-file-signature"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Nomor BAST</span>
+                                            <span class="info-value fw-semibold">{{ $aset->bast ?? '-' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -263,8 +242,18 @@
                                             <i class="fas fa-user-tie"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Penanggung Jawab (PIC)</span>
+                                            <span class="info-label d-block fw-bold">PIC Aset</span>
                                             <span class="info-value fw-semibold">{{ $aset->pic ? $aset->pic->firstname . ' ' . $aset->pic->lastname : '-' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-user-shield"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Penanggung Jawab Aset</span>
+                                            <span class="info-value fw-semibold">{{ $aset->penanggungJawab ? $aset->penanggungJawab->firstname . ' ' . $aset->penanggungJawab->lastname : '-' }}</span>
                                         </div>
                                     </div>
 

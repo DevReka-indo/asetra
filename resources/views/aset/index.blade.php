@@ -69,7 +69,7 @@
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                         <div class="input-group input-group-sm input-group-focus rounded-3">
                             <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                            <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari nomor, nama atau jenis aset..." value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari nomor, nama atau klasifikasi..." value="{{ request('search') }}">
                         </div>
                     </div>
 
@@ -138,6 +138,7 @@
                             <th width="80" class="text-center">Kode QR</th>
                             <th>Kode Aset</th>
                             <th>Nama Aset</th>
+                            <th class="text-center">Tipe</th>
                             <th>Lokasi Aset</th>
                             <th>Kondisi Aset</th>
                             <th>Status Aset</th>
@@ -169,6 +170,11 @@
                                 {{-- Data Aset --}}
                                 <td>{{ $aset->nomor_aset }}</td>
                                 <td>{{ $aset->nama_aset }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-{{ $aset->kategoriAset->tipe_badge_color ?? 'secondary' }}">
+                                        {{ $aset->kategoriAset->tipe_label ?? '-' }}
+                                    </span>
+                                </td>
                                 <td>{{ $aset->lokasi->nama_lokasi ?? $aset->lokasi->nm_lokasi_aset ?? '-' }}</td>
                                 <td>
                                     @php
@@ -254,12 +260,19 @@
                                                         Anda yakin ingin menghapus aset <br>
                                                         <strong class="text-danger fs-5">{{ $aset->nomor_aset }}</strong>?
                                                     </p>
-                                                    <div class="d-flex justify-content-center gap-3">
-                                                        <form action="{{ route('aset.destroy', $aset->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                                                    <div class="d-flex justify-content-center">
+                                                        <form action="{{ route('aset.destroy', $aset->id) }}" method="POST" enctype="multipart/form-data" class="w-100 text-start">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
-                                                            <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
+                                                            <div class="mb-4 text-start">
+                                                                <label class="form-label fw-bold text-navy small">Upload Berita Acara Penghapusbukuan (PDF) <span class="text-danger">*</span></label>
+                                                                <input type="file" name="dokumen_penghapusan" class="form-control" accept="application/pdf" required>
+                                                                <small class="text-muted" style="font-size: 0.75rem;">Maksimal 5MB.</small>
+                                                            </div>
+                                                            <div class="d-flex justify-content-center gap-3">
+                                                                <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                                                                <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
+                                                            </div>
                                                         </form>
                                                     </div>
                                                 </div>

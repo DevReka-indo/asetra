@@ -15,7 +15,7 @@
         <div class="panel-left_bar-top"></div>
 
         <div class="panel-left_visual">
-
+            <img src="{{ asset('assets/img/login_page.png') }}" alt="Login Visual" class="login-visual-img">
         </div>
 
        

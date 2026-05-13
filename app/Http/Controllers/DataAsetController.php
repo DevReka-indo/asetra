@@ -5,13 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DataAset;
 use App\Models\AsetFoto;
-use App\Models\JenisAsetKhusus;
-use App\Models\Divisi;
-use App\Models\LokasiAset;
-use App\Models\SumberKepemilikan;
-use App\Models\User;
-use App\Models\JenisAsetUmum;
 use App\Models\KategoriAset;
+use App\Models\LokasiAset;
+use App\Models\User;
+use App\Models\Director;
 use Illuminate\Support\Facades\Storage;
 
 class DataAsetController extends Controller
@@ -23,7 +20,7 @@ class DataAsetController extends Controller
         $kondisi = $request->input('kondisi');
         $status  = $request->input('status_aset');
 
-        $query = DataAset::with(['jenisAsetKhusus', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
+        $query = DataAset::with(['kategoriAset', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
 
         $user = auth()->user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
@@ -48,9 +45,9 @@ class DataAsetController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nomor_aset', 'LIKE', "%{$search}%")
                   ->orWhere('nama_aset', 'LIKE', "%{$search}%")
-                  ->orWhereHas('jenisAsetKhusus', function($qj) use ($search) {
-                      $qj->where('jenis_aset', 'LIKE', "%{$search}%")
-                         ->orWhere('kode_khusus', 'LIKE', "%{$search}%");
+                  ->orWhereHas('kategoriAset', function($qj) use ($search) {
+                      $qj->where('nama', 'LIKE', "%{$search}%")
+                         ->orWhere('kode', 'LIKE', "%{$search}%");
                   });
             });
         }
@@ -95,9 +92,9 @@ class DataAsetController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nomor_aset', 'LIKE', "%{$search}%")
                   ->orWhere('nama_aset', 'LIKE', "%{$search}%")
-                  ->orWhereHas('jenisAsetKhusus', function($qj) use ($search) {
-                      $qj->where('jenis_aset', 'LIKE', "%{$search}%")
-                         ->orWhere('kode_khusus', 'LIKE', "%{$search}%");
+                  ->orWhereHas('klasifikasiAset', function($qj) use ($search) {
+                      $qj->where('nama', 'LIKE', "%{$search}%")
+                         ->orWhere('kode', 'LIKE', "%{$search}%");
                   });
             });
         }
@@ -130,22 +127,20 @@ class DataAsetController extends Controller
     public function create()
     {
         $lastAset = DataAset::orderBy('id', 'desc')->first();
-        $nextId   = $lastAset ? str_pad($lastAset->id + 1, 3, '0', STR_PAD_LEFT) : '001';
+        $nextId   = $lastAset ? str_pad($lastAset->id + 1, 5, '0', STR_PAD_LEFT) : '00001';
 
-        $mainDirector = \App\Models\Director::with([
+        $mainDirector = Director::with([
             'subDirectors',
             'divisi.department.section.unit'
         ])->whereNull('parent_director_id')->first();
 
-        $jenisUmum            = JenisAsetUmum::all();
-        $jenisKhusus          = JenisAsetKhusus::all();
-        $kategori             = KategoriAset::all();
+        $kategoriTetap     = KategoriAset::asetTetap()->get();
+        $kategoriInventaris = KategoriAset::inventaris()->get();
         $lokasi               = LokasiAset::all();
-        $sumberKepemilikan    = SumberKepemilikan::all();
         $users                = User::all();
 
         return view('aset.create', compact(
-            'mainDirector', 'jenisUmum', 'jenisKhusus', 'kategori', 'lokasi', 'sumberKepemilikan', 'users', 'nextId'
+            'mainDirector', 'kategoriTetap', 'kategoriInventaris', 'lokasi', 'users', 'nextId'
         ));
     }
 
@@ -156,26 +151,23 @@ class DataAsetController extends Controller
     {
         $validatedData = $request->validate([
             'nama_aset'            => 'required|string|max:150',
-            'jenis_aset_khusus_id' => 'required|integer',
+            'kategori_id'          => 'required|integer|exists:kategori_aset,id',
             'kode_organisasi'      => 'required|string',
-            'sumber_kepemilikan_id'=> 'required|integer',
             'lokasi_id'            => 'required|integer',
-            'merek'                => 'nullable|string|max:100',
-            'deskripsi'            => 'nullable|string',
-            'tahun_kapitalisasi'   => 'nullable|integer|min:1900|max:' . date('Y'),
-            'kategori_id'          => 'required|integer|exists:kategori_aset,kategori_id',
-            'pic_id'               => 'nullable|integer',
+            'merek'                => 'required|string|max:100',
+            'deskripsi'            => 'required|string',
+            'tahun_kapitalisasi'   => 'required|integer|min:1900|max:' . date('Y'),
+            'pic_id'               => 'required|integer',
+            'penanggung_jawab_id'  => 'required|integer',
+            'bast'                 => 'nullable|string|max:255',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
             'keterangan_kondisi'   => 'nullable|string|max:255',
             'keterangan'           => 'nullable|string',
             // Multi-foto
-            'foto'                 => 'nullable|array|max:10',
+            'foto'                 => 'required|array|min:1|max:10',
             'foto.*'               => 'image|mimes:jpeg,png,jpg|max:4096',
         ]);
-
-        $jenis                    = JenisAsetKhusus::find($request->jenis_aset_khusus_id);
-        $validatedData['kode_aset'] = $jenis ? $jenis->full_kode : 'XXXX';
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
@@ -211,10 +203,9 @@ class DataAsetController extends Controller
     public function show($id)
     {
         $aset = DataAset::with([
-            'jenisAsetKhusus',
+            'kategoriAset',
             'director', 'divisi', 'department', 'section', 'unit',
             'lokasi',
-            'sumberKepemilikan',
             'pic',
             'foto',
             'logAset' => fn($q) => $q->latest('tanggal_cek')->limit(10),
@@ -237,7 +228,7 @@ class DataAsetController extends Controller
             }
         }
 
-        $mainDirector = \App\Models\Director::with([
+        $mainDirector = Director::with([
             'subDirectors',
             'divisi.department.section.unit'
         ])->whereNull('parent_director_id')->first();
@@ -308,12 +299,10 @@ class DataAsetController extends Controller
     {
         $aset = DataAset::with('foto')->findOrFail($id);
 
-        $jenisUmum         = JenisAsetUmum::all();
-        $jenisKhusus       = JenisAsetKhusus::all();
-        $kategori          = KategoriAset::all();
-        $lokasi            = LokasiAset::all();
-        $sumberKepemilikan = SumberKepemilikan::all();
-        $users             = User::all();
+        $kategoriTetap     = KategoriAset::asetTetap()->get();
+        $kategoriInventaris = KategoriAset::inventaris()->get();
+        $lokasi               = LokasiAset::all();
+        $users                = User::all();
 
         $mainDirector = \App\Models\Director::with([
             'subDirectors',
@@ -321,7 +310,7 @@ class DataAsetController extends Controller
         ])->whereNull('parent_director_id')->first();
 
         return view('aset.edit', compact(
-            'aset', 'jenisUmum', 'jenisKhusus', 'kategori', 'lokasi', 'sumberKepemilikan', 'users', 'mainDirector'
+            'aset', 'kategoriTetap', 'kategoriInventaris', 'lokasi', 'users', 'mainDirector'
         ));
     }
 
@@ -334,14 +323,15 @@ class DataAsetController extends Controller
 
         $validatedData = $request->validate([
             'nama_aset'            => 'required|string|max:150',
-            'jenis_aset_khusus_id' => 'required|integer',
+            'kategori_id'          => 'required|integer|exists:kategori_aset,id',
             'kode_organisasi'      => 'required|string',
             'lokasi_id'            => 'required|integer',
-            'merek'                => 'nullable|string|max:100',
-            'deskripsi'            => 'nullable|string',
-            'tahun_kapitalisasi'   => 'nullable|integer|min:1900|max:' . date('Y'),
-            'kategori_id'          => 'required|integer|exists:kategori_aset,kategori_id',
-            'pic_id'               => 'nullable|integer',
+            'merek'                => 'required|string|max:100',
+            'deskripsi'            => 'required|string',
+            'tahun_kapitalisasi'   => 'required|integer|min:1900|max:' . date('Y'),
+            'pic_id'               => 'required|integer',
+            'penanggung_jawab_id'  => 'required|integer',
+            'bast'                 => 'nullable|string|max:255',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
             'keterangan_kondisi'   => 'nullable|string|max:255',
@@ -406,20 +396,25 @@ class DataAsetController extends Controller
     /**
      * Menghapus data aset beserta semua foto terkait.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $aset = DataAset::with('foto')->findOrFail($id);
+        $aset = DataAset::findOrFail($id);
 
-        // Hapus semua foto dari storage
-        foreach ($aset->foto as $foto) {
-            Storage::disk('public')->delete($foto->path_foto);
+        $request->validate([
+            'dokumen_penghapusan' => 'required|mimes:pdf|max:5120',
+        ]);
+
+        if ($request->hasFile('dokumen_penghapusan')) {
+            $path = $request->file('dokumen_penghapusan')->store('dokumen_penghapusan', 'public');
+            $aset->dokumen_penghapusan = $path;
+            $aset->save();
         }
 
-        // Hapus record aset
+        // Hapus record aset (Soft Delete)
         $aset->delete();
 
         return redirect()->route('aset.index')
-            ->with('success', 'Data aset berhasil dihapus!');
+            ->with('success', 'Data aset berhasil dihapus dan masuk ke menu pemulihan!');
     }
 
     /**
@@ -432,7 +427,7 @@ class DataAsetController extends Controller
             'ids.*' => 'exists:data_aset,id'
         ]);
 
-        $asets = DataAset::with(['jenisAsetKhusus', 'lokasi'])->whereIn('id', $request->ids)->get();
+        $asets = DataAset::with(['kategoriAset', 'lokasi'])->whereIn('id', $request->ids)->get();
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('aset.print_label_pdf', compact('asets'))
                 ->setPaper('a4', 'portrait');
@@ -445,7 +440,7 @@ class DataAsetController extends Controller
      */
     public function previewAsetLokasi($lokasi_id)
     {
-        $asets = DataAset::with('jenisAsetKhusus')
+        $asets = DataAset::with('kategoriAset')
             ->where('lokasi_id', $lokasi_id)
             ->get();
             
@@ -461,7 +456,7 @@ class DataAsetController extends Controller
             'lokasi_id' => 'required|exists:lokasi_aset,lokasi_id'
         ]);
 
-        $asets = DataAset::with(['jenisAsetKhusus', 'lokasi'])
+        $asets = DataAset::with(['kategoriAset', 'lokasi'])
             ->where('lokasi_id', $request->lokasi_id)
             ->get();
             

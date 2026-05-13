@@ -201,10 +201,18 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     position: relative;
     z-index: 2;
-    padding: 2rem 0;
+    padding: 2rem;
     animation: fadeIn 0.8s ease 0.25s both;
+}
+
+.login-visual-img {
+    max-width: 85%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
 }
 
 .eyebrow {

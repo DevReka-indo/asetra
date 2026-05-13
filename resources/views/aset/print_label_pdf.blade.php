@@ -31,26 +31,26 @@
             height: 25mm;
             position: relative;
             background-color: #ffffff;
-            border-radius: 8px;
+            border-radius: 4px;
             box-sizing: border-box;
-            border: 1px solid #777;
+            border: 1px solid #333;
             overflow: hidden;
         }
         /* Style untuk Text */
         .info-title {
-            font-size: 7px;
+            font-size: 6.5px;
             font-weight: bold;
             color: #555;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             text-transform: uppercase;
         }
         .info-value {
-            font-size: 8.5px;
+            font-size: 7.5px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .asset-tag-title {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
             margin-bottom: 2px;
             margin-top: 0px;
@@ -70,6 +70,17 @@
             transform-origin: 0 0;
             text-align: center;
         }
+        /* Sticker warna */
+        .sticker-color {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 8mm;
+            height: 8mm;
+            border-bottom-left-radius: 100%;
+        }
+        .sticker-red { background-color: #e30613; }
+        .sticker-blue { background-color: #0056b3; }
     </style>
 </head>
 <body>
@@ -89,43 +100,50 @@
             @foreach ($row as $aset)
             <td>
                 <div class="label-container">
+                    
+                    {{-- Sticker Warna (Merah untuk 1xx, Biru untuk 2xx) --}}
+                    @php
+                        $tipe = $aset->kategoriAset->tipe ?? 'inventaris';
+                        $stickerClass = $tipe === 'aset_tetap' ? 'sticker-red' : 'sticker-blue';
+                    @endphp
+                    <div class="sticker-color {{ $stickerClass }}"></div>
 
                     <!-- Left Panel: Logo Vertikal -->
                     <div style="position: absolute; left: 0; top: 0; width: 16%; height: 100%; border-right: 1.5px solid #333; text-align: center;">
                         @if($base64Logo)
                             <div class="rotated-left">
                                 <div style="text-align: center; line-height: 1;">
-                                    <span style="font-size: 7.5px; color: #000; letter-spacing: 0.5px;">PROPERTY OF:</span>
+                                    <span style="font-size: 7px; color: #000; letter-spacing: 0.5px;">PROPERTY OF:</span>
                                 </div>
                                 <div style="text-align: center; line-height: 1; margin-top: 2px;">
-                                    <img src="{{ $base64Logo }}" style="height: 20px;">
+                                    <img src="{{ $base64Logo }}" style="height: 18px;">
                                 </div>
                             </div>
                         @else
-                            <div class="rotated-left" style="font-size: 11px; font-weight: bold; color: #333;">
-                                <span style="font-size: 8px; font-weight:normal; letter-spacing: 1px; display:inline-block; margin-right:4px;">PROPERTY OF:</span>
-                                REKA<span style="color:#e30613;">INKA</span> Group
+                            <div class="rotated-left" style="font-size: 9px; font-weight: bold; color: #333;">
+                                <span style="font-size: 7px; font-weight:normal; letter-spacing: 1px; display:inline-block; margin-right:4px;">PROPERTY OF:</span>
+                                REKA<span style="color:#e30613;">INKA</span>
                             </div>
                         @endif
                     </div>
 
                     <!-- Middle Panel: Info -->
-                    <div style="position: absolute; left: 18%; top: 50%; width: 36%; transform: translateY(-50%);">
-                        <div class="info-title">SITES LOCATION</div>
-                        <div class="info-value" style="white-space: nowrap; font-size: 7.5px;">PT Rekaindo Global Jasa</div>
+                    <div style="position: absolute; left: 18%; top: 50%; width: 40%; transform: translateY(-50%);">
+                        <div class="info-title">PROPERTY OF</div>
+                        <div class="info-value" style="white-space: nowrap; font-size: 7px;">PT Rekaindo Global Jasa</div>
 
                         <div class="info-title">HELPDESK CONTACT</div>
-                        <div class="info-value" style="margin-bottom:0;">WA : 0819 0475 7690</div>
+                        <div class="info-value" style="margin-bottom:0; font-size: 7.5px;">WA : 0819 0475 7690</div>
                     </div>
 
                     <!-- Right Panel: QR Code & Nomor Aset -->
-                    <div style="position: absolute; left: 54%; right: 3px; top: 0; height: 100%;">
+                    <div style="position: absolute; left: 58%; right: 3px; top: 0; height: 100%;">
                         <div style="position: absolute; top: 3px; left: 0; width: 100%; text-align: left;">
                             <div class="asset-tag-title">Asset Tag</div>
                         </div>
                         <div style="position: absolute; top: 56%; left: 0; width: 100%; transform: translateY(-50%); text-align: left;">
-                            <img src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(62)->generate(route('aset.show', $aset->id))) !!}" alt="QR" style="display: block;">
-                            <div class="asset-kode" style="margin-top: 3px;">{{ $aset->nomor_aset }}</div>
+                            <img src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(58)->generate(route('aset.show', $aset->id))) !!}" alt="QR" style="display: block;">
+                            <div class="asset-kode" style="margin-top: 2px; font-size: 6.5px;">{{ $aset->nomor_aset }}</div>
                         </div>
                     </div>
 

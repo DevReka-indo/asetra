@@ -12,14 +12,14 @@ return new class extends Migration
             $table->id();
 
             // Aset yang dilaporkan
-            $table->unsignedInteger('aset_id');
+            $table->unsignedBigInteger('aset_id');
             $table->foreign('aset_id')
                   ->references('id')
                   ->on('data_aset')
                   ->onDelete('cascade');
 
             // User yang mengajukan
-            $table->unsignedInteger('diajukan_oleh');
+            $table->unsignedBigInteger('diajukan_oleh');
             $table->foreign('diajukan_oleh')
                   ->references('id')
                   ->on('users')
@@ -36,7 +36,7 @@ return new class extends Migration
 
             // Data review oleh admin Bagian Umum
             $table->text('catatan')->nullable();
-            $table->unsignedInteger('diproses_oleh')->nullable();
+            $table->unsignedBigInteger('diproses_oleh')->nullable();
             $table->foreign('diproses_oleh')
                   ->references('id')
                   ->on('users')

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('data_aset', function (Blueprint $table) {
-            $table->integer('kategori_id')->nullable()->after('lokasi_id');
+            $table->unsignedBigInteger('kategori_id')->nullable()->after('lokasi_id');
             $table->foreign('kategori_id')->references('kategori_id')->on('kategori_aset')->onDelete('set null');
         });
     }

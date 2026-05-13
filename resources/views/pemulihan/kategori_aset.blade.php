@@ -6,7 +6,7 @@
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
         <h3 class="fw-bold mb-0">Pemulihan Kategori Aset</h3>
-        <p class="text-muted small">Data di bawah ini adalah data yang telah dihapus. Anda dapat memulihkannya atau menghapusnya secara permanen.</p>
+        <p class="text-muted small">Data di bawah ini adalah data klasifikasi yang telah dihapus. Anda dapat memulihkannya atau menghapusnya secara permanen.</p>
     </div>
 
     {{-- FILTER --}}
@@ -28,7 +28,7 @@
                     <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                     <div class="input-group input-group-sm input-group-focus rounded-3">
                         <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari kode atau kategori..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari kode atau nama klasifikasi..." value="{{ request('search') }}">
                     </div>
                 </div>
             </form>
@@ -43,31 +43,37 @@
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th>Kode Kategori</th>
+                            <th>Kode</th>
                             <th>Nama Kategori</th>
+                            <th class="text-center">Tipe</th>
                             <th>Tgl Dihapus</th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($dataKategori as $i => $kategori)
+                        @forelse ($data as $i => $item)
                             <tr>
-                                <td class="text-center">{{ $dataKategori->firstItem() + $i }}</td>
-                                <td class="fw-bold text-primary">{{ $kategori->kode }}</td>
-                                <td>{{ $kategori->nama_kategori }}</td>
-                                <td>{{ $kategori->deleted_at ? $kategori->deleted_at->format('d/m/Y H:i') : '-' }}</td>
+                                <td class="text-center">{{ $data->firstItem() + $i }}</td>
+                                <td class="fw-bold text-primary">{{ $item->kode }}</td>
+                                <td>{{ $item->nama }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-{{ $item->tipe_badge_color }}">
+                                        {{ $item->tipe_label }}
+                                    </span>
+                                </td>
+                                <td>{{ $item->deleted_at ? $item->deleted_at->format('d/m/Y H:i') : '-' }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">
                                         {{-- RESTORE BUTTON --}}
                                         <button type="button" class="btn btn-success btn-sm rounded-circle text-white border-0" 
                                             style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
-                                            title="Pulihkan" data-bs-toggle="modal" data-bs-target="#restoreKategoriModal{{ $kategori->kategori_id }}">
-                                            <i class="fas fa-refresh"></i>
+                                            title="Pulihkan" data-bs-toggle="modal" data-bs-target="#restoreModal{{ $item->id }}">
+                                            <i class="fas fa-undo"></i>
                                         </button>
                                         {{-- FORCE DELETE BUTTON --}}
                                         <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0" 
                                             style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
-                                            title="Hapus Permanen" data-bs-toggle="modal" data-bs-target="#forceDeleteKategoriModal{{ $kategori->kategori_id }}">
+                                            title="Hapus Permanen" data-bs-toggle="modal" data-bs-target="#forceDeleteModal{{ $item->id }}">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </div>
@@ -75,7 +81,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">
+                                <td colspan="6" class="text-center py-4 text-muted">
                                     <i class="fas fa-info-circle mb-2 d-block fa-2x"></i>
                                     Tidak ada data di pemulihan.
                                 </td>
@@ -87,31 +93,31 @@
 
             <div class="mt-3 d-flex justify-content-between align-items-center">
                 <div class="text-muted small">
-                    Menampilkan {{ $dataKategori->firstItem() ?? 0 }} sampai {{ $dataKategori->lastItem() ?? 0 }} dari {{ $dataKategori->total() }} data
+                    Menampilkan {{ $data->firstItem() ?? 0 }} sampai {{ $data->lastItem() ?? 0 }} dari {{ $data->total() }} data
                 </div>
                 <div>
-                    {{ $dataKategori->appends(request()->query())->links('pagination::bootstrap-5') }}
+                    {{ $data->appends(request()->query())->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@foreach($dataKategori as $kategori)
+@foreach($data as $item)
 {{-- MODAL RESTORE --}}
-<div class="modal fade" id="restoreKategoriModal{{ $kategori->kategori_id }}" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="restoreModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-body p-5 text-center bg-light">
                 <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f1f3f5;">
-                    <i class="fas fa-refresh fa-3x text-success"></i>
+                    <i class="fas fa-undo fa-3x text-success"></i>
                 </div>
                 <h4 class="fw-bold text-dark mb-2">Konfirmasi Pulihkan</h4>
                 <p class="text-muted mb-3" style="font-size: 1rem;">
-                    Anda yakin ingin memulihkan data <strong class="text-success fs-5">{{ $kategori->kode }} - {{ $kategori->nama_kategori }}</strong>?
+                    Anda yakin ingin memulihkan data <strong class="text-success fs-5">{{ $item->kode }} - {{ $item->nama }}</strong>?
                 </p>
                 <div class="d-flex justify-content-center gap-3">
-                    <form action="{{ route('pemulihan.kategori-aset.restore', $kategori->kategori_id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                    <form action="{{ route('pemulihan.kategori-aset.restore', $item->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
                         @csrf 
                         @method('PUT')
                         <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
@@ -124,7 +130,7 @@
 </div>
 
 {{-- MODAL FORCE DELETE --}}
-<div class="modal fade" id="forceDeleteKategoriModal{{ $kategori->kategori_id }}" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="forceDeleteModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-body p-5 text-center bg-light">
@@ -133,7 +139,7 @@
                 </div>
                 <h4 class="fw-bold text-dark mb-2">Hapus Permanen</h4>
                 <p class="text-muted mb-3" style="font-size: 1rem;">
-                    Hapus data <strong class="text-danger fs-5">{{ $kategori->kode }} - {{ $kategori->nama_kategori }}</strong> secara permanen?
+                    Hapus data <strong class="text-danger fs-5">{{ $item->kode }} - {{ $item->nama }}</strong> secara permanen?
                 </p>
                 
                 <div class="alert alert-danger mb-4 text-start small border-0 shadow-sm rounded-3">
@@ -141,7 +147,7 @@
                 </div>
 
                 <div class="d-flex justify-content-center gap-3">
-                    <form action="{{ route('pemulihan.kategori-aset.force-delete', $kategori->kategori_id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                    <form action="{{ route('pemulihan.kategori-aset.force-delete', $item->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
                         @csrf 
                         @method('DELETE')
                         <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
@@ -164,7 +170,6 @@
 
         @if (session('success')) Swal.fire({ ...swalConfig, icon: 'success', title: 'Berhasil!', text: '{{ session('success') }}' }); @endif
         @if (session('error')) Swal.fire({ ...swalConfig, icon: 'error', title: 'Gagal!', text: '{{ session('error') }}' }); @endif
-        @if (session('warning')) Swal.fire({ ...swalConfig, icon: 'warning', title: 'Perhatian!', text: '{{ session('warning') }}' }); @endif
     });
 </script>
 @endpush

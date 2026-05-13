@@ -9,12 +9,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserManageController;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SumberKepemilikanController;
+
 use App\Http\Controllers\LokasiAsetController;
-use App\Http\Controllers\JenisAsetController;
-use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\DataAsetController;
 use App\Http\Controllers\PemulihanController;
+use App\Http\Controllers\KlasifikasiAsetController;
+use App\Http\Controllers\KategoriAsetController;
 
 
 
@@ -133,41 +133,27 @@ Route::middleware(['auth'])->group(function () {
 
 // Sumber Kepemilikan & Lokasi Aset - superadmin (role:1) and GA staff (section:12)
 Route::middleware(['auth', 'ga-admin'])->group(function () {
-Route::resource('sumber-kepemilikan', SumberKepemilikanController::class);
+
 Route::resource('lokasi-aset', LokasiAsetController::class);
 
-// JENIS ASET UMUM
-Route::get('/jenis-umum', [JenisAsetController::class, 'indexUmum'])->name('jenis-umum.index');
-Route::post('/jenis-umum', [JenisAsetController::class, 'storeUmum'])->name('jenis-aset.storeUmum');
-Route::put('/jenis-umum/{id}', [JenisAsetController::class, 'updateUmum'])->name('jenis-aset.updateUmum');
-Route::delete('/jenis-umum/{id}', [JenisAsetController::class, 'destroyUmum'])->name('jenis-aset.destroyUmum');
-
-// JENIS ASET KHUSUS
-Route::get('/jenis-khusus', [JenisAsetController::class, 'indexKhusus'])->name('jenis-khusus.index');
-Route::post('/jenis-khusus', [JenisAsetController::class, 'storeKhusus'])->name('jenis-aset.storeKhusus');
-Route::put('/jenis-khusus/{id}', [JenisAsetController::class, 'updateKhusus'])->name('jenis-aset.updateKhusus');
-Route::delete('/jenis-khusus/{id}', [JenisAsetController::class, 'destroyKhusus'])->name('jenis-aset.destroyKhusus');
-
-// KATEGORI ASET
-Route::get('/kategori-aset', [KategoriAsetController::class, 'index'])->name('kategori-aset.index');
+// KATEGORI ASET (ASET TETAP & INVENTARIS/EC)
+Route::get('/kategori-tetap', [KategoriAsetController::class, 'indexTetap'])->name('kategori-tetap.index');
+Route::get('/kategori-inventaris', [KategoriAsetController::class, 'indexInventaris'])->name('kategori-inventaris.index');
 Route::post('/kategori-aset', [KategoriAsetController::class, 'store'])->name('kategori-aset.store');
 Route::put('/kategori-aset/{id}', [KategoriAsetController::class, 'update'])->name('kategori-aset.update');
 Route::delete('/kategori-aset/{id}', [KategoriAsetController::class, 'destroy'])->name('kategori-aset.destroy');
-
-// PEMULIHAN JENIS ASET UMUM
-Route::get('/pemulihan/jenis-umum', [PemulihanController::class, 'jenisUmumIndex'])->name('pemulihan.jenis-umum');
-Route::put('/pemulihan/jenis-umum/{id}/restore', [PemulihanController::class, 'jenisUmumRestore'])->name('pemulihan.jenis-umum.restore');
-Route::delete('/pemulihan/jenis-umum/{id}/force-delete', [PemulihanController::class, 'jenisUmumForceDelete'])->name('pemulihan.jenis-umum.force-delete');
-
-// PEMULIHAN JENIS ASET KHUSUS
-Route::get('/pemulihan/jenis-khusus', [PemulihanController::class, 'jenisKhususIndex'])->name('pemulihan.jenis-khusus');
-Route::put('/pemulihan/jenis-khusus/{id}/restore', [PemulihanController::class, 'jenisKhususRestore'])->name('pemulihan.jenis-khusus.restore');
-Route::delete('/pemulihan/jenis-khusus/{id}/force-delete', [PemulihanController::class, 'jenisKhususForceDelete'])->name('pemulihan.jenis-khusus.force-delete');
+Route::post('/kategori-aset/import', [KategoriAsetController::class, 'import'])->name('kategori-aset.import');
+Route::get('/kategori-aset/template', [KategoriAsetController::class, 'downloadTemplate'])->name('kategori-aset.template');
 
 // PEMULIHAN KATEGORI ASET
 Route::get('/pemulihan/kategori-aset', [PemulihanController::class, 'kategoriAsetIndex'])->name('pemulihan.kategori-aset');
 Route::put('/pemulihan/kategori-aset/{id}/restore', [PemulihanController::class, 'kategoriAsetRestore'])->name('pemulihan.kategori-aset.restore');
 Route::delete('/pemulihan/kategori-aset/{id}/force-delete', [PemulihanController::class, 'kategoriAsetForceDelete'])->name('pemulihan.kategori-aset.force-delete');
+
+// PEMULIHAN DATA ASET
+Route::get('/pemulihan/data-aset', [PemulihanController::class, 'dataAsetIndex'])->name('pemulihan.data-aset');
+Route::put('/pemulihan/data-aset/{id}/restore', [PemulihanController::class, 'dataAsetRestore'])->name('pemulihan.data-aset.restore');
+Route::delete('/pemulihan/data-aset/{id}/force-delete', [PemulihanController::class, 'dataAsetForceDelete'])->name('pemulihan.data-aset.force-delete');
 });
 
 // Proses & Selesai Perbaikan

@@ -15,19 +15,12 @@ return new class extends Migration
     {
         Schema::create('log_aset', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('aset_id');
+            $table->unsignedBigInteger('aset_id');
             $table->date('tanggal_cek');
             $table->string('kondisi', 50);
             $table->string('status_aset', 50)->nullable();
             $table->text('keterangan')->nullable();
             $table->unsignedBigInteger('dicatat_oleh')->nullable();
-            $table->unsignedInteger('lokasi_id')->nullable();
-            $table->unsignedInteger('id_director')->nullable();
-            $table->unsignedInteger('id_divisi')->nullable();
-            $table->unsignedInteger('id_department')->nullable();
-            $table->unsignedInteger('id_section')->nullable();
-            $table->unsignedInteger('id_unit')->nullable();
-            $table->string('foto_bukti')->nullable();
             $table->timestamps();
 
             $table->foreign('aset_id')
