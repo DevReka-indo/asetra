@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\JenisKategori;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\JenisKategoriImport;
+use App\Exports\TemplateExport;
 
 class JenisKategoriController extends Controller
 {
@@ -103,5 +106,33 @@ class JenisKategoriController extends Controller
 
         return redirect()->route('jenis-kategori.index')
             ->with('success', 'Jenis Kategori berhasil dihapus.');
+    }
+
+    /**
+     * Import Jenis Kategori dari file Excel.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new JenisKategoriImport, $request->file('file'));
+
+            return redirect()->route('jenis-kategori.index')
+                ->with('success', 'Data Jenis Kategori berhasil diimport.');
+        } catch (\Exception $e) {
+            return redirect()->route('jenis-kategori.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template Excel.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new TemplateExport(['nama_jenis', 'kode_awalan', 'warna_label']), 'template_jenis_kategori.xlsx');
     }
 }

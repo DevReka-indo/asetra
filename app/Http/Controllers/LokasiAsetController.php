@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\LokasiAset;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\LokasiAsetImport;
+use App\Exports\TemplateExport;
 
 class LokasiAsetController extends Controller
 {
@@ -99,5 +102,33 @@ class LokasiAsetController extends Controller
 
         return redirect()->route('lokasi-aset.index')
             ->with('success', 'Data lokasi aset berhasil dihapus.');
+    }
+
+    /**
+     * Import Lokasi Aset dari file Excel.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new LokasiAsetImport, $request->file('file'));
+
+            return redirect()->route('lokasi-aset.index')
+                ->with('success', 'Data Lokasi Aset berhasil diimport.');
+        } catch (\Exception $e) {
+            return redirect()->route('lokasi-aset.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template Excel.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new TemplateExport(['kode_lokasi', 'nama_lokasi', 'detail_lokasi']), 'template_lokasi_aset.xlsx');
     }
 }

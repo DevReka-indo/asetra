@@ -158,15 +158,6 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 bg-light">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI <span class="text-danger">*</span></label>
-                        <select name="jenis_kategori_id" class="form-select shadow-sm rounded-3" required>
-                            <option value="" disabled selected>-- Pilih Jenis --</option>
-                            @foreach($jenisList as $jenis)
-                                <option value="{{ $jenis->id }}">{{ $jenis->kode_awalan }} - {{ $jenis->nama_jenis }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4">
                         <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-1"></i> Format Excel:</h6>
                         <ul class="mb-2 small">
@@ -177,6 +168,15 @@
                         <a href="{{ route('kategori-aset.template') }}" class="btn btn-sm btn-outline-info w-100 rounded-pill fw-bold">
                             <i class="fas fa-download me-1"></i> Download Template Excel
                         </a>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI <span class="text-danger">*</span></label>
+                        <select name="jenis_kategori_id" class="form-select shadow-sm rounded-3" required>
+                            <option value="" disabled selected>-- Pilih Jenis --</option>
+                            @foreach($jenisList as $jenis)
+                                <option value="{{ $jenis->id }}">{{ $jenis->kode_awalan }} - {{ $jenis->nama_jenis }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="mb-2">
                         <label class="form-label fw-bold small" style="color: #253070;">PILIH FILE EXCEL (.xlsx, .xls, .csv)</label>

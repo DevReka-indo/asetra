@@ -36,7 +36,8 @@
                     <div class="d-flex gap-2">
 
                         {{-- Import --}}
-                        <button type="button" class="btn btn-warning px-4 rounded-3 d-flex align-items-center text-dark" title="Import Data">
+                        <button type="button" class="btn btn-warning px-4 rounded-3 d-flex align-items-center text-dark" title="Import Data"
+                            data-bs-toggle="modal" data-bs-target="#modalImportLokasi">
                             <i class="fas fa-file-import me-1"></i> Import
                         </button>
 
@@ -175,6 +176,47 @@
                 <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
                 <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
                     <i class="fas fa-save me-1"></i> Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- MODAL IMPORT --}}
+<div class="modal fade" id="modalImportLokasi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ route('lokasi-aset.import') }}" method="POST" enctype="multipart/form-data"
+            class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            @csrf
+            <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #f39c12;">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-file-import me-2"></i> Import Lokasi Aset
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4">
+                    <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-1"></i> Format Excel:</h6>
+                    <ul class="mb-2 small">
+                        <li>Baris pertama sebagai Judul (Heading Row).</li>
+                        <li>Kolom A: <strong>kode_lokasi</strong> (wajib, unik, maks 20 karakter)</li>
+                        <li>Kolom B: <strong>nama_lokasi</strong> (wajib, unik, maks 100 karakter)</li>
+                        <li>Kolom C: <strong>detail_lokasi</strong> (opsional, maks 255 karakter)</li>
+                    </ul>
+                    <a href="{{ route('lokasi-aset.template') }}" class="btn btn-sm btn-outline-info w-100 rounded-pill fw-bold">
+                        <i class="fas fa-download me-1"></i> Download Template Excel
+                    </a>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold small" style="color: #253070;">PILIH FILE EXCEL (.xlsx, .xls, .csv)</label>
+                    <input type="file" name="file" class="form-control shadow-sm rounded-3" required accept=".xlsx,.xls,.csv">
+                    <small class="text-muted mt-2 d-block">Ukuran maksimal file: 2MB</small>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top-0 pt-3 pb-4 px-4">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-warning text-dark rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="fas fa-upload me-1"></i> Upload & Import
                 </button>
             </div>
         </form>
