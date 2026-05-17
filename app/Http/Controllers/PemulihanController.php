@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriAset;
+use App\Models\JenisKategori;
 use App\Models\DataAset;
+use App\Models\LokasiAset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -111,5 +113,97 @@ class PemulihanController extends Controller
 
         return redirect()->route('pemulihan.data-aset')
             ->with('success', 'Data aset berhasil dihapus secara permanen beserta dokumen terkait.');
+    }
+
+    /**
+     * Menampilkan daftar Jenis Kategori yang dihapus.
+     */
+    public function jenisKategoriIndex(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+
+        $query = JenisKategori::onlyTrashed();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_jenis', 'LIKE', "%{$search}%")
+                  ->orWhere('kode_awalan', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $data = $query->latest('deleted_at')->paginate($perPage)->withQueryString();
+        
+        return view('pemulihan.jenis_kategori', compact('data'));
+    }
+
+    /**
+     * Memulihkan Jenis Kategori.
+     */
+    public function jenisKategoriRestore($id)
+    {
+        $jenis = JenisKategori::onlyTrashed()->findOrFail($id);
+        $jenis->restore();
+
+        return redirect()->route('pemulihan.jenis-kategori')
+            ->with('success', 'Jenis kategori berhasil dipulihkan.');
+    }
+
+    /**
+     * Menghapus secara permanen Jenis Kategori.
+     */
+    public function jenisKategoriForceDelete($id)
+    {
+        $jenis = JenisKategori::onlyTrashed()->findOrFail($id);
+        $jenis->forceDelete();
+
+        return redirect()->route('pemulihan.jenis-kategori')
+            ->with('success', 'Jenis kategori berhasil dihapus secara permanen.');
+    }
+
+    /**
+     * Menampilkan daftar Lokasi Aset yang dihapus.
+     */
+    public function lokasiAsetIndex(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $search  = $request->input('search');
+
+        $query = LokasiAset::onlyTrashed();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_lokasi', 'LIKE', "%{$search}%")
+                  ->orWhere('kode_lokasi', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $data = $query->latest('deleted_at')->paginate($perPage)->withQueryString();
+        
+        return view('pemulihan.lokasi_aset', compact('data'));
+    }
+
+    /**
+     * Memulihkan Lokasi Aset.
+     */
+    public function lokasiAsetRestore($id)
+    {
+        $lokasi = LokasiAset::onlyTrashed()->findOrFail($id);
+        $lokasi->restore();
+
+        return redirect()->route('pemulihan.lokasi-aset')
+            ->with('success', 'Lokasi aset berhasil dipulihkan.');
+    }
+
+    /**
+     * Menghapus secara permanen Lokasi Aset.
+     */
+    public function lokasiAsetForceDelete($id)
+    {
+        $lokasi = LokasiAset::onlyTrashed()->findOrFail($id);
+        $lokasi->forceDelete();
+
+        return redirect()->route('pemulihan.lokasi-aset')
+            ->with('success', 'Lokasi aset berhasil dihapus secara permanen.');
     }
 }

@@ -14,7 +14,7 @@ class KategoriAset extends Model
     protected $fillable = [
         'kode',
         'nama',
-        'tipe',
+        'jenis_kategori_id',
     ];
 
     protected $casts = [
@@ -23,28 +23,11 @@ class KategoriAset extends Model
     ];
 
     /**
-     * Otomatis tentukan tipe berdasarkan digit pertama kode.
-     * 1xx = aset_tetap, 2xx = inventaris
+     * Relasi ke JenisKategori
      */
-    protected static function boot()
+    public function jenisKategori()
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (empty($model->tipe) && !empty($model->kode)) {
-                $model->tipe = str_starts_with((string) $model->kode, '1')
-                    ? 'aset_tetap'
-                    : 'inventaris';
-            }
-        });
-
-        static::updating(function ($model) {
-            if (!empty($model->kode)) {
-                $model->tipe = str_starts_with((string) $model->kode, '1')
-                    ? 'aset_tetap'
-                    : 'inventaris';
-            }
-        });
+        return $this->belongsTo(JenisKategori::class, 'jenis_kategori_id');
     }
 
     /**
@@ -56,34 +39,35 @@ class KategoriAset extends Model
     }
 
     /**
-     * Scope: hanya aset tetap (kode 1xx)
+     * Scope: filter berdasarkan jenis kategori tertentu
      */
-    public function scopeAsetTetap($query)
+    public function scopeOfJenis($query, $jenisKategoriId)
     {
-        return $query->where('tipe', 'aset_tetap');
+        return $query->where('jenis_kategori_id', $jenisKategoriId);
     }
 
     /**
-     * Scope: hanya inventaris/EC (kode 2xx)
-     */
-    public function scopeInventaris($query)
-    {
-        return $query->where('tipe', 'inventaris');
-    }
-
-    /**
-     * Label badge untuk tampilan UI
+     * Label jenis kategori untuk tampilan UI (via relasi)
      */
     public function getTipeLabelAttribute(): string
     {
-        return $this->tipe === 'aset_tetap' ? 'Aset Tetap' : 'Inventaris/EC';
+        return $this->jenisKategori ? $this->jenisKategori->nama_jenis : '-';
     }
 
     /**
-     * Warna badge berdasarkan tipe
+     * Warna badge berdasarkan urutan kode_awalan (1=danger, 2=primary, lainnya=secondary)
      */
     public function getTipeBadgeColorAttribute(): string
     {
-        return $this->tipe === 'aset_tetap' ? 'danger' : 'primary';
+        if (!$this->jenisKategori) return 'secondary';
+        return match($this->jenisKategori->kode_awalan) {
+            '1'     => 'danger',
+            '2'     => 'primary',
+            '3'     => 'success',
+            '4'     => 'warning',
+            '5'     => 'info',
+            default => 'secondary',
+        };
     }
+
 }

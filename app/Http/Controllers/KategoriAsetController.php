@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriAset;
+use App\Models\JenisKategori;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -12,126 +13,135 @@ use App\Exports\TemplateExport;
 class KategoriAsetController extends Controller
 {
     /**
-     * Menampilkan daftar Kategori Aset Tetap (1xx)
+     * Menampilkan semua Kategori Aset (terpadu), dengan filter opsional per jenis.
      */
-    public function indexTetap(Request $request)
+    public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
-        $search  = $request->input('search');
+        $perPage    = $request->input('per_page', 10);
+        $search     = $request->input('search');
+        $jenisId    = $request->input('jenis_kategori_id');
 
-        $query = KategoriAset::asetTetap();
+        $query = KategoriAset::with('jenisKategori');
+
+        if ($jenisId) {
+            $query->where('jenis_kategori_id', $jenisId);
+        }
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('kode', 'LIKE', "%{$search}%")
                   ->orWhere('nama', 'LIKE', "%{$search}%");
             });
         }
 
-        $data = $query->latest()->paginate($perPage)->withQueryString();
-        $title = "Kategori Aset Tetap";
-        $type = "aset_tetap";
-        
-        return view('kategori_aset.index', compact('data', 'title', 'type'));
+        $data       = $query->oldest()->paginate($perPage)->withQueryString();
+        $jenisList  = JenisKategori::orderBy('kode_awalan')->get();
+        $jenisAktif = $jenisId ? JenisKategori::find($jenisId) : null;
+
+        return view('kategori_aset.index', compact('data', 'jenisList', 'jenisAktif'));
     }
 
     /**
-     * Menampilkan daftar Kategori Aset EC (2xx)
+     * Simpan Kategori Aset baru dengan validasi prefix dinamis.
      */
-    public function indexInventaris(Request $request)
-    {
-        $perPage = $request->input('per_page', 10);
-        $search  = $request->input('search');
-
-        $query = KategoriAset::inventaris();
-
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('kode', 'LIKE', "%{$search}%")
-                  ->orWhere('nama', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $data = $query->latest()->paginate($perPage)->withQueryString();
-        $title = "Kategori Aset EC";
-        $type = "inventaris";
-        
-        return view('kategori_aset.index', compact('data', 'title', 'type'));
-    }
-
     public function store(Request $request)
     {
         $request->validate([
-            'kode' => 'required|string|max:10|unique:kategori_aset,kode',
-            'nama' => 'required|string|max:100',
+            'kode'              => 'required|string|max:10|unique:kategori_aset,kode',
+            'nama'              => 'required|string|max:100',
+            'jenis_kategori_id' => 'required|exists:jenis_kategori,id',
         ], [
-            'kode.required' => 'Kolom Kode tidak boleh kosong.',
-            'kode.unique'   => 'Kode tersebut sudah digunakan.',
-            'nama.required' => 'Kolom Nama tidak boleh kosong.',
+            'kode.required'              => 'Kolom Kode tidak boleh kosong.',
+            'kode.unique'                => 'Kode tersebut sudah digunakan.',
+            'nama.required'              => 'Kolom Nama tidak boleh kosong.',
+            'jenis_kategori_id.required' => 'Jenis Kategori harus dipilih.',
+            'jenis_kategori_id.exists'   => 'Jenis Kategori tidak valid.',
         ]);
 
-        $kategori = KategoriAset::create($request->only('kode', 'nama'));
+        // Validasi prefix kode sesuai kode_awalan jenis kategori
+        $jenis = JenisKategori::findOrFail($request->jenis_kategori_id);
+        if (!str_starts_with((string) $request->kode, $jenis->kode_awalan)) {
+            return back()->withInput()->withErrors([
+                'kode' => "Kode kategori untuk \"{$jenis->nama_jenis}\" harus diawali dengan angka {$jenis->kode_awalan}.",
+            ])->with('form_type', 'tambah');
+        }
 
-        $routeName = $kategori->tipe === 'aset_tetap' ? 'kategori-tetap.index' : 'kategori-inventaris.index';
+        KategoriAset::create($request->only('kode', 'nama', 'jenis_kategori_id'));
 
-        return redirect()->route($routeName)
+        return redirect()->route('kategori-aset.index')
             ->with('success', 'Kategori aset berhasil ditambahkan.');
     }
 
+    /**
+     * Update Kategori Aset dengan validasi prefix dinamis.
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
             'kode' => [
                 'required', 'string', 'max:10',
-                Rule::unique('kategori_aset', 'kode')->ignore($id)
+                Rule::unique('kategori_aset', 'kode')->ignore($id),
             ],
-            'nama' => 'required|string|max:100',
+            'nama'              => 'required|string|max:100',
+            'jenis_kategori_id' => 'required|exists:jenis_kategori,id',
         ], [
-            'kode.required' => 'Kolom Kode tidak boleh kosong.',
-            'kode.unique'   => 'Kode tersebut sudah digunakan.',
-            'nama.required' => 'Kolom Nama tidak boleh kosong.',
+            'kode.required'              => 'Kolom Kode tidak boleh kosong.',
+            'kode.unique'                => 'Kode tersebut sudah digunakan.',
+            'nama.required'              => 'Kolom Nama tidak boleh kosong.',
+            'jenis_kategori_id.required' => 'Jenis Kategori harus dipilih.',
         ]);
 
+        // Validasi prefix kode
+        $jenis = JenisKategori::findOrFail($request->jenis_kategori_id);
+        if (!str_starts_with((string) $request->kode, $jenis->kode_awalan)) {
+            return back()->withInput()->withErrors([
+                'kode' => "Kode kategori untuk \"{$jenis->nama_jenis}\" harus diawali dengan angka {$jenis->kode_awalan}.",
+            ])->with('form_type_edit', $id);
+        }
+
         $kategori = KategoriAset::findOrFail($id);
-        $kategori->update($request->only('kode', 'nama'));
+        $kategori->update($request->only('kode', 'nama', 'jenis_kategori_id'));
 
-        $routeName = $kategori->tipe === 'aset_tetap' ? 'kategori-tetap.index' : 'kategori-inventaris.index';
-
-        return redirect()->route($routeName)
+        return redirect()->route('kategori-aset.index')
             ->with('success', 'Kategori aset berhasil diperbarui.');
     }
 
+    /**
+     * Hapus (soft delete) Kategori Aset.
+     */
     public function destroy($id)
     {
         $kategori = KategoriAset::findOrFail($id);
-        $type = $kategori->tipe;
         $kategori->delete();
 
-        $routeName = $type === 'aset_tetap' ? 'kategori-tetap.index' : 'kategori-inventaris.index';
-
-        return redirect()->route($routeName)
+        return redirect()->route('kategori-aset.index')
             ->with('success', 'Kategori aset berhasil dipindahkan ke menu Pemulihan.');
     }
 
+    /**
+     * Import Kategori Aset dari file Excel.
+     */
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
-            'type' => 'required|in:aset_tetap,inventaris'
+            'file'              => 'required|mimes:xlsx,xls,csv|max:2048',
+            'jenis_kategori_id' => 'required|exists:jenis_kategori,id',
         ]);
 
         try {
-            Excel::import(new KategoriAsetImport, $request->file('file'));
-            
-            $routeName = $request->type === 'aset_tetap' ? 'kategori-tetap.index' : 'kategori-inventaris.index';
-            
-            return redirect()->route($routeName)->with('success', 'Data Kategori Aset berhasil diimport.');
+            Excel::import(new KategoriAsetImport($request->jenis_kategori_id), $request->file('file'));
+
+            return redirect()->route('kategori-aset.index')
+                ->with('success', 'Data Kategori Aset berhasil diimport.');
         } catch (\Exception $e) {
-            $routeName = $request->type === 'aset_tetap' ? 'kategori-tetap.index' : 'kategori-inventaris.index';
-            return redirect()->route($routeName)->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->route('kategori-aset.index')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Download template Excel.
+     */
     public function downloadTemplate()
     {
         return Excel::download(new TemplateExport(['kode', 'nama']), 'template_kategori_aset.xlsx');
