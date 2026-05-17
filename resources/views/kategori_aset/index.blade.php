@@ -57,6 +57,9 @@
                             data-bs-toggle="modal" data-bs-target="#modalImportKategori">
                             <i class="fas fa-file-import me-1"></i> Import
                         </button>
+                        <a href="{{ route('kategori-aset.export', request()->query()) }}" class="btn btn-success px-4 rounded-3 d-flex align-items-center text-white" title="Export Data">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </a>
                         <button type="button" class="btn btn-primary px-4 rounded-3 d-flex align-items-center"
                             data-bs-toggle="modal" data-bs-target="#modalTambahKategori">
                             <i class="fas fa-plus me-1"></i> Tambah Kategori

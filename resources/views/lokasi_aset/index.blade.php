@@ -42,9 +42,9 @@
                         </button>
 
                         {{-- Export --}}
-                        <button type="button" class="btn btn-success px-4 rounded-3 d-flex align-items-center text-white" title="Export Data">
+                        <a href="{{ route('lokasi-aset.export', request()->query()) }}" class="btn btn-success px-4 rounded-3 d-flex align-items-center text-white" title="Export Data">
                             <i class="fas fa-file-excel me-1"></i> Export
-                        </button>
+                        </a>
 
                         {{-- Tombol Tambah --}}
                         <button type="button" class="btn btn-primary px-4 rounded-3 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTambah">

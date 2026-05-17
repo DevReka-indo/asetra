@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\JenisKategoriImport;
 use App\Exports\TemplateExport;
+use App\Exports\JenisKategoriExport;
 
 class JenisKategoriController extends Controller
 {
@@ -134,5 +135,14 @@ class JenisKategoriController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(new TemplateExport(['nama_jenis', 'kode_awalan', 'warna_label']), 'template_jenis_kategori.xlsx');
+    }
+
+    /**
+     * Export data Jenis Kategori ke Excel dengan pencarian aktif.
+     */
+    public function export(Request $request)
+    {
+        $search = $request->input('search');
+        return Excel::download(new JenisKategoriExport($search), 'jenis_kategori_export.xlsx');
     }
 }

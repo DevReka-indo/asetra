@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\KategoriAsetImport;
 use App\Exports\TemplateExport;
+use App\Exports\KategoriAsetExport;
 
 class KategoriAsetController extends Controller
 {
@@ -145,5 +146,16 @@ class KategoriAsetController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(new TemplateExport(['kode', 'nama']), 'template_kategori_aset.xlsx');
+    }
+
+    /**
+     * Export data Kategori Aset ke Excel dengan pencarian dan filter jenis aktif.
+     */
+    public function export(Request $request)
+    {
+        $jenisKategoriId = $request->input('jenis_kategori_id');
+        $search          = $request->input('search');
+
+        return Excel::download(new KategoriAsetExport($jenisKategoriId, $search), 'kategori_aset_export.xlsx');
     }
 }

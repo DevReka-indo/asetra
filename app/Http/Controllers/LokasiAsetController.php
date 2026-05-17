@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\LokasiAsetImport;
 use App\Exports\TemplateExport;
+use App\Exports\LokasiAsetExport;
 
 class LokasiAsetController extends Controller
 {
@@ -130,5 +131,14 @@ class LokasiAsetController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(new TemplateExport(['kode_lokasi', 'nama_lokasi', 'detail_lokasi']), 'template_lokasi_aset.xlsx');
+    }
+
+    /**
+     * Export data Lokasi Aset ke Excel dengan pencarian aktif.
+     */
+    public function export(Request $request)
+    {
+        $search = $request->input('search');
+        return Excel::download(new LokasiAsetExport($search), 'lokasi_aset_export.xlsx');
     }
 }
