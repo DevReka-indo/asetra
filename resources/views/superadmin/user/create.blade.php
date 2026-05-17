@@ -40,7 +40,7 @@
         {{-- Informasi Akun --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-id-card me-2"></i> Informasi Akun</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-id-card me-2"></i> Informasi Akun</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -65,7 +65,7 @@
         {{-- Data Pribadi --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-user me-2"></i> Data Pribadi</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-user me-2"></i> Data Pribadi</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -104,7 +104,7 @@
         {{-- Keamanan --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-lock me-2"></i> Keamanan</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-lock me-2"></i> Keamanan</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -129,7 +129,7 @@
         {{-- Organisasi & Posisi --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-building me-2"></i> Organisasi & Posisi</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-building me-2"></i> Organisasi & Posisi</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -184,7 +184,7 @@
         {{-- Hak Akses & Kode Bagian --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-shield-alt me-2"></i> Hak Akses & Area Kerja</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-shield-alt me-2"></i> Hak Akses & Area Kerja</h6>
             </div>
             <div class="card-body p-4">
                 <!-- Baris Atas: Hak Akses -->
@@ -198,7 +198,7 @@
                                 <div class="form-check m-0 d-flex align-items-center">
                                     <input class="form-check-input mt-0 me-3" type="radio" name="role_id_role" value="1" id="role1" required>
                                     <label class="form-check-label w-100 cursor-pointer m-0" for="role1">
-                                        <div class="fw-bold text-primary"><i class="fas fa-star me-1 text-primary"></i> Superadmin</div>
+                                        <div class="fw-bold text-navy"><i class="fas fa-star me-1 text-navy"></i> Superadmin</div>
                                         <small class="text-muted">Akses penuh sistem</small>
                                     </label>
                                 </div>

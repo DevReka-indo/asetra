@@ -41,7 +41,7 @@
         {{-- Informasi Akun --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-id-card me-2"></i> Informasi Akun</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-id-card me-2"></i> Informasi Akun</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -67,7 +67,7 @@
         {{-- Data Pribadi --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-user me-2"></i> Data Pribadi</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-user me-2"></i> Data Pribadi</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -106,7 +106,7 @@
         {{-- Keamanan --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-lock me-2"></i> Keamanan</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-lock me-2"></i> Keamanan</h6>
             </div>
             <div class="card-body p-4">
                 <div class="alert alert-info py-2 px-3 mb-4 d-flex align-items-center">
@@ -137,7 +137,7 @@
         {{-- Organisasi & Posisi --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-building me-2"></i> Organisasi & Posisi</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-building me-2"></i> Organisasi & Posisi</h6>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
@@ -148,32 +148,51 @@
                             <select class="form-select border-start-0 ps-0 shadow-none parent_id_select" id="parent_id" name="parent_id" required>
                                 <option value="">-- Pilih Organisasi --</option>
                                 @php
-                                    $currParentId = $user->unit_id_unit ?? $user->section_id_section ?? $user->department_id_department ?? $user->divisi_id_divisi ?? $user->director_id_director ?? '';
-                                    function renderOrgOptionsUserEdit($node, $currId, $level = 0) {
+                                    $currParentId = '';
+                                    $currParentType = '';
+                                    
+                                    if ($user->unit_id_unit) {
+                                        $currParentId = $user->unit_id_unit;
+                                        $currParentType = 'unit';
+                                    } elseif ($user->section_id_section) {
+                                        $currParentId = $user->section_id_section;
+                                        $currParentType = 'section';
+                                    } elseif ($user->department_id_department) {
+                                        $currParentId = $user->department_id_department;
+                                        $currParentType = 'department';
+                                    } elseif ($user->divisi_id_divisi) {
+                                        $currParentId = $user->divisi_id_divisi;
+                                        $currParentType = 'divisi';
+                                    } elseif ($user->director_id_director) {
+                                        $currParentId = $user->director_id_director;
+                                        $currParentType = 'director';
+                                    }
+
+                                    function renderOrgOptionsUserEdit($node, $currId, $currType, $level = 0) {
                                         $indent = str_repeat('&nbsp;', $level * 4);
                                         if (isset($node->name_director)) {
-                                            $sel = ($node->id_director == $currId) ? 'selected' : '';
+                                            $sel = ($node->id_director == $currId && $currType == 'director') ? 'selected' : '';
                                             echo "<option value='{$node->id_director}' data-type='director' {$sel}>{$indent}Direktur: {$node->name_director}</option>";
                                         } elseif (isset($node->nm_divisi)) {
-                                            $sel = ($node->id_divisi == $currId) ? 'selected' : '';
+                                            $sel = ($node->id_divisi == $currId && $currType == 'divisi') ? 'selected' : '';
                                             echo "<option value='{$node->id_divisi}' data-type='divisi' {$sel}>{$indent}→ Divisi: {$node->nm_divisi}</option>";
                                         } elseif (isset($node->name_department)) {
-                                            $sel = ($node->id_department == $currId) ? 'selected' : '';
+                                            $sel = ($node->id_department == $currId && $currType == 'department') ? 'selected' : '';
                                             echo "<option value='{$node->id_department}' data-type='department' {$sel}>{$indent}→ Departemen: {$node->name_department}</option>";
                                         } elseif (isset($node->name_section)) {
-                                            $sel = ($node->id_section == $currId) ? 'selected' : '';
+                                            $sel = ($node->id_section == $currId && $currType == 'section') ? 'selected' : '';
                                             echo "<option value='{$node->id_section}' data-type='section' {$sel}>{$indent}→ Bagian: {$node->name_section}</option>";
                                         } elseif (isset($node->name_unit)) {
-                                            $sel = ($node->id_unit == $currId) ? 'selected' : '';
+                                            $sel = ($node->id_unit == $currId && $currType == 'unit') ? 'selected' : '';
                                             echo "<option value='{$node->id_unit}' data-type='unit' {$sel}>{$indent}→ Unit: {$node->name_unit}</option>";
                                         }
-                                        if (isset($node->subDirectors)) { foreach ($node->subDirectors as $subDir) renderOrgOptionsUserEdit($subDir, $currId, $level + 1); }
-                                        if (isset($node->divisi)) { foreach ($node->divisi as $div) renderOrgOptionsUserEdit($div, $currId, $level + 1); }
-                                        if (isset($node->department)) { foreach ($node->department as $dept) renderOrgOptionsUserEdit($dept, $currId, $level + 1); }
-                                        if (isset($node->section)) { foreach ($node->section as $sec) renderOrgOptionsUserEdit($sec, $currId, $level + 1); }
-                                        if (isset($node->unit)) { foreach ($node->unit as $unit) renderOrgOptionsUserEdit($unit, $currId, $level + 1); }
+                                        if (isset($node->subDirectors)) { foreach ($node->subDirectors as $subDir) renderOrgOptionsUserEdit($subDir, $currId, $currType, $level + 1); }
+                                        if (isset($node->divisi)) { foreach ($node->divisi as $div) renderOrgOptionsUserEdit($div, $currId, $currType, $level + 1); }
+                                        if (isset($node->department)) { foreach ($node->department as $dept) renderOrgOptionsUserEdit($dept, $currId, $currType, $level + 1); }
+                                        if (isset($node->section)) { foreach ($node->section as $sec) renderOrgOptionsUserEdit($sec, $currId, $currType, $level + 1); }
+                                        if (isset($node->unit)) { foreach ($node->unit as $unit) renderOrgOptionsUserEdit($unit, $currId, $currType, $level + 1); }
                                     }
-                                    if ($mainDirector) renderOrgOptionsUserEdit($mainDirector, $currParentId);
+                                    if ($mainDirector) renderOrgOptionsUserEdit($mainDirector, $currParentId, $currParentType);
                                 @endphp
                             </select>
                         </div>
@@ -200,7 +219,7 @@
         {{-- Hak Akses & Kode Bagian --}}
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-shield-alt me-2"></i> Hak Akses & Area Kerja</h6>
+                <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-shield-alt me-2"></i> Hak Akses & Area Kerja</h6>
             </div>
             <div class="card-body p-4">
                 <!-- Baris Atas: Hak Akses -->
@@ -214,7 +233,7 @@
                                 <div class="form-check m-0 d-flex align-items-center">
                                     <input class="form-check-input mt-0 me-3" type="radio" name="role_id_role" value="1" id="role1_edit_{{ $user->id }}" {{ $user->role_id_role == 1 ? 'checked' : '' }} required>
                                     <label class="form-check-label w-100 cursor-pointer m-0" for="role1_edit_{{ $user->id }}">
-                                        <div class="fw-bold text-primary"><i class="fas fa-star me-1 text-primary"></i> Superadmin</div>
+                                        <div class="fw-bold text-navy"><i class="fas fa-star me-1 text-navy"></i> Superadmin</div>
                                         <small class="text-muted">Akses penuh sistem</small>
                                     </label>
                                 </div>
@@ -265,7 +284,7 @@
                                     <div class="form-check m-0 d-flex align-items-center">
                                         <input class="form-check-input mt-0" type="checkbox" name="kode_bagian[]" value="{{ $b->kode_bagian }}" id="edit_bagian_{{ $b->kode_bagian }}" {{ in_array($b->kode_bagian, $selectedKodeBagian) ? 'checked' : '' }}>
                                         <label for="edit_bagian_{{ $b->kode_bagian }}" class="form-check-label d-flex align-items-center mb-0 cursor-pointer py-1 ms-3">
-                                            <span class="badge {{ in_array($b->kode_bagian, $selectedKodeBagian) ? 'bg-success' : 'bg-primary' }} text-white px-3 py-2 me-3 rounded-1" style="min-width: 70px; text-align: center; letter-spacing: 0.5px;">
+                                            <span class="badge bg-primary text-white px-3 py-2 me-3 rounded-1" style="min-width: 70px; text-align: center; letter-spacing: 0.5px;">
                                                 {{ $b->kode_bagian }}
                                             </span>
                                             <span class="text-dark fw-medium small">{{ $b->nama_bagian ?? '-' }}</span>
