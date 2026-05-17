@@ -22,6 +22,9 @@
     <div class="sidebar-content">
         <ul class="nav nav-secondary" style="margin-top: 50px;">
 
+        <li class="nav-section">
+            <span class="text-section">Menu</span>
+        </li>
         <!-- SUPERADMIN & GENERAL AFFAIRS -->
             @if (Auth::user()->role->nm_role == 'superadmin')
                 <li class="nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active_' : '' }}">
@@ -40,7 +43,9 @@
             @endif
 
             <!-- SUPERADMIN & GENERAL AFFAIRS MENU -->
-            @if (Auth::user()->role->nm_role == 'superadmin' || Auth::user()->section_id_section == 12)
+            @if (Auth::user()->role->nm_role == 'superadmin')
+
+                
 
                 <li class="nav-item {{ request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
                     <a href="{{ route('lokasi-aset.index') }}" class="nav-link">
@@ -49,36 +54,18 @@
                     </a>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('kategori-tetap.*') || request()->routeIs('kategori-inventaris.*') ? 'active_' : '' }}">
-                    <a href="#jenisAsetDrop"
-                        class="nav-link {{ request()->routeIs('kategori-tetap.*') || request()->routeIs('kategori-inventaris.*') ? '' : 'collapsed' }}" 
-                        data-toggle="collapse"
-                        aria-expanded="{{ request()->routeIs('kategori-tetap.*') || request()->routeIs('kategori-inventaris.*') ? 'true' : 'false' }}">
-                            <i class="fas fa-boxes"></i>
-                            <p>Kategori Aset</p>
-                            <span class="caret"></span>
+                <li class="nav-item {{ request()->routeIs('jenis-kategori.*') ? 'active_' : '' }}">
+                    <a href="{{ route('jenis-kategori.index') }}" class="nav-link">
+                        <i class="fas fa-layer-group"></i>
+                        <p>Jenis Kategori</p>
                     </a>
+                </li>
 
-                    <div class="collapse {{ request()->routeIs('klasifikasi-tetap.*') || request()->routeIs('klasifikasi-inventaris.*') ? 'show' : '' }}" 
-                        id="jenisAsetDrop">
-                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
-
-                            {{-- Sub-menu 1: Aset Tetap --}}
-                            <li class="{{ request()->routeIs('kategori-tetap.*') ? 'active' : '' }}">
-                                <a href="{{ route('kategori-tetap.index') }}">
-                                    <span class="sub-item">Kategori Aset Tetap</span>
-                                </a>
-                            </li>
-
-                            {{-- Sub-menu 2: Inventaris / EC --}}
-                            <li class="{{ request()->routeIs('kategori-inventaris.*') ? 'active' : '' }}">
-                                <a href="{{ route('kategori-inventaris.index') }}">
-                                    <span class="sub-item">Kategori Aset EC</span>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </div>
+                <li class="nav-item {{ request()->routeIs('kategori-aset.*') ? 'active_' : '' }}">
+                    <a href="{{ route('kategori-aset.index') }}" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <p>Kategori Aset</p>
+                    </a>
                 </li>
 
                 <li class="nav-item {{ request()->routeIs('aset.index') ? 'active_' : '' }}">
@@ -102,6 +89,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item {{ request()->routeIs('stock-opname.*') ? 'active_' : '' }}">
+                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <p>Stock Opname</p>
+                    </a>
+                </li>
+
                 <li class="nav-item {{ request()->routeIs('perbaikan.*') ? 'active_' : '' }}">
                     <a href="{{ route('perbaikan.index') }}" class="nav-link">
                         <i class="fas fa-tools"></i>
@@ -109,6 +103,11 @@
                     </a>
                 </li>
 
+                <li class="nav-section">
+                    <span class="text-section">Lainnya</span>
+                </li>
+
+                {{-- Pemulihan di bawah Lainnya --}}
                 <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
                     <a href="#pemulihanDrop"
                         class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
@@ -122,6 +121,110 @@
                     <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
                         id="pemulihanDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+                            <li class="{{ request()->routeIs('pemulihan.lokasi-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.lokasi-aset') }}">
+                                    <span class="sub-item">Lokasi Aset</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.jenis-kategori') }}">
+                                    <span class="sub-item">Jenis Kategori</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('pemulihan.kategori-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.kategori-aset') }}">
+                                    <span class="sub-item">Kategori Aset</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('pemulihan.data-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.data-aset') }}">
+                                    <span class="sub-item">Data Aset Perusahaan</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+            @elseif (Auth::user()->section_id_section == 12)
+                {{-- General Affairs tetap seperti semula untuk GA users --}}
+                <li class="nav-item {{ request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
+                    <a href="{{ route('lokasi-aset.index') }}" class="nav-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Lokasi Aset</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('jenis-kategori.*') ? 'active_' : '' }}">
+                    <a href="{{ route('jenis-kategori.index') }}" class="nav-link">
+                        <i class="fas fa-layer-group"></i>
+                        <p>Jenis Kategori</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('kategori-aset.*') ? 'active_' : '' }}">
+                    <a href="{{ route('kategori-aset.index') }}" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <p>Kategori Aset</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('aset.index') ? 'active_' : '' }}">
+                    <a href="{{ route('aset.index') }}" class="nav-link">
+                        <i class="fas fa-box"></i>
+                        <p>Data Aset Perusahaan</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('aset.pic') ? 'active_' : '' }}">
+                    <a href="{{ route('aset.pic') }}" class="nav-link">
+                        <i class="fas fa-user-tag"></i>
+                        <p>Aset PIC</p>
+                    </a>
+                </li>
+                
+                <li class="nav-item {{ request()->routeIs('log-aset.index') ? 'active_' : '' }}">
+                    <a href="{{ route('log-aset.index') }}" class="nav-link">
+                        <i class="fas fa-clipboard-check"></i>
+                        <p>Riwayat Monitoring</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('stock-opname.*') ? 'active_' : '' }}">
+                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
+                        <i class="fas fa-boxes"></i>
+                        <p>Stock Opname</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('perbaikan.*') ? 'active_' : '' }}">
+                    <a href="{{ route('perbaikan.index') }}" class="nav-link">
+                        <i class="fas fa-tools"></i>
+                        <p>Pengajuan Perbaikan</p>
+                    </a>
+                </li>
+
+                <li class="nav-section">
+                    <span class="text-section">Lainnya</span>
+                </li>
+                
+                <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
+                    <a href="#pemulihanDrop"
+                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse"
+                        aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
+                            <i class="fas fa-trash-restore"></i>
+                            <p>Pemulihan</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
+                        id="pemulihanDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+                            <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.jenis-kategori') }}">
+                                    <span class="sub-item">Jenis Kategori</span>
+                                </a>
+                            </li>
                             <li class="{{ request()->routeIs('pemulihan.kategori-aset') ? 'active' : '' }}">
                                 <a href="{{ route('pemulihan.kategori-aset') }}">
                                     <span class="sub-item">Kategori Aset</span>
@@ -130,6 +233,11 @@
                             <li class="{{ request()->routeIs('pemulihan.data-aset') ? 'active' : '' }}">
                                 <a href="{{ route('pemulihan.data-aset') }}">
                                     <span class="sub-item">Data Aset</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('pemulihan.lokasi-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.lokasi-aset') }}">
+                                    <span class="sub-item">Lokasi Aset</span>
                                 </a>
                             </li>
                         </ul>
@@ -172,7 +280,7 @@
                 <li class="nav-item {{ request()->routeIs('user.manage') ? 'active_' : '' }}">
                     <a href="{{ route('user.manage') }}" class="nav-link">
                         <i class="fas fa-users"></i>
-                        <p>Manage Users</p>
+                        <p>Manajemen Pengguna</p>
                     </a>
                 </li>
             @endif
@@ -201,13 +309,6 @@
                     </a>
                 </li>
                 
-                <li class="nav-item {{ request()->routeIs('aset.scanner') ? 'active_' : '' }}">
-                    <a href="{{ route('aset.scanner') }}" class="nav-link">
-                        <i class="fas fa-qrcode"></i>
-                        <p>Scanner Aset</p>
-                    </a>
-                </li>
-
                 <li class="nav-item {{ request()->routeIs('log-aset.index') ? 'active_' : '' }}">
                     <a href="{{ route('log-aset.index') }}" class="nav-link">
                         <i class="fas fa-clipboard-check"></i>
@@ -220,6 +321,55 @@
                         <i class="fas fa-tools"></i>
                         <p>Pengajuan Perbaikan</p>
                     </a>
+                </li>
+
+                @php
+                    $adaOpnameAktif = \App\Models\StockOpname::where('status', 'aktif')->exists();
+                @endphp
+                @if($adaOpnameAktif)
+                    <li class="nav-item {{ request()->routeIs('stock-opname.user-*') ? 'active_' : '' }}">
+                        <a href="{{ route('stock-opname.user-index') }}" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <p>Stock Opname</p>
+                        </a>
+                    </li>
+                @endif
+                
+                <li class="nav-section">
+                    <span class="text-section">Lainnya</span>
+                </li>
+
+                {{-- Untuk General Affairs, Lainnya hanya berisi Pemulihan --}}
+                <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
+                    <a href="#pemulihanDrop"
+                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
+                        data-toggle="collapse"
+                        aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
+                            <i class="fas fa-trash-restore"></i>
+                            <p>Pemulihan</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
+                        id="pemulihanDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+                            <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.jenis-kategori') }}">
+                                    <span class="sub-item">Jenis Kategori</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('pemulihan.kategori-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.kategori-aset') }}">
+                                    <span class="sub-item">Kategori Aset</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('pemulihan.data-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.data-aset') }}">
+                                    <span class="sub-item">Data Aset</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
             @endif
         </ul>

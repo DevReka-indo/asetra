@@ -187,6 +187,20 @@ header .navbar-nav .nav-link.dropdown-toggle,
     border-color: #00BFFF !important;
 }
 
+.sidebar-wrapper .nav-collapse li:nth-child(3) > a::before,
+.sidebar-wrapper .nav-collapse li:nth-child(3) .sub-item::before {
+    background-color: #884dff !important;
+    color: #4da0ff !important;
+    border-color: #4da0ff !important;
+}
+
+.sidebar-wrapper .nav-collapse li:nth-child(4) > a::before,
+.sidebar-wrapper .nav-collapse li:nth-child(4) .sub-item::before {
+    background-color: #120989 !important;
+    color: #120989 !important;
+    border-color: #120989 !important;
+}
+
 .sidebar-wrapper .nav-collapse li > a::before,
 .sidebar-wrapper .nav-collapse li .sub-item::before {
     transform: scale(1.5) !important;
