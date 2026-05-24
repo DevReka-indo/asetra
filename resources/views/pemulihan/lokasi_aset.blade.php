@@ -43,8 +43,8 @@
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th width="150">Kode Lokasi</th>
                             <th>Nama Lokasi</th>
+                            <th width="150">Kode Lokasi</th>
                             <th>Tgl Dihapus</th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
@@ -53,8 +53,8 @@
                         @forelse ($data as $i => $item)
                             <tr>
                                 <td class="text-center">{{ $data->firstItem() + $i }}</td>
-                                <td class="fw-bold text-primary fs-5">{{ $item->kode_lokasi }}</td>
                                 <td class="fw-semibold">{{ $item->nama_lokasi }}</td>
+                                <td class="fw-bold text-primary fs-5">{{ $item->kode_lokasi }}</td>
                                 <td>{{ $item->deleted_at ? $item->deleted_at->format('d/m/Y H:i') : '-' }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">

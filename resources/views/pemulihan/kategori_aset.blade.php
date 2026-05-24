@@ -43,8 +43,8 @@
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th>Kode</th>
                             <th>Nama Kategori</th>
+                            <th>Kode</th>
                             <th class="text-center">Tipe</th>
                             <th>Tgl Dihapus</th>
                             <th width="150" class="text-center">Aksi</th>
@@ -54,8 +54,8 @@
                         @forelse ($data as $i => $item)
                             <tr>
                                 <td class="text-center">{{ $data->firstItem() + $i }}</td>
-                                <td class="fw-bold text-primary">{{ $item->kode }}</td>
                                 <td>{{ $item->nama }}</td>
+                                <td class="fw-bold text-primary">{{ $item->kode }}</td>
                                 <td class="text-center">
                                     <span class="badge bg-{{ $item->tipe_badge_color }}">
                                         {{ $item->tipe_label }}

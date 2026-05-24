@@ -126,7 +126,7 @@ class KategoriAsetController extends Controller
     {
         $request->validate([
             'file'              => 'required|mimes:xlsx,xls,csv|max:2048',
-            'jenis_kategori_id' => 'required|exists:jenis_kategori,id',
+            'jenis_kategori_id' => 'nullable|exists:jenis_kategori,id',
         ]);
 
         try {
@@ -145,7 +145,7 @@ class KategoriAsetController extends Controller
      */
     public function downloadTemplate()
     {
-        return Excel::download(new TemplateExport(['kode', 'nama']), 'template_kategori_aset.xlsx');
+        return Excel::download(new TemplateExport(['nama', 'kode']), 'template_kategori_aset.xlsx');
     }
 
     /**

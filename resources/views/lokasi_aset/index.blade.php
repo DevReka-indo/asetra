@@ -63,8 +63,8 @@
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th>Kode Lokasi</th>
                             <th>Nama Lokasi</th>
+                            <th>Kode Lokasi</th>
                             <th>Detail Lokasi</th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
@@ -73,8 +73,8 @@
                         @forelse ($data as $i => $row)
                             <tr>
                                 <td class="text-center">{{ $data->firstItem() + $i }}</td>
-                                <td class="fw-bold text-primary">{{ $row->kode_lokasi }}</td>
                                 <td>{{ $row->nama_lokasi }}</td>
+                                <td class="fw-bold text-primary">{{ $row->kode_lokasi }}</td>
                                 <td>{{ $row->detail_lokasi }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">
@@ -103,7 +103,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">
+                                <td colspan="5" class="text-center py-5 text-muted">
                                     <i class="fas fa-info-circle mb-2 d-block fa-2x"></i>
                                     Belum ada data lokasi aset
                                 </td>
@@ -142,17 +142,6 @@
 
             <div class="modal-body p-4 bg-light">
                 <div class="mb-4">
-                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE LOKASI <span class="text-danger">*</span></label>
-                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
-                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
-                        <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_lokasi') : '' }}" placeholder="Contoh: Keu"> 
-                    </div>
-                    @if(old('form_type') == 'tambah')
-                        @error('kode_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
-                    @endif
-                </div>
-
-                <div class="mb-4">
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA LOKASI <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
@@ -160,6 +149,16 @@
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('nama_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                    @endif
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE LOKASI <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                        <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_lokasi') : '' }}" placeholder="Contoh: Keu"> 
+                    </div>
+                    @if(old('form_type') == 'tambah')
+                        @error('kode_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
                     @endif
                 </div>
 
@@ -199,8 +198,8 @@
                     <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-1"></i> Format Excel:</h6>
                     <ul class="mb-2 small">
                         <li>Baris pertama sebagai Judul (Heading Row).</li>
-                        <li>Kolom A: <strong>kode_lokasi</strong> (wajib, unik, maks 20 karakter)</li>
-                        <li>Kolom B: <strong>nama_lokasi</strong> (wajib, unik, maks 100 karakter)</li>
+                        <li>Kolom A: <strong>nama_lokasi</strong> (wajib, unik, maks 100 karakter)</li>
+                        <li>Kolom B: <strong>kode_lokasi</strong> (wajib, unik, maks 45 karakter)</li>
                         <li>Kolom C: <strong>detail_lokasi</strong> (opsional, maks 255 karakter)</li>
                     </ul>
                     <a href="{{ route('lokasi-aset.template') }}" class="btn btn-sm btn-outline-info w-100 rounded-pill fw-bold">

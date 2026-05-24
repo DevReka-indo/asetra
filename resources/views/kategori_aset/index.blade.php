@@ -165,17 +165,17 @@
                         <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-1"></i> Format Excel:</h6>
                         <ul class="mb-2 small">
                             <li>Baris pertama sebagai Judul (Heading Row).</li>
-                            <li>Kolom A: <strong>kode</strong> (awalan sesuai jenis kategori)</li>
-                            <li>Kolom B: <strong>nama</strong></li>
+                            <li>Kolom A: <strong>nama</strong></li>
+                            <li>Kolom B: <strong>kode</strong> (awalan sesuai jenis kategori)</li>
                         </ul>
                         <a href="{{ route('kategori-aset.template') }}" class="btn btn-sm btn-outline-info w-100 rounded-pill fw-bold">
                             <i class="fas fa-download me-1"></i> Download Template Excel
                         </a>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI <span class="text-danger">*</span></label>
-                        <select name="jenis_kategori_id" class="form-select shadow-sm rounded-3" required>
-                            <option value="" disabled selected>-- Pilih Jenis --</option>
+                        <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI (OPSIONAL)</label>
+                        <select name="jenis_kategori_id" class="form-select shadow-sm rounded-3">
+                            <option value="" selected>-- Semua Jenis (Otomatis Mendeteksi dari Awalan Kode) --</option>
                             @foreach($jenisList as $jenis)
                                 <option value="{{ $jenis->id }}">{{ $jenis->kode_awalan }} - {{ $jenis->nama_jenis }}</option>
                             @endforeach

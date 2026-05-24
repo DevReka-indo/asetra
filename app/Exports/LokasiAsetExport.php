@@ -34,8 +34,8 @@ class LokasiAsetExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'Kode Lokasi',
             'Nama Lokasi',
+            'Kode Lokasi',
             'Detail Lokasi',
         ];
     }
@@ -43,8 +43,8 @@ class LokasiAsetExport implements FromCollection, WithHeadings, WithMapping
     public function map($row): array
     {
         return [
-            $row->kode_lokasi,
             $row->nama_lokasi,
+            $row->kode_lokasi,
             $row->detail_lokasi,
         ];
     }

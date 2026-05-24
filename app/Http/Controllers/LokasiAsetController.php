@@ -40,7 +40,7 @@ class LokasiAsetController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_lokasi' => 'required|string|max:20|unique:lokasi_aset,kode_lokasi',
+            'kode_lokasi' => 'required|string|max:45|unique:lokasi_aset,kode_lokasi',
             'nama_lokasi' => 'required|string|max:100|unique:lokasi_aset,nama_lokasi',
             'detail_lokasi' => 'nullable|string|max:255',
         ], [
@@ -72,7 +72,7 @@ class LokasiAsetController extends Controller
             'kode_lokasi' => [
                 'required', 
                 'string', 
-                'max:20',
+                'max:45',
                 Rule::unique('lokasi_aset', 'kode_lokasi')->ignore($id, 'lokasi_id')
             ],
             'nama_lokasi' => [
@@ -130,7 +130,7 @@ class LokasiAsetController extends Controller
      */
     public function downloadTemplate()
     {
-        return Excel::download(new TemplateExport(['kode_lokasi', 'nama_lokasi', 'detail_lokasi']), 'template_lokasi_aset.xlsx');
+        return Excel::download(new TemplateExport(['nama_lokasi', 'kode_lokasi', 'detail_lokasi']), 'template_lokasi_aset.xlsx');
     }
 
     /**
