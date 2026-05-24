@@ -173,9 +173,11 @@ class DataAsetController extends Controller
                        ->withQueryString();
 
         $lokasis = LokasiAset::all();
+        $departments = \App\Models\Department::all();
+        $divisis = \App\Models\Divisi::all();
         $pageTitle = "Data Aset PIC Saya";
 
-        return view('aset.index', compact('asets', 'lokasis', 'pageTitle'));
+        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle'));
     }
 
     /**

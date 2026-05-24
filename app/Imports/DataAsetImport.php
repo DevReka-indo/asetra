@@ -184,14 +184,71 @@ class DataAsetImport implements ToCollection
 
                 foreach ($photoUrls as $i => $url) {
                     if (!empty($url)) {
+                        $finalUrl = $url;
+                        $driveId = $this->extractDriveId($url);
+                        
+                        if ($driveId) {
+                            // Coba unduh file dari Drive publik dan unggah ke Folder Sistem
+                            $downloadUrl = "https://drive.google.com/uc?export=download&id=" . $driveId;
+                            
+                            $ch = curl_init();
+                            curl_setopt($ch, CURLOPT_URL, $downloadUrl);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+                            $content = curl_exec($ch);
+                            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                            curl_close($ch);
+                            
+                            if ($httpCode === 200 && !empty($content)) {
+                                // Simpan ke file temp lokal
+                                $tempDir = sys_get_temp_dir();
+                                $tempFile = tempnam($tempDir, 'aset_img_');
+                                file_put_contents($tempFile, $content);
+                                
+                                // Unggah ke Google Drive Sistem
+                                $filename = time() . '_' . uniqid() . '.jpg';
+                                $driveService = app(\App\Services\GoogleDriveService::class);
+                                $systemDriveUrl = $driveService->uploadFile($tempFile, $filename);
+                                
+                                @unlink($tempFile);
+                                
+                                if ($systemDriveUrl) {
+                                    $finalUrl = $systemDriveUrl;
+                                } else {
+                                    $finalUrl = "https://lh3.googleusercontent.com/d/" . $driveId;
+                                }
+                            } else {
+                                $finalUrl = "https://lh3.googleusercontent.com/d/" . $driveId;
+                            }
+                        }
+
                         AsetFoto::create([
                             'aset_id'   => $aset->id,
-                            'path_foto' => $url,
+                            'path_foto' => $finalUrl,
                             'urutan'    => $i + 1,
                         ]);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Mengekstrak file ID dari link Google Drive.
+     */
+    private function extractDriveId(string $url): ?string
+    {
+        if (preg_match('/\/file\/d\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        if (preg_match('/[?&]id=([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        if (preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return $matches[1];
+        }
+        return null;
     }
 }

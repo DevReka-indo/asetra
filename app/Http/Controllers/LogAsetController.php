@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Models\LogAset;
 use App\Models\DataAset;
+use App\Models\User;
+use App\Notifications\SystemNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -156,6 +158,38 @@ class LogAsetController extends Controller
         if ($request->lokasi_id) $aset->lokasi_id = $request->lokasi_id;
 
         $aset->save();
+
+        // Notify if there is a change
+        if (count($perubahan) > 0) {
+            $title = 'Update Monitoring Aset';
+            $changeStr = implode(', ', $perubahan);
+            $message = "Aset {$aset->nama_aset} ({$aset->nomor_aset}) memiliki update monitoring terbaru: {$changeStr}.";
+            $url = route('aset.show', $aset->id);
+            $type = 'monitoring';
+
+            $recipients = collect();
+            if ($aset->pic_id) {
+                $pic = User::find($aset->pic_id);
+                if ($pic) $recipients->push($pic);
+            }
+            if ($aset->penanggung_jawab_id) {
+                $pj = User::find($aset->penanggung_jawab_id);
+                if ($pj) $recipients->push($pj);
+            }
+
+            // Notify GA and Superadmin
+            $adminGas = User::where('role_id_role', 1)->get()->merge(
+                User::all()->filter(fn($u) => $u->isGeneralAffairs())
+            );
+            $recipients = $recipients->merge($adminGas)->unique('id');
+
+            foreach ($recipients as $recipient) {
+                // Don't notify the person who created the log
+                if ($recipient->id !== Auth::id()) {
+                    $recipient->notify(new SystemNotification($title, $message, $url, $type));
+                }
+            }
+        }
 
         return back()->with('success', 'Log monitoring aset berhasil ditambahkan!');
     }

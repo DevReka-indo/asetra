@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\PengajuanPerbaikan;
 use App\Models\DataAset;
 use App\Models\LogAset;
+use App\Models\User;
+use App\Notifications\SystemNotification;
 
 class PengajuanPerbaikanController extends Controller
 {
@@ -110,14 +112,32 @@ class PengajuanPerbaikanController extends Controller
                 ->store('perbaikan', 'public');
         }
 
-        PengajuanPerbaikan::create($data);
+        $pengajuan = PengajuanPerbaikan::create($data);
 
         // Update status aset menjadi "Dalam Perbaikan" saat pengajuan dibuat
         DataAset::findOrFail($request->aset_id)->update([
             'status_aset' => 'Dalam Perbaikan',
         ]);
 
-        return back()->with('success', 'Pengajuan perbaikan aset berhasil dikirim! Menunggu review dari admin Bagian Umum.');
+        // Notify GA / Superadmin
+        $aset = DataAset::find($request->aset_id);
+        $asetName = $aset ? $aset->nama_aset : 'Aset';
+        $userFullName = Auth::user()->fullname;
+        
+        $adminGas = User::where('role_id_role', 1)->get()->merge(
+            User::all()->filter(fn($u) => $u->isGeneralAffairs())
+        )->unique('id');
+
+        $title = 'Pengajuan Perbaikan Baru';
+        $message = "{$userFullName} mengajukan perbaikan untuk aset {$asetName}.";
+        $url = route('perbaikan.show', $pengajuan->id);
+        $type = 'perbaikan';
+
+        foreach ($adminGas as $adminGa) {
+            $adminGa->notify(new SystemNotification($title, $message, $url, $type));
+        }
+
+        return back()->with('success', 'Pengajuan perbaikan aset berhasil dikirim! Menunggu review dari Bagian Umum.');
     }
 
     /**
@@ -164,7 +184,7 @@ class PengajuanPerbaikanController extends Controller
     public function proses(Request $request, $id)
     {
         if (!$this->canProcess()) {
-            abort(403, 'Hanya admin Bagian Umum yang dapat memproses pengajuan ini.');
+            abort(403, 'Hanya Bagian Umum yang dapat memproses pengajuan ini.');
         }
 
         $request->validate([
@@ -193,6 +213,21 @@ class PengajuanPerbaikanController extends Controller
         }
         // Jika disetujui: pastikan status_aset tetap "Dalam Perbaikan"
         
+        // Notify the user who requested
+        $pengajuUser = $pengajuan->pengaju;
+        if ($pengajuUser) {
+            $asetName = $pengajuan->aset ? $pengajuan->aset->nama_aset : 'Aset';
+            $pemrosesName = Auth::user()->fullname;
+            $statusLabel = $request->aksi === 'disetujui' ? 'disetujui' : 'ditolak';
+            
+            $title = 'Status Perbaikan Diperbarui';
+            $message = "Pengajuan perbaikan Anda untuk aset {$asetName} telah {$statusLabel} oleh {$pemrosesName}.";
+            $url = route('perbaikan.show', $pengajuan->id);
+            $type = 'perbaikan';
+
+            $pengajuUser->notify(new SystemNotification($title, $message, $url, $type));
+        }
+
         $label = $request->aksi === 'disetujui' ? 'disetujui' : 'ditolak';
 
         return redirect()
@@ -206,7 +241,7 @@ class PengajuanPerbaikanController extends Controller
     public function selesai(Request $request, $id)
     {
         if (!$this->canProcess()) {
-            abort(403, 'Hanya admin Bagian Umum yang dapat menandai perbaikan selesai.');
+            abort(403, 'Hanya Bagian Umum yang dapat menandai perbaikan selesai.');
         }
 
         $request->validate([
@@ -244,6 +279,20 @@ class PengajuanPerbaikanController extends Controller
                               . ($request->catatan ? ' | Catatan: ' . $request->catatan : ''),
             'dicatat_oleh' => Auth::id(),
         ]);
+
+        // Notify the user who requested
+        $pengajuUser = $pengajuan->pengaju;
+        if ($pengajuUser) {
+            $asetName = $pengajuan->aset ? $pengajuan->aset->nama_aset : 'Aset';
+            $pemrosesName = Auth::user()->fullname;
+            
+            $title = 'Perbaikan Aset Selesai';
+            $message = "Perbaikan untuk aset {$asetName} yang Anda ajukan telah diselesaikan oleh {$pemrosesName}.";
+            $url = route('perbaikan.show', $pengajuan->id);
+            $type = 'perbaikan';
+
+            $pengajuUser->notify(new SystemNotification($title, $message, $url, $type));
+        }
 
         return redirect()
             ->route('perbaikan.show', $pengajuan->id)

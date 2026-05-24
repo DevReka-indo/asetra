@@ -6,6 +6,8 @@ use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
 use App\Models\DataAset;
 use App\Models\LokasiAset;
+use App\Models\User;
+use App\Notifications\SystemNotification;
 use App\Exports\StockOpnameExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +45,7 @@ class StockOpnameController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        StockOpname::create([
+        $session = StockOpname::create([
             'periode' => $request->periode,
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_berakhir' => $request->tanggal_berakhir,
@@ -51,6 +53,19 @@ class StockOpnameController extends Controller
             'created_by' => auth()->id(),
             'status' => 'aktif'
         ]);
+
+        // Notify all active users
+        $users = User::all();
+        $title = 'Jadwal Stock Opname Baru';
+        $formattedMulai = \Carbon\Carbon::parse($request->tanggal_mulai)->format('d M');
+        $formattedAkhir = \Carbon\Carbon::parse($request->tanggal_berakhir)->format('d M Y');
+        $message = "Periode Stock Opname {$request->periode} telah dibuat. Pelaksanaan mulai {$formattedMulai} s/d {$formattedAkhir}.";
+        $url = route('stock-opname.user-index');
+        $type = 'stock_opname';
+
+        foreach ($users as $u) {
+            $u->notify(new SystemNotification($title, $message, $url, $type));
+        }
 
         return redirect()->route('stock-opname.index')->with('success', 'Jadwal Stock Opname berhasil dibuat.');
     }
