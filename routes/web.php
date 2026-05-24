@@ -126,6 +126,11 @@ Route::middleware(['auth', 'ga-admin'])->group(function () {
 
 // All Staff
 Route::middleware(['auth'])->group(function () {
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
     // Data Aset
     Route::get('/aset', [DataAsetController::class, 'index'])->name('aset.index');
     Route::get('/aset-pic', [DataAsetController::class, 'picIndex'])->name('aset.pic');
