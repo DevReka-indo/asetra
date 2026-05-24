@@ -3,39 +3,7 @@
 @section('title', 'Detail Aset - ' . $aset->nomor_aset)
 
 @push('styles')
-<style>
-    .info-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #6c757d;
-        margin-bottom: 2px;
-    }
-    .info-value {
-        font-size: 0.95rem;
-        color: #253070;
-        word-break: break-word;
-    }
-    .icon-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        background: rgba(37, 48, 112, 0.05);
-        border-radius: 8px;
-        width: 36px;
-        height: 36px;
-        color: #253070;
-    }
-    .card-header-custom {
-        background-color: #fff;
-        border-bottom: 1px solid rgba(0,0,0,.05);
-        padding: 1rem 1.25rem;
-    }
-    .text-navy {
-        color: #253070 !important;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('assets/css/aset-show.css') }}">
 @endpush
 
 @section('content')
@@ -86,7 +54,7 @@
                             <p class="text-muted small mb-0">{{ $aset->nama_aset }}</p>
                         </div>
                         <div class="card-footer bg-light border-0">
-                            <form action="{{ route('aset.cetak-label') }}" method="POST" target="_blank">
+                            <form action="{{ route('aset.cetak-label.process') }}" method="POST" target="_blank">
                                 @csrf
                                 <input type="hidden" name="ids[]" value="{{ $aset->id }}">
                                 <button type="submit" class="btn btn-sm btn-dark w-100 rounded-3">
@@ -103,7 +71,7 @@
                         <div class="card-body p-0 text-center">
                             @if($aset->foto->isNotEmpty())
                                 @foreach($aset->foto as $foto)
-                                    <img src="{{ asset('storage/' . $foto->path_foto) }}"
+                                    <img src="{{ filter_var($foto->path_foto, FILTER_VALIDATE_URL) ? $foto->path_foto : asset('storage/' . $foto->path_foto) }}"
                                          class="img-fluid {{ !$loop->last ? 'border-bottom' : 'rounded-bottom' }}"
                                          alt="Foto Aset"
                                          style="cursor: zoom-in;"
@@ -181,8 +149,8 @@
                                             <i class="fas fa-calendar-alt"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Tahun Kapitalisasi</span>
-                                            <span class="info-value fw-semibold">{{ $aset->tahun_kapitalisasi ?? '-' }}</span>
+                                            <span class="info-label d-block fw-bold">Tanggal Kapitalisasi</span>
+                                            <span class="info-value fw-semibold">{{ $aset->tanggal_kapitalisasi ? \Carbon\Carbon::parse($aset->tanggal_kapitalisasi)->isoFormat('D MMMM Y') : '-' }}</span>
                                         </div>
                                     </div>
 
@@ -206,6 +174,16 @@
                                         <div class="flex-grow-1">
                                             <span class="info-label d-block fw-bold">Lokasi Penempatan</span>
                                             <span class="info-value fw-semibold">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Gedung / Lantai</span>
+                                            <span class="info-value fw-semibold">{{ $aset->gedung ?? '-' }}</span>
                                         </div>
                                     </div>
 
@@ -337,7 +315,7 @@
                                 <th>Lokasi / Divisi Tercatat</th>
                                 <th>Dicatat Oleh</th>
                                 <th>Dokumentasi</th>
-                                <th>Keterangan</th>
+                                <th>Catatan & Perubahan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -370,7 +348,16 @@
                                         <span class="text-muted small">-</span>
                                     @endif
                                 </td>
-                                <td><small>{{ $log->keterangan ?? '-' }}</small></td>
+                                <td>
+                                    @if($log->flag_perubahan == 'Pengecekan Rutin')
+                                        <span class="badge bg-light text-success border border-success rounded-pill px-2 py-1 mb-1" style="font-weight: 500; font-size: 0.7rem;"><i class="fas fa-check-circle me-1"></i>Pengecekan Rutin</span>
+                                    @elseif($log->flag_perubahan)
+                                        <span class="badge bg-light text-danger border border-danger rounded-pill px-2 py-1 mb-1" style="font-weight: 500; font-size: 0.7rem;"><i class="fas fa-exclamation-circle me-1"></i>{{ $log->flag_perubahan }}</span>
+                                    @endif
+                                    @if($log->keterangan)
+                                        <p class="text-muted small mb-0 mt-1">{{ $log->keterangan }}</p>
+                                    @endif
+                                </td>
                             </tr>
                             @empty
                             <tr>
@@ -417,7 +404,7 @@
                                 <option value="Bongkar" {{ $aset->status_kondisi == 'Bongkar' ? 'selected' : '' }}>🔨 Bongkar</option>
                                 <option value="Tidak Terpakai" {{ $aset->status_kondisi == 'Tidak Terpakai' ? 'selected' : '' }}>⚪ Tidak Terpakai</option>
                                 <option value="Hilang" {{ $aset->status_kondisi == 'Hilang' ? 'selected' : '' }}>❌ Hilang</option>
-                                <option value="Lainnya" {{ $aset->status_kondisi == 'Lainnya' ? 'selected' : '' }}>📝 Lainnya</option>
+                                <option value="Tidak Teridentifikasi" {{ $aset->status_kondisi == 'Tidak Teridentifikasi' ? 'selected' : '' }}>🔍 Tidak Teridentifikasi</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -625,4 +612,37 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    window.addEventListener('load', function() {
+        const swalConfig = {
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#253070',
+            customClass: {
+                popup: 'rounded-4 shadow'
+            }
+        };
+
+        @if (session('success'))
+            Swal.fire({
+                ...swalConfig,
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}'
+            });
+        @endif
+
+        @if (session('error'))
+            Swal.fire({
+                ...swalConfig,
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error') }}'
+            });
+        @endif
+    });
+</script>
+@endpush
 @endsection

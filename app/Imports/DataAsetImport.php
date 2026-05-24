@@ -1,0 +1,197 @@
+<?php
+
+namespace App\Imports;
+
+use App\Models\DataAset;
+use App\Models\KategoriAset;
+use App\Models\LokasiAset;
+use App\Models\User;
+use App\Models\AsetFoto;
+use App\Models\Department;
+use App\Models\Divisi;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
+
+class DataAsetImport implements ToCollection
+{
+    public function collection(Collection $rows)
+    {
+        // Skip 2 baris pertama karena merupakan header bertingkat (Row 1 dan Row 2)
+        $dataRows = $rows->slice(2);
+
+        foreach ($dataRows as $row) {
+            // Ubah row menjadi array biasa
+            $cells = $row->toArray();
+
+            // Skip jika baris kosong (Kategori & Nama Aset kosong)
+            // Nama Aset adalah indeks 1, Kategori adalah indeks 2
+            $namaAset = isset($cells[1]) ? trim((string) $cells[1]) : '';
+            $kategoriKode = isset($cells[2]) ? trim((string) $cells[2]) : '';
+
+            if (empty($kategoriKode) && empty($namaAset)) {
+                continue;
+            }
+
+            // 1. Cari Kategori
+            $kategori = KategoriAset::where('kode', $kategoriKode)->first();
+            if (!$kategori) {
+                // Lewati baris jika kategori tidak valid
+                continue;
+            }
+
+            // 2. Format Tanggal Kapitalisasi (Indeks 6)
+            $tanggalRaw = isset($cells[6]) ? trim((string) $cells[6]) : '';
+            $tanggalKapitalisasi = null;
+            if (!empty($tanggalRaw)) {
+                // Cek jika numeric excel date
+                if (is_numeric($tanggalRaw)) {
+                    $tanggalKapitalisasi = date('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($tanggalRaw));
+                } else {
+                    $timestamp = strtotime($tanggalRaw);
+                    $tanggalKapitalisasi = $timestamp ? date('Y-m-d', $timestamp) : date('Y-m-d');
+                }
+            } else {
+                $tanggalKapitalisasi = date('Y-m-d');
+            }
+
+            // 3. Tentukan Status Kondisi (Indeks 7 s.d 12)
+            $statusKondisi = 'Baik';
+            if (!empty(trim((string) ($cells[7] ?? '')))) $statusKondisi = 'Baik';
+            elseif (!empty(trim((string) ($cells[8] ?? '')))) $statusKondisi = 'Rusak';
+            elseif (!empty(trim((string) ($cells[9] ?? '')))) $statusKondisi = 'Bongkar';
+            elseif (!empty(trim((string) ($cells[10] ?? '')))) $statusKondisi = 'Tidak Terpakai';
+            elseif (!empty(trim((string) ($cells[11] ?? '')))) $statusKondisi = 'Hilang';
+            elseif (!empty(trim((string) ($cells[12] ?? '')))) $statusKondisi = 'Tidak Teridentifikasi';
+
+            // 4. Cari PIC & Penanggung Jawab berdasarkan Nama (atau Email)
+            // PIC Aset: Indeks 18
+            $picNameOrEmail = isset($cells[18]) ? trim((string) $cells[18]) : '';
+            $pic = null;
+            if (!empty($picNameOrEmail)) {
+                if (filter_var($picNameOrEmail, FILTER_VALIDATE_EMAIL) !== false || str_contains($picNameOrEmail, '@')) {
+                    $pic = User::where('email', $picNameOrEmail)->first();
+                }
+                if (!$pic) {
+                    // Cari berdasarkan fullname (firstname + ' ' + lastname) atau firstname
+                    $pic = User::where(\DB::raw("CONCAT(firstname, ' ', lastname)"), 'LIKE', "%{$picNameOrEmail}%")
+                               ->orWhere('firstname', 'LIKE', "%{$picNameOrEmail}%")
+                               ->first();
+                }
+            }
+            $picId = $pic ? $pic->id : auth()->id();
+
+            // Penanggung Jawab Aset: Indeks 19
+            $pjNameOrEmail = isset($cells[19]) ? trim((string) $cells[19]) : '';
+            $pj = null;
+            if (!empty($pjNameOrEmail)) {
+                if (filter_var($pjNameOrEmail, FILTER_VALIDATE_EMAIL) !== false || str_contains($pjNameOrEmail, '@')) {
+                    $pj = User::where('email', $pjNameOrEmail)->first();
+                }
+                if (!$pj) {
+                    $pj = User::where(\DB::raw("CONCAT(firstname, ' ', lastname)"), 'LIKE', "%{$pjNameOrEmail}%")
+                               ->orWhere('firstname', 'LIKE', "%{$pjNameOrEmail}%")
+                               ->first();
+                }
+            }
+            $pjId = $pj ? $pj->id : $picId;
+
+            // 5. Parse Organisasi Terikat (Divisi/Dept): Indeks 13
+            $orgName = isset($cells[13]) ? trim((string) $cells[13]) : '';
+            $idDirector = null;
+            $idDivisi = null;
+            $idDepartment = null;
+            $idSection = null;
+            $idUnit = null;
+
+            if (!empty($orgName)) {
+                if (str_contains($orgName, '_')) {
+                    $parts = explode('_', $orgName);
+                    if (count($parts) === 2) {
+                        $type = $parts[0];
+                        $idVal = $parts[1];
+                        if ($type === 'director') $idDirector = $idVal;
+                        elseif ($type === 'divisi') $idDivisi = $idVal;
+                        elseif ($type === 'department') $idDepartment = $idVal;
+                        elseif ($type === 'section') $idSection = $idVal;
+                        elseif ($type === 'unit') $idUnit = $idVal;
+                    }
+                } else {
+                    // Cari berdasarkan nama departemen
+                    $dept = Department::where('name_department', 'LIKE', "%{$orgName}%")->first();
+                    if ($dept) {
+                        $idDepartment = $dept->id_department;
+                        $idDivisi = $dept->divisi_id_divisi;
+                    } else {
+                        // Cari berdasarkan nama divisi
+                        $div = Divisi::where('nm_divisi', 'LIKE', "%{$orgName}%")->first();
+                        if ($div) {
+                            $idDivisi = $div->id_divisi;
+                        }
+                    }
+                }
+            }
+
+            // 6. Cari Lokasi Aset berdasarkan Kode: Indeks 14
+            $kodeLokasi = isset($cells[14]) ? trim((string) $cells[14]) : '';
+            $lokasi = LokasiAset::where('kode_lokasi', $kodeLokasi)->first();
+            $lokasiId = $lokasi ? $lokasi->lokasi_id : (LokasiAset::first()->lokasi_id ?? null);
+
+            // 7. Simpan atau Update Data Aset
+            // Nomor Aset: Indeks 3 (Kode Aset -> Nomor)
+            $nomorAset = isset($cells[3]) ? trim((string) $cells[3]) : '';
+            $aset = null;
+            if (!empty($nomorAset)) {
+                $aset = DataAset::where('nomor_aset', $nomorAset)->first();
+            }
+
+            $asetData = [
+                'nama_aset'            => $namaAset,
+                'kategori_id'          => $kategori->id,
+                'deskripsi'            => isset($cells[4]) ? trim((string) $cells[4]) : '',
+                'merek'                => isset($cells[5]) ? trim((string) $cells[5]) : '',
+                'tanggal_kapitalisasi' => $tanggalKapitalisasi,
+                'id_director'          => $idDirector,
+                'id_divisi'            => $idDivisi,
+                'id_department'        => $idDepartment,
+                'id_section'           => $idSection,
+                'id_unit'              => $idUnit,
+                'lokasi_id'            => $lokasiId,
+                'gedung'               => isset($cells[15]) ? trim((string) $cells[15]) : '',
+                'pic_id'               => $picId,
+                'penanggung_jawab_id'  => $pjId,
+                'bast'                 => isset($cells[17]) ? trim((string) $cells[17]) : '',
+                'status_kondisi'       => $statusKondisi,
+                'status_aset'          => $aset ? $aset->status_aset : 'Aktif',
+                'keterangan'           => $aset ? $aset->keterangan : '',
+            ];
+
+            if ($aset) {
+                // Update
+                $aset->update($asetData);
+            } else {
+                // Create
+                $aset = DataAset::create($asetData);
+            }
+
+            // 8. Simpan/Update Link Foto Google Drive: Indeks 20 (Dokumentasi Aset)
+            $photosRaw = isset($cells[20]) ? trim((string) $cells[20]) : '';
+            if (!empty($photosRaw)) {
+                // Pisahkan string koma menjadi array URL
+                $photoUrls = array_map('trim', explode(',', $photosRaw));
+                
+                // Hapus foto lama, lalu daftarkan ulang link barunya
+                $aset->foto()->delete();
+
+                foreach ($photoUrls as $i => $url) {
+                    if (!empty($url)) {
+                        AsetFoto::create([
+                            'aset_id'   => $aset->id,
+                            'path_foto' => $url,
+                            'urutan'    => $i + 1,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+}

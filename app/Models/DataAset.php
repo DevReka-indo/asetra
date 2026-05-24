@@ -18,25 +18,25 @@ class DataAset extends Model
         'kategori_id',
         'deskripsi',
         'merek',
-        'tahun_kapitalisasi',
+        'tanggal_kapitalisasi',
         'id_director',
         'id_divisi',
         'id_department',
         'id_section',
         'id_unit',
         'lokasi_id',
+        'gedung',
         'pic_id',
         'penanggung_jawab_id',
         'bast',
         'status_kondisi',
         'status_aset',
-        'keterangan_kondisi',
         'keterangan',
         'dokumen_penghapusan',
     ];
 
     protected $casts = [
-        'tahun_kapitalisasi' => 'integer',
+        'tanggal_kapitalisasi' => 'date',
     ];
 
     /**
@@ -49,8 +49,8 @@ class DataAset extends Model
             // No urut: ID aset diformat 5 digit
             $noUrut = str_pad($aset->id, 5, '0', STR_PAD_LEFT);
 
-            // Tahun kapitalisasi
-            $tahun = $aset->tahun_kapitalisasi ?? date('Y');
+            // Tahun kapitalisasi (ambil tahunnya saja untuk nomor aset)
+            $tahun = $aset->tanggal_kapitalisasi ? date('Y', strtotime($aset->tanggal_kapitalisasi)) : date('Y');
 
             // Kode kategori aset (101, 102, 201, ...)
             $kategori = \App\Models\KategoriAset::find($aset->kategori_id);
@@ -82,6 +82,31 @@ class DataAset extends Model
         if ($this->id_divisi && $this->divisi) return "Divisi: " . $this->divisi->nm_divisi;
         if ($this->id_director && $this->director) return "Direktur: " . $this->director->name_director;
         return 'Tanpa Organisasi';
+    }
+
+    public function getResolvedDepartmentNameAttribute(): string
+    {
+        if ($this->id_unit && $this->unit) {
+            if ($this->unit->section && $this->unit->section->department) {
+                return $this->unit->section->department->name_department;
+            }
+            if ($this->unit->department) {
+                return $this->unit->department->name_department;
+            }
+        }
+        if ($this->id_section && $this->section && $this->section->department) {
+            return $this->section->department->name_department;
+        }
+        if ($this->id_department && $this->department) {
+            return $this->department->name_department;
+        }
+        if ($this->id_divisi && $this->divisi) {
+            return $this->divisi->nm_divisi;
+        }
+        if ($this->id_director && $this->director) {
+            return $this->director->name_director;
+        }
+        return 'Tanpa Departemen';
     }
 
     public function getKodeOrganisasiAttribute(): ?string

@@ -28,14 +28,14 @@
                         </button>
 
                         {{-- Tombol Import --}}
-                        <button type="button" class="btn btn-warning px-3 rounded-3 d-flex align-items-center text-dark" title="Import Data">
+                        <button type="button" class="btn btn-warning px-3 rounded-3 d-flex align-items-center text-dark" title="Import Data" data-bs-toggle="modal" data-bs-target="#modalImportAset">
                             <i class="fas fa-file-import me-1"></i> Import
                         </button>
 
                         {{-- Tombol Export --}}
-                        <button type="button" class="btn btn-success px-3 rounded-3 d-flex align-items-center text-white" title="Export Data">
+                        <a href="{{ route('aset.export', request()->query()) }}" class="btn btn-success px-3 rounded-3 d-flex align-items-center text-white" title="Export Data">
                             <i class="fas fa-file-excel me-1"></i> Export
-                        </button>
+                        </a>
                     @endif
 
                     {{-- Tombol Scan --}}
@@ -83,7 +83,7 @@
                             <option value="Bongkar" {{ request('kondisi') == 'Bongkar' ? 'selected' : '' }}>Bongkar</option>
                             <option value="Tidak Terpakai" {{ request('kondisi') == 'Tidak Terpakai' ? 'selected' : '' }}>Tidak Terpakai</option>
                             <option value="Hilang" {{ request('kondisi') == 'Hilang' ? 'selected' : '' }}>Hilang</option>
-                            <option value="Lainnya" {{ request('kondisi') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                            <option value="Tidak Teridentifikasi" {{ request('kondisi') == 'Tidak Teridentifikasi' ? 'selected' : '' }}>Tidak Teridentifikasi</option>
                         </select>
                     </div>
 
@@ -107,6 +107,28 @@
                             <option value="">Semua Lokasi</option>
                             @foreach($lokasis as $lokasi)
                                 <option value="{{ $lokasi->lokasi_id }}" {{ request()->filled('lokasi') && request('lokasi') == $lokasi->lokasi_id ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Filter Divisi --}}
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Divisi</label>
+                        <select name="divisi_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Divisi</option>
+                            @foreach($divisis as $divisi)
+                                <option value="{{ $divisi->id_divisi }}" {{ request('divisi_id') == $divisi->id_divisi ? 'selected' : '' }}>{{ $divisi->nm_divisi }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Filter Departemen --}}
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
+                        <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Departemen</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept->id_department }}" {{ request('department_id') == $dept->id_department ? 'selected' : '' }}>{{ $dept->name_department }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -194,12 +216,6 @@
                                         <span class="badge bg-dark rounded-pill px-3">Tidak Teridentifikasi</span>
                                     @else
                                         <span class="badge bg-light text-white border rounded-pill px-3">{{ $kondisi ?? 'Lainnya' }}</span>
-                                    @endif
-                                    
-                                    @if($kondisi == 'Lainnya' && !empty($aset->keterangan_kondisi))
-                                        <div class="mt-1 small text-muted fst-italic" style="font-size: 0.75rem;">
-                                            <i class="fas fa-angle-right me-1"></i>{{ $aset->keterangan_kondisi }}
-                                        </div>
                                     @endif
                                 </td>
                                 <td>
@@ -323,7 +339,7 @@
 
             {{-- Body --}}
             <div class="modal-body p-4 bg-light">
-                <form id="formCetakLabelLokasi" action="{{ route('aset.cetak-label-lokasi') }}" method="POST" target="_blank">
+                <form id="formCetakLabelLokasi" action="{{ route('aset.cetak-label-lokasi.process') }}" method="POST" target="_blank">
                     @csrf
 
                     {{-- Pilih Lokasi --}}
@@ -375,6 +391,64 @@
                 </button>
                 <button type="submit" form="formCetakLabelLokasi" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" id="btnProsesCetakLokasi" disabled style="background-color: #253070;">
                     <i class="fas fa-print me-1"></i> Cetak Semua Aset Di Ruangan Ini
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Import Aset -->
+<div class="modal fade" id="modalImportAset" tabindex="-1" aria-labelledby="modalImportAsetLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+
+            {{-- Header --}}
+            <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                <h5 class="modal-title fw-bold text-white" id="modalImportAsetLabel">
+                    <i class="fas fa-file-import me-2"></i> Import Data Aset
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            {{-- Body --}}
+            <div class="modal-body p-4 bg-light">
+                <form id="formImportAset" action="{{ route('aset.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    {{-- Panduan / Download Template --}}
+                    <div class="alert alert-info border-0 shadow-sm rounded-3 mb-4 d-flex align-items-start gap-2" style="background-color: #eef2fa; color: #253070;">
+                        <i class="fas fa-info-circle fa-lg mt-1"></i>
+                        <div>
+                            <span class="fw-bold">Petunjuk Import:</span>
+                            <p class="small mb-2 text-muted">Gunakan template Excel standar yang telah disediakan agar data dapat terstruktur dan terimpor dengan benar.</p>
+                            <a href="{{ route('aset.template') }}" class="btn btn-sm btn-navy text-white rounded-pill px-3 py-1 fw-bold border-0 shadow-sm" style="background-color: #253070;">
+                                <i class="fas fa-download me-1"></i> Unduh Template Excel
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- File Input --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase" style="color: #253070; font-size: 0.72rem;">
+                            <i class="fas fa-file-excel me-1"></i> File Excel (.xlsx, .xls) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                            <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-upload"></i></span>
+                            <input type="file" class="form-control border-0 shadow-none fs-6 bg-white" name="file_excel" accept=".xlsx, .xls" required>
+                        </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Maksimal ukuran file adalah 10MB.</small>
+                    </div>
+
+                </form>
+            </div>
+
+            {{-- Footer --}}
+            <div class="modal-footer bg-light border-top-0 pt-2 pb-4 px-4">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">
+                    Batal
+                </button>
+                <button type="submit" form="formImportAset" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
+                    <i class="fas fa-upload me-1"></i> Import Sekarang
                 </button>
             </div>
 
@@ -382,7 +456,7 @@
     </div>
 </div>
 
-<form id="formCetakLabelSelected" action="{{ route('aset.cetak-label') }}" method="POST" target="_blank">
+<form id="formCetakLabelSelected" action="{{ route('aset.cetak-label.process') }}" method="POST" target="_blank">
     @csrf
 </form>
 
@@ -404,7 +478,14 @@ document.addEventListener('DOMContentLoaded', function() {
         btnCetakSelected.addEventListener('click', function() {
             const checkedBoxes = document.querySelectorAll('.aset-checkbox:checked');
             if (checkedBoxes.length === 0) {
-                alert('Pilih minimal satu aset untuk dicetak!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian!',
+                    text: 'Silakan pilih minimal satu aset terlebih dahulu untuk dicetak.',
+                    confirmButtonColor: '#253070',
+                    confirmButtonText: 'OK',
+                    customClass: { popup: 'rounded-4 shadow' }
+                });
                 return;
             }
             

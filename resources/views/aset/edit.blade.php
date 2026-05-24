@@ -2,6 +2,10 @@
 
 @section('title', 'Edit Data Aset')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/aset-form.css') }}">
+@endpush
+
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     {{-- HEADER --}}
@@ -74,40 +78,35 @@
                                         <option value="" disabled>-- Pilih Kategori Aset --</option>
                                         <optgroup label="KATEGORI ASET TETAP">
                                             @foreach($kategoriTetap as $kt)
-                                                <option value="{{ $kt->id }}" data-kode="{{ $kt->kode }}" {{ (old('kategori_id', $aset->kategori_id) == $kt->id) ? 'selected' : '' }}>
+                                                <option value="{{ $kt->id }}" data-kode="{{ $kt->kode }}" data-nama="{{ $kt->nama }}" {{ (old('kategori_id', $aset->kategori_id) == $kt->id) ? 'selected' : '' }}>
                                                     {{ $kt->kode }} - {{ $kt->nama }}
                                                 </option>
                                             @endforeach
                                         </optgroup>
                                         <optgroup label="KATEGORI ASET EC">
                                             @foreach($kategoriInventaris as $ki)
-                                                <option value="{{ $ki->id }}" data-kode="{{ $ki->kode }}" {{ (old('kategori_id', $aset->kategori_id) == $ki->id) ? 'selected' : '' }}>
+                                                <option value="{{ $ki->id }}" data-kode="{{ $ki->kode }}" data-nama="{{ $ki->nama }}" {{ (old('kategori_id', $aset->kategori_id) == $ki->id) ? 'selected' : '' }}>
                                                     {{ $ki->kode }} - {{ $ki->nama }}
                                                 </option>
                                             @endforeach
                                         </optgroup>
                                     </select>
                                 </div>
-                            </div>
+                              </div>
 
-                            <div class="col-md-6">
+                              <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Nama Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-box-open"></i></span>
-                                    <input type="text" name="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset', $aset->nama_aset) }}" placeholder="Contoh: Gedung Kantor Utama" required>
+                                    <input type="text" name="nama_aset" id="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset', $aset->nama_aset) }}" placeholder="Contoh: Gedung Kantor Utama" required>
                                 </div>
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold text-navy mb-1 small">Tanggal Kapitalisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
-                                    <select name="tahun_kapitalisasi" id="id_tahun" class="form-select border-start-0 ps-0 shadow-none" required>
-                                        <option value="" disabled>-- Tahun --</option>
-                                        @for ($year = date('Y'); $year >= 1900; $year--)
-                                            <option value="{{ $year }}" {{ old('tahun_kapitalisasi', $aset->tahun_kapitalisasi) == $year ? 'selected' : '' }}>{{ $year }}</option>
-                                        @endfor
-                                    </select>
+                                    <input type="date" name="tanggal_kapitalisasi" id="id_tahun" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('tanggal_kapitalisasi', optional($aset->tanggal_kapitalisasi)->format('Y-m-d') ?? date('Y-m-d')) }}" required>
                                 </div>
                             </div>
 
@@ -147,7 +146,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold text-navy mb-1 small">Lokasi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
@@ -165,11 +164,19 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold text-navy mb-1 small text-muted">Detail Lokasi</label>
                                 <input type="text" id="input_detail_lokasi" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
                                        disabled placeholder="Otomatis dari lokasi terpilih" style="cursor: not-allowed; opacity: 0.8;"
                                        value="{{ $aset->lokasi->detail_lokasi ?? '' }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-navy mb-1 small">Gedung (Opsional)</label>
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-building"></i></span>
+                                    <input type="text" name="gedung" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('gedung', $aset->gedung) }}" placeholder="Contoh: Gedung A / Lantai 2">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -194,19 +201,11 @@
                                         <option value="Tidak Terpakai" {{ old('status_kondisi', $aset->status_kondisi) == 'Tidak Terpakai' ? 'selected' : '' }}>Tidak Terpakai</option>
                                         <option value="Hilang" {{ old('status_kondisi', $aset->status_kondisi) == 'Hilang' ? 'selected' : '' }}>Hilang</option>
                                         <option value="Tidak Teridentifikasi" {{ old('status_kondisi', $aset->status_kondisi) == 'Tidak Teridentifikasi' ? 'selected' : '' }}>Tidak Teridentifikasi</option>
-                                        <option value="Lainnya" {{ old('status_kondisi', $aset->status_kondisi) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                                     </select>
                                 </div>
                             </div>
                             
-                            {{-- Field Keterangan Lainnya --}}
-                            <div class="col-md-12 mt-2" id="keterangan_kondisi_wrapper" style="{{ old('status_kondisi', $aset->status_kondisi) == 'Lainnya' ? 'display: block;' : 'display: none;' }}">
-                                <label class="form-label fw-bold text-navy mb-1 small">Spesifikasikan Kondisi Lainnya <span class="text-danger">*</span></label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-pen"></i></span>
-                                    <input type="text" name="keterangan_kondisi" id="keterangan_kondisi" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('keterangan_kondisi', $aset->keterangan_kondisi) }}" placeholder="Tulis rincian kondisinya disini...">
-                                </div>
-                            </div>
+
 
                             <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">Status Aset <span class="text-danger">*</span></label>
@@ -318,7 +317,7 @@
                                 @foreach($aset->foto as $f)
                                     <div class="col-md-2 position-relative">
                                         <div class="rounded-3 overflow-hidden shadow-sm" style="height: 100px;">
-                                            <img src="{{ asset('storage/' . $f->path) }}" class="w-100 h-100 object-fit-cover" alt="Foto Aset">
+                                            <img src="{{ filter_var($f->path_foto, FILTER_VALIDATE_URL) ? $f->path_foto : asset('storage/' . $f->path_foto) }}" class="w-100 h-100 object-fit-cover" alt="Foto Aset">
                                         </div>
                                         <div class="form-check position-absolute top-0 end-0 m-1 bg-white rounded px-1 shadow-sm">
                                             <input class="form-check-input" type="checkbox" name="hapus_foto[]" value="{{ $f->id }}" id="f{{ $f->id }}">
@@ -333,11 +332,22 @@
                         @endif
 
                         <label class="form-label fw-bold text-navy mb-1 small">Tambah Foto Baru</label>
-                        <div class="input-group input-group-focus rounded-3">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-plus"></i></span>
-                            <input type="file" name="foto_baru[]" class="form-control border-start-0 ps-0 shadow-none" accept="image/*" multiple>
+                        <div class="upload-container border border-2 border-dashed rounded-3 p-4 text-center bg-light position-relative mb-2" id="dropzone" style="border-color: #253070 !important; cursor: pointer; transition: all 0.3s ease;">
+                            <input type="file" name="foto_baru[]" id="fileInput" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" accept="image/*" multiple style="cursor: pointer; z-index: 10;">
+                            <div class="upload-prompt">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h6 class="fw-bold text-navy">Tarik & Lepas Foto di Sini</h6>
+                                <p class="text-muted small mb-0">atau klik untuk memilih file dari komputer</p>
+                                <span class="badge bg-secondary mt-2">Maks. 10 Foto Baru</span>
+                            </div>
                         </div>
-                        <small class="text-muted mt-2 d-block">Maks 4MB per foto.</small>
+
+                        {{-- Container untuk Pratinjau Foto --}}
+                        <div class="row g-3 mt-3" id="previewContainer" style="display: none;">
+                            {{-- Rendered by JS --}}
+                        </div>
+
+                        <small class="text-muted mt-2 d-block"><i class="fas fa-info-circle me-1"></i> Bisa upload lebih dari 1 foto sekaligus. Format: JPG, JPEG, PNG. Maks 4MB per foto.</small>
                     </div>
                 </div>
 
@@ -363,8 +373,7 @@
         const selectLok = document.getElementById('dropdown_lokasi');
         const selectThn = document.getElementById('id_tahun');
         const statusKondisi = document.getElementById('status_kondisi');
-        const keteranganWrapper = document.getElementById('keterangan_kondisi_wrapper');
-        const inputKeterangan = document.getElementById('keterangan_kondisi');
+        const inputNamaAset = document.getElementById('nama_aset');
         
         // No Urut tetap dari ID aset (diformat 5 digit)
         const assetIdFormatted = "{{ str_pad($aset->id, 5, '0', STR_PAD_LEFT) }}"; 
@@ -379,7 +388,8 @@
             const kLok = (selectLok.value && optLok.getAttribute('data-kode')) ? optLok.getAttribute('data-kode') : 'LOK';
             
             // Tahun
-            const thn = (selectThn && selectThn.value) ? selectThn.value : new Date().getFullYear();
+            const tgl = (selectThn && selectThn.value) ? new Date(selectThn.value).getFullYear() : new Date().getFullYear();
+            const thn = isNaN(tgl) ? new Date().getFullYear() : tgl;
 
             // Hasil: [KODE]/[ID]/[LOKASI]/[TAHUN]
             const finalResult = `${kKat}/${assetIdFormatted}/${kLok}/${thn}`;
@@ -390,6 +400,16 @@
             if(el) el.addEventListener('change', updateNomor);
         });
 
+        if(selectKategori) {
+            selectKategori.addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                if(opt && opt.value !== "") {
+                    inputNamaAset.value = opt.getAttribute('data-nama') || '';
+                }
+                updateNomor();
+            });
+        }
+
         if(selectLok) {
             selectLok.addEventListener('change', function() {
                 const opt = this.options[this.selectedIndex];
@@ -397,18 +417,122 @@
             });
         }
 
-        if(statusKondisi) {
-            statusKondisi.addEventListener('change', function() {
-                if(this.value === 'Lainnya') {
-                    keteranganWrapper.style.display = 'block';
-                    inputKeterangan.setAttribute('required', 'required');
-                } else {
-                    keteranganWrapper.style.display = 'none';
-                    inputKeterangan.removeAttribute('required');
-                    inputKeterangan.value = '';
-                }
+
+        // Uploader Multi-Foto Logic untuk Edit Aset
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const previewContainer = document.getElementById('previewContainer');
+        let selectedFiles = [];
+
+        if (fileInput && dropzone) {
+            // Drag and Drop Events
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                handleFiles(dt.files);
+            });
+
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
             });
         }
+
+        function handleFiles(files) {
+            const validFiles = Array.from(files).filter(file => {
+                const isImage = file.type.startsWith('image/');
+                const isValidSize = file.size <= 4 * 1024 * 1024; // 4MB
+                if (!isImage) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Berkas Bukan Gambar',
+                        text: `File "${file.name}" bukan gambar yang valid.`,
+                        confirmButtonColor: '#253070'
+                    });
+                } else if (!isValidSize) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ukuran Terlalu Besar',
+                        text: `File "${file.name}" melebihi batas ukuran maksimal 4MB.`,
+                        confirmButtonColor: '#253070'
+                    });
+                }
+                return isImage && isValidSize;
+            });
+
+            if (selectedFiles.length + validFiles.length > 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Batas Maksimal Foto',
+                    text: 'Maksimal foto baru yang dapat diunggah adalah 10 foto.',
+                    confirmButtonColor: '#253070'
+                });
+                const remainingSlots = 10 - selectedFiles.length;
+                selectedFiles = [...selectedFiles, ...validFiles.slice(0, remainingSlots)];
+            } else {
+                selectedFiles = [...selectedFiles, ...validFiles];
+            }
+
+            updateInputAndPreview();
+        }
+
+        window.removeUploadFile = function(index) {
+            selectedFiles.splice(index, 1);
+            updateInputAndPreview();
+        };
+
+        function updateInputAndPreview() {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
+
+            // Clear preview
+            previewContainer.innerHTML = '';
+
+            if (selectedFiles.length > 0) {
+                previewContainer.style.display = 'flex';
+                
+                selectedFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const col = document.createElement('div');
+                        col.className = 'col-6 col-md-3 col-lg-2 position-relative';
+                        col.innerHTML = `
+                            <div class="card border shadow-sm rounded-3 overflow-hidden preview-card" style="height: 120px;">
+                                <img src="${e.target.result}" class="w-100 h-100 object-fit-cover" alt="Preview">
+                                <div class="position-absolute top-0 end-0 m-1">
+                                    <button type="button" class="remove-btn btn btn-danger btn-sm p-0 rounded-circle" onclick="window.removeUploadFile(${index})">
+                                        <i class="fas fa-times" style="font-size: 11px;"></i>
+                                    </button>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-75 text-white px-2 py-1 small text-truncate" style="font-size: 0.7rem;" title="${file.name}">
+                                    ${file.name}
+                                </div>
+                            </div>
+                        `;
+                        previewContainer.appendChild(col);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        // Jalankan update pratinjau nomor aset pertama kali
+        setTimeout(updateNomor, 100);
     });
 </script>
 @endpush

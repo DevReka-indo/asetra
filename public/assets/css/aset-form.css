@@ -1,0 +1,42 @@
+.upload-container {
+    border: 2px dashed #253070 !important;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+.upload-container:hover, .upload-container.dragover {
+    background-color: #fff !important;
+    border-color: #3b4b9b !important;
+    box-shadow: 0 4px 12px rgba(37, 48, 112, 0.08);
+}
+.upload-container input[type="file"] {
+    cursor: pointer;
+}
+.preview-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.preview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+.preview-card img {
+    height: 100px;
+    object-fit: cover;
+}
+.remove-btn {
+    background-color: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.remove-btn:hover {
+    background-color: #dc3545;
+    transform: scale(1.1);
+}

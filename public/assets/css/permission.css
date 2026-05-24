@@ -1,4 +1,4 @@
-﻿/* PAGE LAYOUT */
+/* PAGE LAYOUT */
 .perm-shell {
     background: #fff;
     border-radius: 1rem;
@@ -432,7 +432,7 @@ body.perm-dirty .dirty-pill {
     transition: transform .2s ease;
 }
 
-.form-check.form-switch {
+.perm-shell .form-check.form-switch {
     margin: 0;
     padding-left: 2.4em;
     display: inline-flex;
@@ -440,7 +440,7 @@ body.perm-dirty .dirty-pill {
     justify-content: center;
 }
 
-.form-check-input {
+.perm-shell .form-check-input {
     cursor: pointer;
     width: 2.1em;
     height: 1.15em;
@@ -449,17 +449,17 @@ body.perm-dirty .dirty-pill {
     border-color: #cbd5e1;
 }
 
-.form-check-input:checked {
+.perm-shell .form-check-input:checked {
     background-color: #003366;
     border-color: #003366;
 }
 
-.form-check-input:focus {
+.perm-shell .form-check-input:focus {
     box-shadow: 0 0 0 0.18rem rgba(0, 51, 102, 0.2);
     border-color: #003366;
 }
 
-.form-check-input:disabled {
+.perm-shell .form-check-input:disabled {
     opacity: 0.55;
     cursor: not-allowed;
 }
