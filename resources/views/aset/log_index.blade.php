@@ -66,7 +66,7 @@
                             <option value="Bongkar" {{ request('kondisi') == 'Bongkar' ? 'selected' : '' }}>Bongkar</option>
                             <option value="Tidak Terpakai" {{ request('kondisi') == 'Tidak Terpakai' ? 'selected' : '' }}>Tidak Terpakai</option>
                             <option value="Hilang" {{ request('kondisi') == 'Hilang' ? 'selected' : '' }}>Hilang</option>
-                            <option value="Lainnya" {{ request('kondisi') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                            <option value="Tidak Teridentifikasi" {{ request('kondisi') == 'Tidak Teridentifikasi' ? 'selected' : '' }}>Tidak Teridentifikasi</option>
                         </select>
                     </div>
 
@@ -117,7 +117,7 @@
                             <th>Kondisi Fisik & Status</th>
                             <th>Lokasi & Penempatan</th>
                             <th>Pelapor</th>
-                            <th>Keterangan</th>
+                            <th>Catatan & Perubahan</th>
                             <th class="text-center pe-4">Aksi</th>
                         </tr>
                     </thead>
@@ -164,7 +164,14 @@
                                 </span>
                             </td>
                             <td>
-                                <p class="text-muted small mb-0">{{ $log->keterangan ?? 'Tanpa catatan' }}</p>
+                                @if($log->flag_perubahan == 'Pengecekan Rutin')
+                                    <span class="badge bg-light text-success border border-success rounded-pill px-2 py-1 mb-1" style="font-weight: 500; font-size: 0.7rem;"><i class="fas fa-check-circle me-1"></i>Pengecekan Rutin</span>
+                                @elseif($log->flag_perubahan)
+                                    <span class="badge bg-light text-danger border border-danger rounded-pill px-2 py-1 mb-1" style="font-weight: 500; font-size: 0.7rem;"><i class="fas fa-exclamation-circle me-1"></i>{{ $log->flag_perubahan }}</span>
+                                @endif
+                                @if($log->keterangan)
+                                    <p class="text-muted small mb-0 mt-1">{{ $log->keterangan }}</p>
+                                @endif
                             </td>
                             <td class="text-center pe-4">
                                 @if($log->aset)
