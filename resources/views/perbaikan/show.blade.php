@@ -72,10 +72,14 @@
                             </div>
                             <div class="col-md-6">
                                 <span class="info-label d-block small text-muted">Nomor Aset</span>
-                                <a href="{{ route('aset.show', $pengajuan->aset_id) }}" class="fw-bold text-primary text-decoration-none">
-                                    {{ $pengajuan->aset->nomor_aset ?? '-' }}
-                                    <i class="fas fa-external-link-alt ms-1 small"></i>
-                                </a>
+                                @if($pengajuan->aset)
+                                    <a href="{{ route('aset.show', $pengajuan->aset_id) }}" class="fw-bold text-primary text-decoration-none">
+                                        {{ $pengajuan->aset->nomor_aset ?? '-' }}
+                                        <i class="fas fa-external-link-alt ms-1 small"></i>
+                                    </a>
+                                @else
+                                    <span class="fw-bold text-muted">-</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -156,7 +160,7 @@
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-white pt-3 pb-2">
                     <h6 class="fw-bold text-primary mb-0">
-                        <i class="fas fa-history me-2"></i>Riwayat Pengajuan Perbaikan - {{ $pengajuan->aset->nomor_aset }}
+                        <i class="fas fa-history me-2"></i>Riwayat Pengajuan Perbaikan - {{ $pengajuan->aset->nomor_aset ?? '-' }}
                     </h6>
                 </div>
                 <div class="card-body px-4 py-4">
@@ -316,12 +320,7 @@
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="aksi" id="inputAksi" value="">
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold small">Catatan <span class="text-muted fw-normal">(opsional)</span></label>
-                                <textarea name="catatan" rows="3" class="form-control form-control-sm bg-light border-0 shadow-sm"
-                                          placeholder="Catatan untuk pengaju..."></textarea>
-                            </div>
+                            <input type="hidden" name="catatan" id="inputCatatan" value="">
 
                             <div class="d-flex gap-3 mt-2">
                                 <button type="button" class="btn btn-white border flex-fill rounded-pill fw-bold shadow-sm py-2"
@@ -389,6 +388,14 @@
                 </div>
                 <h4 class="fw-bold text-dark mb-2" id="modalTitle">Konfirmasi</h4>
                 <p class="text-muted mb-4" style="font-size: 1rem;" id="modalDesc">Deskripsi</p>
+                
+                {{-- Textarea Catatan / Alasan --}}
+                <div class="mb-4 text-start" id="modalCatatanContainer">
+                    <label class="form-label fw-bold small text-dark" id="modalCatatanLabel">Catatan</label>
+                    <textarea id="modalCatatan" rows="3" class="form-control bg-white border shadow-sm" style="font-size: 14px;"></textarea>
+                    <div class="text-danger small mt-1 d-none" id="modalCatatanError">Alasan penolakan wajib diisi!</div>
+                </div>
+
                 <div class="d-flex justify-content-center gap-3">
                     <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
                     <button type="button" class="btn rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;" id="btnConfirmProses" onclick="executeProses()">Ya, Lanjutkan</button>
@@ -401,6 +408,7 @@
 @push('scripts')
 <script>
 let currentAksi = '';
+let myModal = null;
 
 function showModalProses(aksi) {
     currentAksi = aksi;
@@ -409,6 +417,14 @@ function showModalProses(aksi) {
     const modalIcon = document.getElementById('modalIcon');
     const btnConfirm = document.getElementById('btnConfirmProses');
     const iconContainer = document.getElementById('modalIconContainer');
+    const modalCatatanLabel = document.getElementById('modalCatatanLabel');
+    const modalCatatan = document.getElementById('modalCatatan');
+    const modalCatatanError = document.getElementById('modalCatatanError');
+    
+    // Reset catatan and error
+    modalCatatan.value = '';
+    modalCatatan.classList.remove('is-invalid');
+    modalCatatanError.classList.add('d-none');
     
     if(aksi === 'disetujui') {
         modalTitle.innerText = 'Setujui Pengajuan';
@@ -419,6 +435,9 @@ function showModalProses(aksi) {
         btnConfirm.className = 'btn rounded-pill fw-bold py-2 shadow-sm text-white';
         btnConfirm.style.backgroundColor = '#253070';
         btnConfirm.innerText = 'Ya, Setujui';
+        
+        modalCatatanLabel.innerHTML = 'Catatan Persetujuan <span class="text-muted fw-normal">(opsional)</span>';
+        modalCatatan.placeholder = 'Catatan tambahan untuk pengaju...';
     } else {
         modalTitle.innerText = 'Tolak Pengajuan';
         modalDesc.innerHTML = 'Apakah Anda yakin ingin menolak pengajuan perbaikan ini?';
@@ -428,16 +447,60 @@ function showModalProses(aksi) {
         btnConfirm.className = 'btn btn-danger rounded-pill fw-bold py-2 shadow-sm text-white';
         btnConfirm.style.backgroundColor = ''; // Hapus style inline agar pakai class btn-danger
         btnConfirm.innerText = 'Ya, Tolak';
+        
+        modalCatatanLabel.innerHTML = 'Alasan Penolakan <span class="text-danger">*</span>';
+        modalCatatan.placeholder = 'Wajib diisi! Masukkan alasan penolakan...';
     }
     
-    var myModal = new bootstrap.Modal(document.getElementById('modalProses'));
+    if(!myModal) {
+        myModal = new bootstrap.Modal(document.getElementById('modalProses'));
+    }
     myModal.show();
 }
 
 function executeProses() {
+    const modalCatatan = document.getElementById('modalCatatan');
+    const modalCatatanError = document.getElementById('modalCatatanError');
+    
+    if (currentAksi === 'ditolak' && modalCatatan.value.trim() === '') {
+        modalCatatan.classList.add('is-invalid');
+        modalCatatanError.classList.remove('d-none');
+        return;
+    }
+    
     document.getElementById('inputAksi').value = currentAksi;
+    document.getElementById('inputCatatan').value = modalCatatan.value;
     document.getElementById('formProses').submit();
 }
+
+window.addEventListener('load', function() {
+    const swalConfig = {
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#253070',
+        customClass: {
+            popup: 'rounded-4 shadow'
+        }
+    };
+
+    @if (session('success'))
+        Swal.fire({
+            ...swalConfig,
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}'
+        });
+    @endif
+
+    @if (session('error'))
+        Swal.fire({
+            ...swalConfig,
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('error') }}'
+        });
+    @endif
+});
 </script>
 @endpush
 @endsection
