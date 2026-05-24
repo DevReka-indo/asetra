@@ -99,8 +99,24 @@ class LogAsetController extends Controller
         ];
 
         $aset = DataAset::findOrFail($request->aset_id);
-        $updateData = [];
-
+        
+        // Cek perubahan
+        $perubahan = [];
+        if ($request->kondisi && $aset->status_kondisi != $request->kondisi) {
+            $perubahan[] = "Kondisi: " . ($aset->status_kondisi ?: '-') . " ➔ " . $request->kondisi;
+        }
+        if ($request->status_aset && $aset->status_aset != $request->status_aset) {
+            $perubahan[] = "Status: " . ($aset->status_aset ?: '-') . " ➔ " . $request->status_aset;
+        }
+        if ($request->lokasi_id && $aset->lokasi_id != $request->lokasi_id) {
+            $lokasiLama = $aset->lokasi ? $aset->lokasi->nama_lokasi : '-';
+            $lokasiBaru = \App\Models\LokasiAset::find($request->lokasi_id);
+            $namaLokasiBaru = $lokasiBaru ? $lokasiBaru->nama_lokasi : '-';
+            $perubahan[] = "Lokasi: " . $lokasiLama . " ➔ " . $namaLokasiBaru;
+        }
+        if ($request->kode_organisasi && $aset->kode_organisasi != $request->kode_organisasi) {
+            $perubahan[] = "Perpindahan Divisi/Departemen";
+        }
         if ($request->kode_organisasi) {
             $parts = explode('_', $request->kode_organisasi);
             if (count($parts) === 2) {
@@ -123,6 +139,13 @@ class LogAsetController extends Controller
 
         if ($request->hasFile('foto_bukti')) {
             $logData['foto_bukti'] = $request->file('foto_bukti')->store('log_aset', 'public');
+        }
+
+        // Tentukan flag perubahan
+        if (count($perubahan) > 0) {
+            $logData['flag_perubahan'] = implode(', ', $perubahan);
+        } else {
+            $logData['flag_perubahan'] = 'Pengecekan Rutin';
         }
 
         LogAset::create($logData);

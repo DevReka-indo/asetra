@@ -14,6 +14,7 @@ class LogAset extends Model
         'kondisi',
         'status_aset',
         'keterangan',
+        'flag_perubahan',
         'lokasi_id',
         'id_director',
         'id_divisi',
