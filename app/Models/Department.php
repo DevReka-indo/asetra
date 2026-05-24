@@ -37,4 +37,15 @@ class Department extends Model
         return $this->belongsTo(Director::class, 'director_id_director');
     }
 
+    public function permissions()
+    {
+        return $this->belongsToMany(
+            Permission::class,
+            'department_permission',
+            'department_id_department',
+            'permission_id',
+            'id_department',
+            'id'
+        );
+    }
 }

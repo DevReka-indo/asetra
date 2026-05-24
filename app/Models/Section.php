@@ -27,6 +27,16 @@ class Section extends Model
     {
         return $this->hasMany(User::class, 'section_id_section', 'id_section');
     }
-}
 
-?>
+    public function permissions()
+    {
+        return $this->belongsToMany(
+            Permission::class,
+            'section_permission',
+            'section_id_section',
+            'permission_id',
+            'id_section',
+            'id'
+        );
+    }
+}

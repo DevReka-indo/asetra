@@ -33,7 +33,7 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-            @elseif (Auth::user()->section_id_section == 12)
+            @elseif (Auth::user()->hasPermission('view_dashboard_ga'))
                 <li class="nav-item {{ request()->routeIs('general-affairs.dashboard') ? 'active_' : '' }}">
                     <a href="{{ route('general-affairs.dashboard') }}" class="nav-link">
                         <i class="fas fa-home"></i>
@@ -89,19 +89,27 @@
                     </a>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('stock-opname.*') ? 'active_' : '' }}">
-                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
-                        <i class="fas fa-boxes"></i>
-                        <p>Stock Opname</p>
-                    </a>
-                </li>
-
                 <li class="nav-item {{ request()->routeIs('perbaikan.*') ? 'active_' : '' }}">
                     <a href="{{ route('perbaikan.index') }}" class="nav-link">
                         <i class="fas fa-tools"></i>
                         <p>Pengajuan Perbaikan</p>
                     </a>
                 </li>
+
+                <li class="nav-item {{ request()->routeIs('stock-opname.index') || request()->routeIs('stock-opname.show') || request()->routeIs('stock-opname.export') ? 'active_' : '' }}">
+                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Stock Opname</p>
+                    </a>
+                </li>
+                @if(\App\Models\StockOpname::where('status', 'aktif')->exists())
+                    <li class="nav-item {{ request()->routeIs('stock-opname.user-*') ? 'active_' : '' }}">
+                        <a href="{{ route('stock-opname.user-index') }}" class="nav-link">
+                            <i class="fas fa-clipboard-check"></i>
+                            <p>Pelaksanaan Opname</p>
+                        </a>
+                    </li>
+                @endif
 
                 <li class="nav-section">
                     <span class="text-section">Lainnya</span>
@@ -145,7 +153,7 @@
                     </div>
                 </li>
 
-            @elseif (Auth::user()->section_id_section == 12)
+            @elseif (Auth::user()->hasPermission('view_dashboard_ga'))
                 {{-- General Affairs tetap seperti semula untuk GA users --}}
                 <li class="nav-item {{ request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
                     <a href="{{ route('lokasi-aset.index') }}" class="nav-link">
@@ -189,12 +197,20 @@
                     </a>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('stock-opname.*') ? 'active_' : '' }}">
+                <li class="nav-item {{ request()->routeIs('stock-opname.index') || request()->routeIs('stock-opname.show') ? 'active_' : '' }}">
                     <a href="{{ route('stock-opname.index') }}" class="nav-link">
                         <i class="fas fa-boxes"></i>
                         <p>Stock Opname</p>
                     </a>
                 </li>
+                @if(\App\Models\StockOpname::where('status', 'aktif')->exists())
+                    <li class="nav-item {{ request()->routeIs('stock-opname.user-*') ? 'active_' : '' }}">
+                        <a href="{{ route('stock-opname.user-index') }}" class="nav-link">
+                            <i class="fas fa-clipboard-check"></i>
+                            <p>Pelaksanaan Opname</p>
+                        </a>
+                    </li>
+                @endif
 
                 <li class="nav-item {{ request()->routeIs('perbaikan.*') ? 'active_' : '' }}">
                     <a href="{{ route('perbaikan.index') }}" class="nav-link">
@@ -281,6 +297,13 @@
                     <a href="{{ route('user.manage') }}" class="nav-link">
                         <i class="fas fa-users"></i>
                         <p>Manajemen Pengguna</p>
+                    </a>
+                </li>
+
+                <li class="nav-item {{ request()->routeIs('permissions.manage') ? 'active_' : '' }}">
+                    <a href="{{ route('permissions.manage') }}" class="nav-link">
+                        <i class="fas fa-user-shield"></i>
+                        <p>Manajemen Hak Akses</p>
                     </a>
                 </li>
             @endif

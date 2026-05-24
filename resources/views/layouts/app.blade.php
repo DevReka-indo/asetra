@@ -39,6 +39,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/scanner.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/profil.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/permission.css') }}">
     @stack('styles')
 
     <link rel="stylesheet" href="{{ asset('assets/css/sidebar-theme.css') }}">
