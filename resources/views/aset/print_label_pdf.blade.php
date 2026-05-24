@@ -4,83 +4,7 @@
     <meta charset="UTF-8">
     <title>Cetak Label Aset</title>
     <style>
-        @page {
-            margin: 10mm;
-            size: A4 portrait;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #000;
-        }
-        /* Grid 2 kolom */
-        .grid-table {
-            width: auto;
-            border-collapse: separate;
-            border-spacing: 3mm;
-        }
-        .grid-table td {
-            width: 70mm;
-            vertical-align: top;
-            padding: 0;
-        }
-        /* Label container */
-        .label-container {
-            width: 70mm;
-            height: 25mm;
-            position: relative;
-            background-color: #ffffff;
-            border-radius: 4px;
-            box-sizing: border-box;
-            border: 1px solid #333;
-            overflow: hidden;
-        }
-        /* Style untuk Text */
-        .info-title {
-            font-size: 6.5px;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 1px;
-            text-transform: uppercase;
-        }
-        .info-value {
-            font-size: 7.5px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-        .asset-tag-title {
-            font-size: 8px;
-            font-weight: bold;
-            margin-bottom: 2px;
-            margin-top: 0px;
-        }
-        .asset-kode {
-            font-size: 7px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        /* Vertical rotation logic */
-        .rotated-left {
-            position: absolute;
-            top: 90px;
-            left: 3px;
-            width: 85px;
-            transform: rotate(-90deg);
-            transform-origin: 0 0;
-            text-align: center;
-        }
-        /* Sticker warna */
-        .sticker-color {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 8mm;
-            height: 8mm;
-            border-bottom-left-radius: 100%;
-        }
-        .sticker-red { background-color: #e30613; }
-        .sticker-blue { background-color: #0056b3; }
+        {!! file_get_contents(public_path('assets/css/print_label_pdf.css')) !!}
     </style>
 </head>
 <body>
@@ -99,51 +23,41 @@
         <tr>
             @foreach ($row as $aset)
             <td>
-                <div class="label-container">
+                @php
+                    $warnaLabel = $aset->kategoriAset->jenisKategori->warna_label ?? '#ea6565';
+                @endphp
+                <div class="label-container" style="border-color: {{ $warnaLabel }};">
                     
-                    {{-- Sticker Warna (Merah untuk 1xx, Biru untuk 2xx) --}}
-                    @php
-                        $tipe = $aset->kategoriAset->tipe ?? 'inventaris';
-                        $stickerClass = $tipe === 'aset_tetap' ? 'sticker-red' : 'sticker-blue';
-                    @endphp
-                    <div class="sticker-color {{ $stickerClass }}"></div>
-
-                    <!-- Left Panel: Logo Vertikal -->
-                    <div style="position: absolute; left: 0; top: 0; width: 16%; height: 100%; border-right: 1.5px solid #333; text-align: center;">
+                    <!-- Top Banner -->
+                    <div class="top-banner" style="background-color: {{ $warnaLabel }};">
                         @if($base64Logo)
-                            <div class="rotated-left">
-                                <div style="text-align: center; line-height: 1;">
-                                    <span style="font-size: 7px; color: #000; letter-spacing: 0.5px;">PROPERTY OF:</span>
-                                </div>
-                                <div style="text-align: center; line-height: 1; margin-top: 2px;">
-                                    <img src="{{ $base64Logo }}" style="height: 18px;">
-                                </div>
-                            </div>
+                            <img src="{{ $base64Logo }}" alt="Logo">
                         @else
-                            <div class="rotated-left" style="font-size: 9px; font-weight: bold; color: #333;">
-                                <span style="font-size: 7px; font-weight:normal; letter-spacing: 1px; display:inline-block; margin-right:4px;">PROPERTY OF:</span>
-                                REKA<span style="color:#e30613;">INKA</span>
+                            <div class="banner-text">
+                                REKA<span style="color:#ffffff;">INKA</span> GROUP
                             </div>
                         @endif
                     </div>
 
-                    <!-- Middle Panel: Info -->
-                    <div style="position: absolute; left: 18%; top: 50%; width: 40%; transform: translateY(-50%);">
-                        <div class="info-title">PROPERTY OF</div>
-                        <div class="info-value" style="white-space: nowrap; font-size: 7px;">PT Rekaindo Global Jasa</div>
-
-                        <div class="info-title">HELPDESK CONTACT</div>
-                        <div class="info-value" style="margin-bottom:0; font-size: 7.5px;">WA : 0819 0475 7690</div>
+                    <!-- Asset Number -->
+                    <div class="asset-number">
+                        {{ $aset->nomor_aset }}
                     </div>
 
-                    <!-- Right Panel: QR Code & Nomor Aset -->
-                    <div style="position: absolute; left: 58%; right: 3px; top: 0; height: 100%;">
-                        <div style="position: absolute; top: 3px; left: 0; width: 100%; text-align: left;">
-                            <div class="asset-tag-title">Asset Tag</div>
-                        </div>
-                        <div style="position: absolute; top: 56%; left: 0; width: 100%; transform: translateY(-50%); text-align: left;">
-                            <img src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(58)->generate(route('aset.show', $aset->id))) !!}" alt="QR" style="display: block;">
-                            <div class="asset-kode" style="margin-top: 2px; font-size: 6.5px;">{{ $aset->nomor_aset }}</div>
+                    <!-- Left Info -->
+                    <div class="info-container">
+                        <div class="info-label">SITES LOCATION</div>
+                        <div class="info-value-bold">PT Rekaindo Global Jasa</div>
+                    </div>
+
+                    <!-- Right QR -->
+                    <div class="qr-frame">
+                        <div class="bracket tl" style="border-color: {{ $warnaLabel }};"></div>
+                        <div class="bracket tr" style="border-color: {{ $warnaLabel }};"></div>
+                        <div class="bracket bl" style="border-color: {{ $warnaLabel }};"></div>
+                        <div class="bracket br" style="border-color: {{ $warnaLabel }};"></div>
+                        <div class="qr-bg">
+                            <img src="data:image/svg+xml;base64,{!! base64_encode(QrCode::format('svg')->size(60)->margin(0)->generate(route('aset.show', $aset->id))) !!}" alt="QR" class="qr-image">
                         </div>
                     </div>
 
