@@ -6,13 +6,25 @@ use Illuminate\Http\Request;
 use App\Models\DataAset;
 use App\Models\AsetFoto;
 use App\Models\KategoriAset;
+use App\Models\JenisKategori;
 use App\Models\LokasiAset;
 use App\Models\User;
 use App\Models\Director;
 use Illuminate\Support\Facades\Storage;
+use App\Services\GoogleDriveService;
+use App\Exports\DataAsetExport;
+use App\Imports\DataAsetImport;
+use App\Exports\TemplateExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DataAsetController extends Controller
 {
+    protected $driveService;
+
+    public function __construct(GoogleDriveService $driveService)
+    {
+        $this->driveService = $driveService;
+    }
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -64,14 +76,59 @@ class DataAsetController extends Controller
             $query->where('lokasi_id', $request->input('lokasi'));
         }
 
+        $divisiId = $request->input('divisi_id');
+        $departmentId = $request->input('department_id');
+
+        if ($divisiId) {
+            if ($departmentId) {
+                $exists = \App\Models\Department::where('id_department', $departmentId)
+                    ->where('divisi_id_divisi', $divisiId)
+                    ->exists();
+                if (!$exists) {
+                    $departmentId = null;
+                    $request->merge(['department_id' => null]);
+                }
+            }
+        }
+
+        if ($departmentId != '') {
+            $query->where('id_department', $departmentId);
+        }
+
+        if ($divisiId != '') {
+            $query->where(function($q) use ($divisiId) {
+                $q->where('id_divisi', $divisiId)
+                  ->orWhereHas('department', function($qd) use ($divisiId) {
+                      $qd->where('divisi_id_divisi', $divisiId);
+                  })
+                  ->orWhereHas('section.department', function($qsd) use ($divisiId) {
+                      $qsd->where('divisi_id_divisi', $divisiId);
+                  })
+                  ->orWhereHas('unit.department', function($qud) use ($divisiId) {
+                      $qud->where('divisi_id_divisi', $divisiId);
+                  })
+                  ->orWhereHas('unit.section.department', function($qusd) use ($divisiId) {
+                      $qusd->where('divisi_id_divisi', $divisiId);
+                  });
+            });
+        }
+
         $asets = $query->latest()
                        ->paginate($perPage)
                        ->withQueryString();
 
         $lokasis = LokasiAset::all();
+
+        $departmentsQuery = \App\Models\Department::query();
+        if ($divisiId != '') {
+            $departmentsQuery->where('divisi_id_divisi', $divisiId);
+        }
+        $departments = $departmentsQuery->get();
+
+        $divisis = \App\Models\Divisi::all();
         $pageTitle = "Data Aset Departemen";
 
-        return view('aset.index', compact('asets', 'lokasis', 'pageTitle'));
+        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle'));
     }
 
     public function picIndex(Request $request)
@@ -81,7 +138,7 @@ class DataAsetController extends Controller
         $kondisi = $request->input('kondisi');
         $status  = $request->input('status_aset');
 
-        $query = DataAset::with(['jenisAsetKhusus', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
+        $query = DataAset::with(['kategoriAset', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
 
         $user = auth()->user();
 
@@ -92,7 +149,7 @@ class DataAsetController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nomor_aset', 'LIKE', "%{$search}%")
                   ->orWhere('nama_aset', 'LIKE', "%{$search}%")
-                  ->orWhereHas('klasifikasiAset', function($qj) use ($search) {
+                  ->orWhereHas('kategoriAset', function($qj) use ($search) {
                       $qj->where('nama', 'LIKE', "%{$search}%")
                          ->orWhere('kode', 'LIKE', "%{$search}%");
                   });
@@ -134,13 +191,21 @@ class DataAsetController extends Controller
             'divisi.department.section.unit'
         ])->whereNull('parent_director_id')->first();
 
-        $kategoriTetap     = KategoriAset::asetTetap()->get();
-        $kategoriInventaris = KategoriAset::inventaris()->get();
+        // Ambil semua kategori dikelompokkan per jenis untuk dropdown
+        $jenisList          = JenisKategori::orderBy('kode_awalan')->get();
+        $kategoriGrouped    = KategoriAset::with('jenisKategori')->orderBy('kode')->get()->groupBy('jenis_kategori_id');
+        // Backward-compat: tetap kirim kategoriTetap & kategoriInventaris untuk view lama
+        $kategoriTetap      = $kategoriGrouped->filter(fn($items, $key) =>
+            JenisKategori::find($key)?->kode_awalan === '1'
+        )->flatten();
+        $kategoriInventaris = $kategoriGrouped->filter(fn($items, $key) =>
+            JenisKategori::find($key)?->kode_awalan !== '1'
+        )->flatten();
         $lokasi               = LokasiAset::all();
         $users                = User::all();
 
         return view('aset.create', compact(
-            'mainDirector', 'kategoriTetap', 'kategoriInventaris', 'lokasi', 'users', 'nextId'
+            'mainDirector', 'jenisList', 'kategoriGrouped', 'kategoriTetap', 'kategoriInventaris', 'lokasi', 'users', 'nextId'
         ));
     }
 
@@ -154,15 +219,16 @@ class DataAsetController extends Controller
             'kategori_id'          => 'required|integer|exists:kategori_aset,id',
             'kode_organisasi'      => 'required|string',
             'lokasi_id'            => 'required|integer',
+            'gedung'               => 'nullable|string|max:100',
             'merek'                => 'required|string|max:100',
             'deskripsi'            => 'required|string',
-            'tahun_kapitalisasi'   => 'required|integer|min:1900|max:' . date('Y'),
+            'tanggal_kapitalisasi' => 'required|date',
             'pic_id'               => 'required|integer',
             'penanggung_jawab_id'  => 'required|integer',
             'bast'                 => 'nullable|string|max:255',
-            'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
+            'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
-            'keterangan_kondisi'   => 'nullable|string|max:255',
+
             'keterangan'           => 'nullable|string',
             // Multi-foto
             'foto'                 => 'required|array|min:1|max:10',
@@ -184,10 +250,19 @@ class DataAsetController extends Controller
         // Simpan foto
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $i => $file) {
-                $path = $file->store('dokumentasi_aset', 'public');
+                // 1. Simpan di lokal sebagai cadangan
+                $localPath = $file->store('dokumentasi_aset', 'public');
+                
+                // 2. Unggah ke Google Drive
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $driveUrl = $this->driveService->uploadFile($file, $filename);
+                
+                // Fallback ke path lokal jika upload ke Drive gagal
+                $savedPath = $driveUrl ?? $localPath;
+
                 AsetFoto::create([
                     'aset_id'   => $aset->id,
-                    'path_foto' => $path,
+                    'path_foto' => $savedPath,
                     'urutan'    => $i + 1,
                 ]);
             }
@@ -243,7 +318,9 @@ class DataAsetController extends Controller
      */
     public function scanner()
     {
-        return view('aset.scanner');
+        $activeOpnames = \App\Models\StockOpname::where('status', 'aktif')->get();
+        $lokasis = LokasiAset::all();
+        return view('aset.scanner', compact('activeOpnames', 'lokasis'));
     }
 
     
@@ -299,8 +376,14 @@ class DataAsetController extends Controller
     {
         $aset = DataAset::with('foto')->findOrFail($id);
 
-        $kategoriTetap     = KategoriAset::asetTetap()->get();
-        $kategoriInventaris = KategoriAset::inventaris()->get();
+        $jenisList          = JenisKategori::orderBy('kode_awalan')->get();
+        $kategoriGrouped    = KategoriAset::with('jenisKategori')->orderBy('kode')->get()->groupBy('jenis_kategori_id');
+        $kategoriTetap      = $kategoriGrouped->filter(fn($items, $key) =>
+            JenisKategori::find($key)?->kode_awalan === '1'
+        )->flatten();
+        $kategoriInventaris = $kategoriGrouped->filter(fn($items, $key) =>
+            JenisKategori::find($key)?->kode_awalan !== '1'
+        )->flatten();
         $lokasi               = LokasiAset::all();
         $users                = User::all();
 
@@ -310,7 +393,7 @@ class DataAsetController extends Controller
         ])->whereNull('parent_director_id')->first();
 
         return view('aset.edit', compact(
-            'aset', 'kategoriTetap', 'kategoriInventaris', 'lokasi', 'users', 'mainDirector'
+            'aset', 'jenisList', 'kategoriGrouped', 'kategoriTetap', 'kategoriInventaris', 'lokasi', 'users', 'mainDirector'
         ));
     }
 
@@ -326,15 +409,16 @@ class DataAsetController extends Controller
             'kategori_id'          => 'required|integer|exists:kategori_aset,id',
             'kode_organisasi'      => 'required|string',
             'lokasi_id'            => 'required|integer',
+            'gedung'               => 'nullable|string|max:100',
             'merek'                => 'required|string|max:100',
             'deskripsi'            => 'required|string',
-            'tahun_kapitalisasi'   => 'required|integer|min:1900|max:' . date('Y'),
+            'tanggal_kapitalisasi' => 'required|date',
             'pic_id'               => 'required|integer',
             'penanggung_jawab_id'  => 'required|integer',
             'bast'                 => 'nullable|string|max:255',
-            'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi,Lainnya',
+            'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
-            'keterangan_kondisi'   => 'nullable|string|max:255',
+
             'keterangan'           => 'nullable|string',
             // Tambah foto baru
             'foto_baru'            => 'nullable|array|max:10',
@@ -370,7 +454,10 @@ class DataAsetController extends Controller
             foreach ($request->hapus_foto as $fotoId) {
                 $foto = AsetFoto::find($fotoId);
                 if ($foto && $foto->aset_id === $aset->id) {
-                    Storage::disk('public')->delete($foto->path_foto);
+                    // Hapus dari penyimpanan lokal jika berupa path lokal (bukan URL)
+                    if (!filter_var($foto->path_foto, FILTER_VALIDATE_URL)) {
+                        Storage::disk('public')->delete($foto->path_foto);
+                    }
                     $foto->delete();
                 }
             }
@@ -380,10 +467,19 @@ class DataAsetController extends Controller
         if ($request->hasFile('foto_baru')) {
             $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
             foreach ($request->file('foto_baru') as $i => $file) {
-                $path = $file->store('dokumentasi_aset', 'public');
+                // 1. Simpan di lokal sebagai cadangan
+                $localPath = $file->store('dokumentasi_aset', 'public');
+                
+                // 2. Unggah ke Google Drive
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $driveUrl = $this->driveService->uploadFile($file, $filename);
+                
+                // Fallback ke path lokal jika upload ke Drive gagal
+                $savedPath = $driveUrl ?? $localPath;
+
                 AsetFoto::create([
                     'aset_id'   => $aset->id,
-                    'path_foto' => $path,
+                    'path_foto' => $savedPath,
                     'urutan'    => $urutanTerakhir + $i + 1,
                 ]);
             }
@@ -420,14 +516,32 @@ class DataAsetController extends Controller
     /**
      * Cetak Label Aset Tertentu (Multi-select)
      */
-    public function cetakLabelSelected(Request $request)
+    /**
+     * Menyimpan pilihan ID ke session dan redirect ke halaman cetak
+     */
+    public function processCetakLabelSelected(Request $request)
     {
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:data_aset,id'
         ]);
 
-        $asets = DataAset::with(['kategoriAset', 'lokasi'])->whereIn('id', $request->ids)->get();
+        session(['cetak_label_ids' => $request->ids]);
+        return redirect()->route('aset.cetak-label');
+    }
+
+    /**
+     * Cetak Label Aset Tertentu (Multi-select)
+     */
+    public function cetakLabelSelected()
+    {
+        $ids = session('cetak_label_ids');
+
+        if (!$ids) {
+            return redirect()->route('aset.index')->with('error', 'Silakan pilih aset yang ingin dicetak terlebih dahulu.');
+        }
+
+        $asets = DataAset::with(['kategoriAset', 'lokasi'])->whereIn('id', $ids)->get();
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('aset.print_label_pdf', compact('asets'))
                 ->setPaper('a4', 'portrait');
@@ -450,23 +564,89 @@ class DataAsetController extends Controller
     /**
      * Cetak Label Aset Per Lokasi
      */
-    public function cetakLabelPerLokasi(Request $request)
+    /**
+     * Menyimpan pilihan lokasi ke session dan redirect
+     */
+    public function processCetakLabelPerLokasi(Request $request)
     {
         $request->validate([
             'lokasi_id' => 'required|exists:lokasi_aset,lokasi_id'
         ]);
 
+        session(['cetak_label_lokasi_id' => $request->lokasi_id]);
+        return redirect()->route('aset.cetak-label-lokasi');
+    }
+
+    /**
+     * Cetak Label Aset Per Lokasi
+     */
+    public function cetakLabelPerLokasi()
+    {
+        $lokasi_id = session('cetak_label_lokasi_id');
+
+        if (!$lokasi_id) {
+            return redirect()->route('aset.index')->with('error', 'Silakan pilih lokasi yang ingin dicetak terlebih dahulu.');
+        }
+
         $asets = DataAset::with(['kategoriAset', 'lokasi'])
-            ->where('lokasi_id', $request->lokasi_id)
+            ->where('lokasi_id', $lokasi_id)
             ->get();
             
         if ($asets->isEmpty()) {
-            return back()->with('error', 'Tidak ada aset di ruangan ini.');
+            return redirect()->route('aset.index')->with('error', 'Tidak ada aset di ruangan ini.');
         }
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('aset.print_label_pdf', compact('asets'))
                 ->setPaper('a4', 'portrait');
 
-        return $pdf->stream("Label_Aset_Lokasi_{$request->lokasi_id}.pdf");
+        return $pdf->stream("Label_Aset_Lokasi_{$lokasi_id}.pdf");
+    }
+
+    public function export(Request $request)
+    {
+        $search = $request->input('search');
+        $kondisi = $request->input('kondisi');
+        $status = $request->input('status_aset');
+        $lokasiId = $request->input('lokasi');
+        $departmentId = $request->input('department_id');
+        $divisiId = $request->input('divisi_id');
+
+        if ($divisiId) {
+            if ($departmentId) {
+                $exists = \App\Models\Department::where('id_department', $departmentId)
+                    ->where('divisi_id_divisi', $divisiId)
+                    ->exists();
+                if (!$exists) {
+                    $departmentId = null;
+                }
+            }
+        }
+
+        return Excel::download(new DataAsetExport($search, $kondisi, $status, $lokasiId, false, $departmentId, $divisiId), 'Data_Aset.xlsx');
+    }
+
+    /**
+     * Mengimpor data aset dari file Excel bertingkat
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        try {
+            Excel::import(new DataAsetImport, $request->file('file_excel'));
+            return redirect()->route('aset.index')->with('success', 'Data aset berhasil diimpor!');
+        } catch (\Exception $e) {
+            return redirect()->route('aset.index')->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Mengunduh template Excel bertingkat untuk impor
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new DataAsetExport(null, null, null, null, true), 'Template_Import_Aset.xlsx');
     }
 }

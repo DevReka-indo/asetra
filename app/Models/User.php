@@ -89,6 +89,34 @@ class User extends Authenticatable
     }
 
     /**
+     * Memeriksa apakah user memiliki hak akses tertentu.
+     */
+    public function hasPermission(string $permissionName): bool
+    {
+        // 1. Superadmin (Role ID 1) otomatis diizinkan mengakses semua hal
+        if ($this->role_id_role === 1) {
+            return true;
+        }
+
+        // 2. Cek permission dari Role yang ditautkan ke User
+        if ($this->role && $this->role->permissions()->where('name', $permissionName)->exists()) {
+            return true;
+        }
+
+        // 3. Cek permission dari Department (Departemen) yang ditautkan ke User
+        if ($this->department && $this->department->permissions()->where('name', $permissionName)->exists()) {
+            return true;
+        }
+
+        // 4. Cek permission dari Section (Kustomisasi Seksi) yang ditautkan ke User
+        if ($this->section && $this->section->permissions()->where('name', $permissionName)->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Mengecek kode_bagian
      */
     public function isBagianUmum(): bool
@@ -105,8 +133,13 @@ class User extends Authenticatable
             }
         }
 
-        // --- section = 12 (GA Admin) ---
-        if ($this->section_id_section == 12) {
+        // --- Cek hak akses GA secara dinamis berdasarkan Department ---
+        if ($this->department && $this->department->permissions()->whereIn('name', ['manage_stock_opname', 'manage_assets'])->exists()) {
+            return true;
+        }
+
+        // --- Cek hak akses GA secara dinamis berdasarkan Section ---
+        if ($this->section && $this->section->permissions()->whereIn('name', ['manage_stock_opname', 'manage_assets'])->exists()) {
             return true;
         }
 
@@ -122,6 +155,20 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /**
+     * Mengecek apakah user merupakan General Affairs untuk modul stock opname.
+     *
+     * Pure delegation ke {@see self::isBagianUmum()} tanpa bypass berdasarkan
+     * `role_id_role === 1`. Konsekuensinya, superadmin yang tidak lolos
+     * `isBagianUmum()` TIDAK diperlakukan sebagai General Affairs pada modul ini.
+     *
+     * Requirements: 1.5, 5.2
+     */
+    public function isGeneralAffairs(): bool
+    {
+        return $this->isBagianUmum();
     }
 
     /** Semua pengajuan perbaikan yang diajukan user */
