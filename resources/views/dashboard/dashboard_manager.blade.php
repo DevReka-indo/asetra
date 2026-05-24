@@ -1,0 +1,259 @@
+@extends('layouts.app')
+
+@section('title', 'Dashboard')
+
+@section('content')
+<div class="container-fluid px-1 py-0 mt-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0 text-dark">Dashboard</h3>
+            <p class="text-muted mb-0">Selamat datang kembali, {{ auth()->user()->firstname }}. Berikut ringkasan aset departemen Anda hari ini.</p>
+        </div>
+    </div>
+
+    {{-- TOP CARDS: METRIKS --}}
+    <div class="row g-3 mb-4">
+        {{-- Card 1: Aset Departemen --}}
+        <div class="col-md-4">
+            <div class="card glass-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon icon-primary me-3">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0 small fw-bold text-uppercase">Aset Departemen</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ number_format($totalAsetDept) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 2: Aset Aktif Departemen --}}
+        <div class="col-md-4">
+            <div class="card glass-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon icon-success me-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0 small fw-bold text-uppercase">Aset Kondisi Aktif</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ number_format($totalAsetDeptAktif) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 3: Total Pengajuan Perbaikan --}}
+        <div class="col-md-4">
+            <div class="card glass-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon icon-warning me-3" style="background: rgba(220, 53, 69, 0.1); color: #dc3545;">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-0 small fw-bold text-uppercase">Total Pengajuan Perbaikan</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ number_format($totalPerbaikan) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        {{-- BAGIAN KIRI: PROGRESS & MONITORING --}}
+        <div class="col-lg-8">
+            
+            {{-- Progress Stock Opname --}}
+            <div class="card glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-navy mb-0"><i class="fas fa-clipboard-check me-2"></i>Status Stock Opname Departemen Anda</h6>
+                    @if($latestOpname)
+                        <span class="badge bg-light text-dark border"><i class="fas fa-calendar-alt me-1"></i> Sesi Aktif</span>
+                    @endif
+                </div>
+                
+                @if($latestOpname)
+                    <p class="text-muted small mb-2">Progres pengecekan fisik aset untuk departemen <strong>{{ auth()->user()->department->name_department ?? 'Departemen Anda' }}</strong> pada periode <strong>{{ $latestOpname->periode }}</strong>.</p>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold text-dark">{{ $opnameProgress }}% Telah Dicek</span>
+                        <span class="text-muted small">{{ $deptCheckedCount }} / {{ $totalAsetDept }} Aset</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px; border-radius: 10px; background-color: #e9ecef;">
+                        <div class="progress-bar progress-bar-custom progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ $opnameProgress }}%" aria-valuenow="{{ $opnameProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ route('stock-opname.user-show', $latestOpname->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                            <i class="fas fa-qrcode me-2"></i> Lakukan Pengecekan Fisik
+                        </a>
+                    </div>
+                @else
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p class="mb-0">Saat ini tidak ada sesi Stock Opname yang sedang aktif.</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Monitoring Terbaru --}}
+            <div class="card glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-success mb-0"><i class="fas fa-history me-2"></i>Aktivitas Monitoring Terbaru Departemen</h6>
+                    <a href="{{ route('log-aset.index') }}" class="small text-decoration-none text-success fw-bold">Lihat Semua</a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover align-middle mb-0">
+                        <thead class="bg-light rounded-3">
+                            <tr class="text-muted small text-uppercase">
+                                <th class="ps-3">Aset</th>
+                                <th>Dicatat Oleh</th>
+                                <th>Tanggal</th>
+                                <th class="text-center">Kondisi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($monitoringTerbaru as $log)
+                                <tr style="border-bottom: 1px solid rgba(0,0,0,.05);">
+                                    <td class="ps-3 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-success me-2" style="width: 35px; height: 35px;">
+                                                <i class="fas fa-clipboard-list"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.85rem;">{{ Str::limit($log->aset->nama_aset ?? 'Aset Dihapus', 30) }}</h6>
+                                                <small class="text-muted" style="font-size: 0.75rem;">No: {{ $log->aset->nomor_aset ?? '-' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ $log->dicatatOleh->fullname ?? 'Sistem' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log->tanggal_cek)->format('d M Y') }}</td>
+                                    <td class="text-center">
+                                        @if($log->kondisi == 'Baik')
+                                            <span class="badge bg-success rounded-pill px-2" style="font-size: 0.7rem;">Baik</span>
+                                        @elseif($log->kondisi == 'Rusak')
+                                            <span class="badge bg-danger rounded-pill px-2" style="font-size: 0.7rem;">Rusak</span>
+                                        @else
+                                            <span class="badge bg-secondary rounded-pill px-2" style="font-size: 0.7rem;">{{ ucfirst($log->kondisi) }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-5">
+                                        <i class="fas fa-history text-muted fs-3 mb-2"></i><br>
+                                        Belum ada riwayat aktivitas monitoring di departemen Anda.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- BAGIAN KANAN: QUICK ACCESS & PERBAIKAN DEPARTEMEN --}}
+        <div class="col-lg-4">
+            
+            {{-- Quick Access --}}
+            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-bolt text-warning me-2"></i>Akses Cepat</h6>
+            <div class="row g-2 mb-4">
+                <div class="col-6">
+                    <a href="{{ route('aset.scanner') }}" class="quick-access-btn shadow-sm">
+                        <i class="fas fa-qrcode"></i>
+                        <span class="fw-bold small text-center">Scan Aset</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ route('aset.index') }}" class="quick-access-btn shadow-sm">
+                        <i class="fas fa-box-open"></i>
+                        <span class="fw-bold small text-center">Data Aset</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ route('aset.pic') }}" class="quick-access-btn shadow-sm">
+                        <i class="fas fa-user-tag"></i>
+                        <span class="fw-bold small text-center">Aset PIC Saya</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ route('perbaikan.index') }}" class="quick-access-btn shadow-sm">
+                        <i class="fas fa-tools"></i>
+                        <span class="fw-bold small text-center">Perbaikan</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Pengajuan Perbaikan Departemen --}}
+            <div class="card glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-danger mb-0"><i class="fas fa-tools me-2"></i>Perbaikan Departemen</h6>
+                    <a href="{{ route('perbaikan.index') }}" class="small text-decoration-none text-danger fw-bold">Lihat Semua</a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover align-middle mb-0">
+                        <tbody>
+                            @forelse($perbaikanTerbaru as $pb)
+                                <tr style="border-bottom: 1px solid rgba(0,0,0,.05);">
+                                    <td class="px-0 py-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-danger me-2" style="width: 35px; height: 35px;">
+                                                <i class="fas fa-wrench"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.85rem;">{{ Str::limit($pb->aset->nama_aset ?? 'Aset Dihapus', 22) }}</h6>
+                                                <small class="text-muted" style="font-size: 0.75rem;">Oleh {{ explode(' ', $pb->pengaju->firstname)[0] ?? 'Staff' }} &bull; {{ $pb->created_at->diffForHumans() }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end px-0 py-2">
+                                        @if($pb->status == 'menunggu')
+                                            <span class="badge bg-warning text-dark rounded-pill px-2" style="font-size: 0.7rem;">Menunggu</span>
+                                        @elseif($pb->status == 'diproses')
+                                            <span class="badge bg-info rounded-pill px-2" style="font-size: 0.7rem;">Diproses</span>
+                                        @else
+                                            <span class="badge bg-success rounded-pill px-2" style="font-size: 0.7rem;">{{ ucfirst($pb->status) }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">
+                                        <i class="fas fa-check-circle text-success fs-4 mb-2"></i><br>
+                                        Tidak ada riwayat pengajuan perbaikan di departemen Anda.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Detail Profil Singkat --}}
+            <div class="card glass-card border-0 shadow-sm p-4 mt-4" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-id-card me-2 text-primary"></i>Informasi Struktur</h6>
+                <div class="d-flex flex-column gap-2 small">
+                    <div class="d-flex justify-content-between border-bottom pb-1">
+                        <span class="text-muted">NIP:</span>
+                        <span class="fw-bold text-dark">{{ auth()->user()->nip ?? '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom pb-1">
+                        <span class="text-muted">Jabatan:</span>
+                        <span class="fw-bold text-dark text-end">{{ auth()->user()->position->name_position ?? '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom pb-1">
+                        <span class="text-muted">Departemen:</span>
+                        <span class="fw-bold text-dark text-end">{{ auth()->user()->department->name_department ?? '-' }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Divisi:</span>
+                        <span class="fw-bold text-dark text-end">{{ auth()->user()->divisi->nm_divisi ?? '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@endsection
