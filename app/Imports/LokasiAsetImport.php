@@ -21,7 +21,7 @@ class LokasiAsetImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'kode_lokasi'   => 'required|string|max:20|unique:lokasi_aset,kode_lokasi',
+            'kode_lokasi'   => 'required|string|max:45|unique:lokasi_aset,kode_lokasi',
             'nama_lokasi'   => 'required|string|max:100|unique:lokasi_aset,nama_lokasi',
             'detail_lokasi' => 'nullable|string|max:255',
         ];
