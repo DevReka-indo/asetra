@@ -18,8 +18,13 @@ class PengajuanPerbaikanController extends Controller
     private function canProcess(): bool
     {
         $user = Auth::user();
-        $adminRoles = ['admin', 'superadmin'];
 
+        // Superadmin bypass Bagian Umum check
+        if ($user->role_id_role === 1 || strtolower($user->role->nm_role ?? '') === 'superadmin') {
+            return true;
+        }
+
+        $adminRoles = ['admin', 'superadmin'];
         $isAdmin = in_array(strtolower($user->role->nm_role ?? ''), $adminRoles);
 
         return $isAdmin && $user->isBagianUmum();
@@ -130,12 +135,14 @@ class PengajuanPerbaikanController extends Controller
             $aset = $pengajuan->aset;
             $isAuthorized = false;
             
-            if ($user->unit_id_unit && $aset->id_unit == $user->unit_id_unit) $isAuthorized = true;
-            elseif ($user->section_id_section && $aset->id_section == $user->section_id_section) $isAuthorized = true;
-            elseif ($user->department_id_department && $aset->id_department == $user->department_id_department) $isAuthorized = true;
-            elseif ($user->divisi_id_divisi && $aset->id_divisi == $user->divisi_id_divisi) $isAuthorized = true;
-            elseif ($user->director_id_director && $aset->id_director == $user->director_id_director) $isAuthorized = true;
-            elseif ($aset->pic_id == $user->id) $isAuthorized = true;
+            if ($aset) {
+                if ($user->unit_id_unit && $aset->id_unit == $user->unit_id_unit) $isAuthorized = true;
+                elseif ($user->section_id_section && $aset->id_section == $user->section_id_section) $isAuthorized = true;
+                elseif ($user->department_id_department && $aset->id_department == $user->department_id_department) $isAuthorized = true;
+                elseif ($user->divisi_id_divisi && $aset->id_divisi == $user->divisi_id_divisi) $isAuthorized = true;
+                elseif ($user->director_id_director && $aset->id_director == $user->director_id_director) $isAuthorized = true;
+                elseif ($aset->pic_id == $user->id) $isAuthorized = true;
+            }
 
             if (!$isAuthorized) {
                 abort(403, 'Anda tidak memiliki akses ke pengajuan ini.');
@@ -162,7 +169,7 @@ class PengajuanPerbaikanController extends Controller
 
         $request->validate([
             'aksi'    => 'required|in:disetujui,ditolak',
-            'catatan' => 'nullable|string|max:1000',
+            'catatan' => 'required_if:aksi,ditolak|nullable|string|max:1000',
         ]);
 
         $pengajuan = PengajuanPerbaikan::findOrFail($id);
@@ -180,7 +187,9 @@ class PengajuanPerbaikanController extends Controller
 
         // Jika ditolak: kembalikan status_aset ke "Aktif"
         if ($request->aksi === 'ditolak') {
-            $pengajuan->aset->update(['status_aset' => 'Aktif']);
+            if ($pengajuan->aset) {
+                $pengajuan->aset->update(['status_aset' => 'Aktif']);
+            }
         }
         // Jika disetujui: pastikan status_aset tetap "Dalam Perbaikan"
         
