@@ -728,6 +728,8 @@
                     e.returnValue = '';
                 }
             });
+        });
+
         async function submitProfile() {
             let ok = true;
             Object.keys(validationRules).forEach(id => {
