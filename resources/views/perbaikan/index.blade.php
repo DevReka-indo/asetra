@@ -42,11 +42,6 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('perbaikan.index') }}" id="filterForm">
-                @php
-                    $activeStatus = request('status', '');
-                @endphp
-                <input type="hidden" name="status" id="filterStatus" value="{{ $activeStatus }}">
-                
                 {{-- Keep sort fields in form so sorting isn't lost on filter submit --}}
                 <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
                 <input type="hidden" name="order_by" value="{{ request('order_by') }}">
@@ -83,29 +78,16 @@
                         </select>
                     </div>
 
-                    {{-- Status Buttons --}}
-                    <div class="col-md-6">
+                    {{-- Filter Status --}}
+                    <div class="col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status Pengajuan</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            @php
-                                $statuses = [
-                                    ''          => ['label' => 'Semua',          'icon' => 'fa-list'],
-                                    'menunggu'  => ['label' => 'Menunggu Review', 'icon' => 'fa-clock'],
-                                    'disetujui' => ['label' => 'Disetujui',       'icon' => 'fa-check-circle'],
-                                    'ditolak'   => ['label' => 'Ditolak',         'icon' => 'fa-times-circle'],
-                                    'selesai'   => ['label' => 'Selesai',         'icon' => 'fa-flag-checkered'],
-                                ];
-                            @endphp
-
-                            @foreach($statuses as $val => $info)
-                                <button type="button" 
-                                        class="btn btn-sm rounded-pill {{ $activeStatus === $val ? 'btn-navy text-white' : 'btn-outline-secondary' }}"
-                                        style="{{ $activeStatus === $val ? 'background-color:#253070;' : '' }}"
-                                        onclick="setStatusAndSubmit('{{ $val }}')">
-                                    <i class="fas {{ $info['icon'] }} me-1"></i>{{ $info['label'] }}
-                                </button>
-                            @endforeach
-                        </div>
+                        <select name="status" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Status</option>
+                            <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu Review</option>
+                            <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                        </select>
                     </div>
                 </div>
             </form>
@@ -248,11 +230,6 @@
 
 @push('scripts')
 <script>
-function setStatusAndSubmit(statusVal) {
-    document.getElementById('filterStatus').value = statusVal;
-    document.getElementById('filterForm').submit();
-}
-
 // Auto-refresh
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.querySelector('input[name="search"]');
