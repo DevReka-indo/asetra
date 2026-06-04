@@ -23,6 +23,9 @@ class LoginController extends Controller
         $request->validate([
             'credential' => 'required|string',
             'password'   => 'required|string',
+        ], [
+            'credential.required' => 'Email/NIP wajib diisi.',
+            'password.required'   => 'Password wajib diisi.',
         ]);
 
         $user = User::where('email', $request->credential)

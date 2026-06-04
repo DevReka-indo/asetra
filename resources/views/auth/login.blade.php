@@ -154,10 +154,9 @@
                 
             </form>
 
-            
+
         </div>
 
-        <small class="panel-right_version">v1.0.0 &copy; {{ date('Y') }} PT Rekaindo Global Jasa</small>
     </main>
 
 </div>
