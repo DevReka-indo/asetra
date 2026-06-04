@@ -342,54 +342,6 @@
                     </a>
                 </li>
 
-                @php
-                    $adaOpnameAktif = \App\Models\StockOpname::where('status', 'aktif')->exists();
-                @endphp
-                @if($adaOpnameAktif)
-                    <li class="nav-item {{ request()->routeIs('stock-opname.user-*') ? 'active_' : '' }}">
-                        <a href="{{ route('stock-opname.user-index') }}" class="nav-link">
-                            <i class="fas fa-boxes"></i>
-                            <p>Stock Opname</p>
-                        </a>
-                    </li>
-                @endif
-
-                <li class="nav-section">
-                    <span class="text-section">Lainnya</span>
-                </li>
-
-                {{-- Untuk General Affairs, Lainnya hanya berisi Pemulihan --}}
-                <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
-                    <a href="#pemulihanDrop"
-                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}"
-                        data-toggle="collapse"
-                        aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
-                            <i class="fas fa-trash-restore"></i>
-                            <p>Pemulihan</p>
-                            <span class="caret"></span>
-                    </a>
-
-                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}"
-                        id="pemulihanDrop">
-                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
-                            <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
-                                <a href="{{ route('pemulihan.jenis-kategori') }}">
-                                    <span class="sub-item">Jenis Kategori</span>
-                                </a>
-                            </li>
-                            <li class="{{ request()->routeIs('pemulihan.kategori-aset') ? 'active' : '' }}">
-                                <a href="{{ route('pemulihan.kategori-aset') }}">
-                                    <span class="sub-item">Kategori Aset</span>
-                                </a>
-                            </li>
-                            <li class="{{ request()->routeIs('pemulihan.data-aset') ? 'active' : '' }}">
-                                <a href="{{ route('pemulihan.data-aset') }}">
-                                    <span class="sub-item">Data Aset</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
             @endif
         </ul>
     </div>
