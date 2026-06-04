@@ -221,8 +221,12 @@
             </div>
             
             <div class="text-end">
-                <a href="{{ route('user.manage') }}" class="btn btn-secondary shadow-sm rounded-pill px-4">Kembali</a>
-                <a href="{{ route('user-manage.edit', $user->id) }}" class="btn btn-primary shadow-sm rounded-pill px-4 ms-2">Edit Pengguna</a>
+                <a href="{{ route('user.manage') }}" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border">
+                    <i class="fas fa-arrow-left me-1"></i> Kembali
+                </a>
+                <a href="{{ route('user-manage.edit', $user->id) }}" class="btn text-white rounded-pill px-4 fw-bold shadow-sm ms-2" style="background-color: #253070;">
+                    <i class="fas fa-edit me-1"></i> Edit Pengguna
+                </a>
             </div>
         </div>
     </div>

@@ -326,12 +326,17 @@
             parentType.value = parentId.options[parentId.selectedIndex].getAttribute('data-type') || '';
         }
 
-        // Change event
+        // Initialize Select2 for parent_id
         if (parentId) {
-            parentId.addEventListener('change', function() {
+            $(parentId).select2({
+                theme: 'bootstrap',
+                placeholder: '-- Pilih Organisasi --',
+                allowClear: true,
+                width: '100%'
+            }).on('change', function() {
                 var selectedOption = this.options[this.selectedIndex];
                 var type = selectedOption ? selectedOption.getAttribute('data-type') : '';
-                parentType.value = type;
+                parentType.value = type || '';
             });
         }
     });

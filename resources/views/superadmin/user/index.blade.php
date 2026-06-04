@@ -24,23 +24,29 @@
 
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body">
-                <form method="GET" action="{{ route('user.manage') }}">
 
-                    <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center mb-3 pb-3 border-bottom">
-                        <button type="button" class="btn btn-success px-3 rounded-3 d-flex align-items-center" onclick="showUploadModal()">
-                            <i class="far fa-file-excel me-1"></i> Import File
+                <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center mb-3 pb-3 border-bottom">
+                    <form method="POST" action="{{ route('user-manage.sync-sipo') }}" id="syncForm" class="d-inline m-0">
+                        @csrf
+                        <button type="submit" class="btn text-white px-3 rounded-3 d-flex align-items-center" onclick="showSyncLoading(event)" style="background-color: #e67e22; border-color: #e67e22;">
+                            <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari SIPO
                         </button>
-                        <a href="{{ route('user.create') }}" class="btn btn-primary px-3 rounded-3 d-flex align-items-center">
-                            <i class="fas fa-plus me-1"></i> Tambah Pengguna
-                        </a>
-                    </div>
+                    </form>
+                    <button type="button" class="btn btn-success px-3 rounded-3 d-flex align-items-center" onclick="showUploadModal()">
+                        <i class="far fa-file-excel me-1"></i> Import File
+                    </button>
+                    <a href="{{ route('user.create') }}" class="btn btn-primary px-3 rounded-3 d-flex align-items-center">
+                        <i class="fas fa-plus me-1"></i> Tambah Pengguna
+                    </a>
+                </div>
 
+                <form method="GET" action="{{ route('user.manage') }}">
                     <div class="row g-2 align-items-end">
 
                         {{-- Entries --}}
                         <div class="col-md-1">
                             <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
-                            <select name="per_page" class="form-select form-select-sm rounded-3 w-100">
+                            <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                                 <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                                 <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                                 <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
@@ -53,7 +59,7 @@
                             <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                             <div class="input-group input-group-sm input-group-focus rounded-3">
                                 <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                                <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent"
+                                <input type="search" name="search" class="form-control border-0 shadow-none bg-transparent"
                                     placeholder="Cari Nama atau NIP..." value="{{ request('search') }}">
                             </div>
                         </div>
@@ -61,7 +67,7 @@
                         {{-- Filter Role --}}
                         <div class="col-md-2">
                             <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Hak Akses</label>
-                            <select name="role" class="form-select form-select-sm rounded-3 w-100">
+                            <select name="role" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                                 <option value="">Semua Role</option>
                                 <option value="1" {{ request('role') === '1' ? 'selected' : '' }}>Superadmin</option>
                                 <option value="3" {{ request('role') === '3' ? 'selected' : '' }}>Admin</option>
@@ -72,18 +78,14 @@
                         {{-- Filter Status --}}
                         <div class="col-md-2">
                             <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status User</label>
-                            <select name="view" class="form-select form-select-sm rounded-3 w-100">
+                            <select name="view" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                                 <option value="all" {{ $view == 'all' ? 'selected' : '' }}>Semua User</option>
                                 <option value="active" {{ $view == 'active' ? 'selected' : '' }}>User Aktif</option>
                                 <option value="deleted" {{ $view == 'deleted' ? 'selected' : '' }}>User Non-Aktif</option>
                             </select>
                         </div>
 
-                        <div class="col-auto ms-auto d-flex gap-2">
-                            <a href="{{ route('user.manage') }}" class="btn btn-sm px-4 rounded-3 d-flex align-items-center text-white" style="background-color: #1b53a7; border-color: #48abf7;" title="Reset Filter">
-                                <i class="fas fa-undo me-1"></i> Reset
-                            </a>
-                        </div>
+
 
                     </div>
 
@@ -94,23 +96,25 @@
         <div class="card shadow-sm border-0">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered custom-table-bagian align-middle">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th class="text-center">Nama</th>
-                                <th class="text-center">NIP</th>
-                                <th class="text-center">Bagian Kerja</th>
-                                <th class="text-center">Posisi</th>
+                                <th width="60" class="text-center">No</th>
+                                <th>Nama</th>
+                                <th>NIP</th>
+                                <th>Bagian Kerja</th>
+                                <th>Posisi</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Hak Akses</th>
                                 @if ($view !== 'deleted')
-                                    <th>Aksi</th>
+                                    <th width="150" class="text-center">Aksi</th>
                                 @endif
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($users as $user)
+                            @forelse($users as $i => $user)
                                 <tr>
+                                    <td class="text-center">{{ $users->firstItem() + $i }}</td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if ($user->profile_image)
@@ -138,7 +142,7 @@
                                             -
                                         @endif
                                     </td>
-                                    <td class="text-center">{{ $user->position->nm_position ?? '-' }}</td>
+                                    <td>{{ $user->position->nm_position ?? '-' }}</td>
                                     <td class="text-center">
                                         @if ($user->deleted_at)
                                             <form action="{{ route('user-manage.restore', $user->id) }}" method="PUT"
@@ -184,14 +188,14 @@
                                                  <!-- Tombol View User -->
                                                 <a href="{{ route('user.show', $user->id) }}"
                                                     class="btn btn-sm rounded-circle text-white border-0"
-                                                    style="background-color:#51a1f1; width:30px; height:30px; display:flex; align-items:center; justify-content:center;"
+                                                    style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; background-color: #51a1f1;"
                                                     title="Lihat Detail">
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
 
                                                 <!-- Tombol Edit -->
                                                 <a href="{{ route('user-manage.edit', $user->id) }}" class="btn btn-sm rounded-circle text-white border-0"
-                                                    style="background-color:#FBC02D; width:30px; height:30px; display:flex; align-items:center; justify-content:center;"
+                                                    style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; background-color: #FBC02D;"
                                                     title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
@@ -202,7 +206,10 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted">Pengguna tidak ditemukan</td>
+                                    <td colspan="8" class="text-center text-muted py-5">
+                                        <i class="fas fa-info-circle mb-2 d-block fa-2x"></i>
+                                        Pengguna tidak ditemukan
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -210,8 +217,13 @@
                 </div>
 
                 {{-- Pagination --}}
-                <div class="d-flex justify-content-end mt-3">
-                    {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        Menampilkan {{ $users->firstItem() ?? 0 }} sampai {{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} data
+                    </div>
+                    <div>
+                        {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -263,6 +275,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Script dimulai');
+
+            // Auto-refresh when search input is cleared
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.trim() === '') {
+                        this.form.submit();
+                    }
+                });
+                searchInput.addEventListener('search', function() {
+                    if (this.value.trim() === '') {
+                        this.form.submit();
+                    }
+                });
+            }
 
             $('#org_select_{{ $user->id ?? '-' }}').select2({
                 theme: "bootstrap-5",
@@ -577,6 +604,22 @@
                     }
                 });
             });
+        }
+
+        function showSyncLoading(event) {
+            event.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Menyinkronkan Data...',
+                    text: 'Harap tunggu, sedang mengambil data dari API SIPO.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+            document.getElementById('syncForm').submit();
         }
     </script>
 @endpush

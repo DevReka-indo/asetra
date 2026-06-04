@@ -275,11 +275,16 @@
 @push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // Handle dropdown hierarchy (Parent ID -> Parent Type)
-        document.getElementById('parent_id').addEventListener('change', function() {
+        // Initialize Select2 for parent_id
+        $('#parent_id').select2({
+            theme: 'bootstrap',
+            placeholder: '-- Pilih Organisasi --',
+            allowClear: true,
+            width: '100%'
+        }).on('change', function() {
             var selectedOption = this.options[this.selectedIndex];
             var type = selectedOption ? selectedOption.getAttribute('data-type') : '';
-            document.getElementById('parent_type').value = type;
+            document.getElementById('parent_type').value = type || '';
         });
     });
 </script>
