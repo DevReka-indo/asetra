@@ -15,29 +15,6 @@
 	padding: 2rem 2rem;
 }
 
-.profile-hero::before,
-.profile-hero::after {
-	content: "";
-	position: absolute;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.06);
-	pointer-events: none;
-}
-
-.profile-hero::before {
-	width: 220px;
-	height: 220px;
-	top: -60px;
-	right: -40px;
-}
-
-.profile-hero::after {
-	width: 140px;
-	height: 140px;
-	bottom: -50px;
-	left: 18%;
-	background: rgba(255, 255, 255, 0.04);
-}
 
 .profile-hero h2 {
 	font-weight: 700;
