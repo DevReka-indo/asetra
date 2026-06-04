@@ -8,7 +8,7 @@
         <h3 class="fw-bold mb-0">Riwayat Monitoring Aset</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                     <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
                 </a>                
@@ -86,6 +86,7 @@
                     </div>
 
                     {{-- Filter Lokasi --}}
+                    @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -95,6 +96,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
                 </div>
 
             </form>

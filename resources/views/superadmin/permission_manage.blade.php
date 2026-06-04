@@ -19,7 +19,7 @@
             <h3 class="fw-bold mb-0">Manajemen Hak Akses</h3>
             <ul class="perm-breadcrumb d-flex align-items-center p-0 m-0">
                 <li class="perm-breadcrumb-home d-flex align-items-center">
-                    <a href="{{ route('superadmin.dashboard') }}"
+                    <a href="{{ route('dashboard') }}"
                         class="text-muted text-decoration-none d-flex align-items-center">
                         <i class="fas fa-home me-2 perm-breadcrumb-icon"></i>
                         <span class="perm-breadcrumb-text">Dashboard</span>

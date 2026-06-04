@@ -14,7 +14,7 @@
         <h3 class="fw-bold mb-0">Manajemen Stock Opname</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                     <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
                 </a>
@@ -113,7 +113,6 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
                     <h5 class="card-title fw-bold text-dark mb-1">Daftar Jadwal Stock Opname</h5>
-                    <p class="text-muted small mb-0">Klik <strong>Detail</strong> untuk membuka dashboard pemantauan periode.</p>
                 </div>
                 @if($sesiAktif > 0)
                     <button class="btn so-btn-primary btn-sm text-white px-3 rounded-pill d-md-none" onclick="Swal.fire('Perhatian', 'Harap selesaikan jadwal opname aktif terlebih dahulu.', 'warning')">
@@ -240,51 +239,57 @@
 <!-- Modal Create -->
 <div class="modal fade so-modal" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg">
-            <div class="modal-header px-4 py-3">
-                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="createModalLabel">
-                    <i class="fas fa-calendar-plus"></i> Buat Jadwal Stock Opname
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 text-white" id="createModalLabel" style="font-size: 1.05rem;">
+                    <i class="fas fa-calendar-plus text-white"></i> Buat Jadwal Stock Opname
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('stock-opname.store') }}" method="POST">
                 @csrf
-                <div class="modal-body px-4 py-4">
+                <div class="modal-body p-4 bg-light">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            <i class="fas fa-tag me-1 text-muted"></i> Periode
+                        <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                            Periode
                             <span class="text-danger">*</span>
                         </label>
-                        <input type="text" name="periode" class="form-control form-control-lg" required placeholder="Mis. Q1-2026 atau Mei 2026">
-                        <small class="text-muted">Identifier unik untuk membedakan periode opname.</small>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                            <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-tag"></i></span>
+                            <input type="text" name="periode" class="form-control border-0 shadow-none fs-6" required placeholder="Contoh: Periode 2 2026">
+                        </div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                <i class="far fa-calendar me-1 text-muted"></i> Tanggal Mulai
+                            <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                Tanggal Mulai
                                 <span class="text-danger">*</span>
                             </label>
-                            <input type="date" name="tanggal_mulai" class="form-control form-control-lg" required value="{{ date('Y-m-d') }}">
+                            <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                                <input type="date" name="tanggal_mulai" class="form-control border-0 shadow-none fs-6" required value="{{ date('Y-m-d') }}">
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                <i class="far fa-calendar-check me-1 text-muted"></i> Tanggal Berakhir
+                            <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                Tanggal Berakhir
                                 <span class="text-danger">*</span>
                             </label>
-                            <input type="date" name="tanggal_berakhir" class="form-control form-control-lg" required value="{{ date('Y-m-d') }}">
+                            <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                                <input type="date" name="tanggal_berakhir" class="form-control border-0 shadow-none fs-6" required value="{{ date('Y-m-d') }}">
+                            </div>
                         </div>
                     </div>
                     <div class="mb-1">
-                        <label class="form-label fw-semibold">
-                            <i class="fas fa-sticky-note me-1 text-muted"></i> Keterangan <span class="text-muted small">(Opsional)</span>
+                        <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                            Keterangan <span class="text-muted small"></span>
                         </label>
-                        <textarea name="keterangan" class="form-control" rows="3" placeholder="Catatan/instruksi tambahan untuk tim..."></textarea>
+                        <textarea name="keterangan" class="form-control shadow-sm rounded-3 border-0" rows="3" placeholder="Catatan/instruksi tambahan untuk tim..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-top px-4 py-3 bg-light">
-                    <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn so-btn-primary text-white rounded-pill px-4">
-                        <i class="fas fa-save me-1"></i> Simpan Jadwal
+                <div class="modal-footer bg-light border-top-0 pt-2 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070; border-color: #253070;">
+                        <i class="fas fa-save me-1"></i> Simpan
                     </button>
                 </div>
             </form>

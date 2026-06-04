@@ -10,7 +10,7 @@
         <h3 class="fw-bold mb-0">Pengajuan Perbaikan Aset</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                     <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
                 </a>

@@ -13,7 +13,7 @@
         <h3 class="fw-bold mb-0">Detail Aset - {{ $aset->nomor_aset }}</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                 <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
                 </a>                
@@ -69,6 +69,18 @@
                             <h6 class="fw-bold text-primary mb-0">Dokumentasi Aset</h6>
                         </div>
                         <div class="card-body p-0 text-center">
+                            @php
+                                $latestLogPhoto = $aset->logAset->where('foto_bukti', '!=', null)->sortByDesc('tanggal_cek')->first();
+                            @endphp
+
+                            @if($latestLogPhoto)
+                                <div class="mb-3 p-2 text-start">
+                                    <div class="small text-muted mb-1">Foto Dokumentasi Terbaru (Monitoring)</div>
+                                    <img src="{{ Storage::url($latestLogPhoto->foto_bukti) }}" class="img-fluid mb-2 rounded" alt="Foto Dokumentasi" style="cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#imagePreviewModal" onclick="document.getElementById('previewImage').src=this.src;">
+                                    <div class="small text-muted">Diunggah: {{ \Carbon\Carbon::parse($latestLogPhoto->tanggal_cek)->format('d M Y, H:i') }} @if($latestLogPhoto->dicatatOleh) oleh {{ $latestLogPhoto->dicatatOleh->firstname }} @endif</div>
+                                </div>
+                            @endif
+
                             @if($aset->foto->isNotEmpty())
                                 @foreach($aset->foto as $foto)
                                     <img src="{{ filter_var($foto->path_foto, FILTER_VALIDATE_URL) ? $foto->path_foto : asset('storage/' . $foto->path_foto) }}"
@@ -80,10 +92,12 @@
                                          onclick="document.getElementById('previewImage').src=this.src;">
                                 @endforeach
                             @else
-                                <div class="py-5 bg-light text-muted">
-                                    <i class="fas fa-camera fa-3x mb-2"></i><br>
-                                    Tidak ada foto
-                                </div>
+                                @if(!$latestLogPhoto)
+                                    <div class="py-5 bg-light text-muted">
+                                        <i class="fas fa-camera fa-3x mb-2"></i><br>
+                                        Tidak ada foto
+                                    </div>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -285,7 +299,7 @@
 
                     {{-- TOMBOL TRIGGER MODAL MONITORING --}}
                     <button type="button" class="btn btn-navy d-flex align-items-center rounded-pill" style="background-color: #253070; color: white;" data-bs-toggle="modal" data-bs-target="#modalMonitoring">
-                        <i class="fas fa-search-plus me-2"></i> Update Monitoring Log
+                        <i class="fas fa-search-plus me-2"></i> Monitoring Aset
                     </button>
                 </div>
             </div>
@@ -425,7 +439,7 @@
 
                         <div class="col-md-6 mt-3">
                             <label class="form-label fw-bold text-navy mb-1 small">Update Penempatan Divisi</label>
-                            <select name="kode_organisasi" class="form-select bg-white border-0 shadow-sm">
+                            <select name="kode_organisasi" class="form-select bg-white border-0 shadow-sm js-org-select2" data-placeholder="Cari struktur organisasi">
                                 <option value="">-- Tetap di ({{ $aset->organisasi_terikat }}) --</option>
                                 @php
                                     $currentOrgKode = $aset->getKodeOrganisasiAttribute();
@@ -608,6 +622,19 @@
 @push('scripts')
 <script>
     window.addEventListener('load', function() {
+        if (window.jQuery && $.fn.select2) {
+            $('.js-org-select2').each(function () {
+                const $select = $(this);
+                const dropdownParent = $select.closest('.modal').length ? $select.closest('.modal') : $(document.body);
+
+                $select.select2({
+                    width: '100%',
+                    dropdownParent: dropdownParent,
+                    placeholder: $select.data('placeholder') || 'Cari struktur organisasi'
+                });
+            });
+        }
+
         const swalConfig = {
             showConfirmButton: true,
             confirmButtonText: 'OK',

@@ -7,8 +7,22 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/>
 
 <div class="container-fluid px-1 py-0 mt-0">
-    <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold mb-0">Mengelola Jenis Kategori Aset</h3>
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
+            <li class="nav-home d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
+                </a>                
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Mengelola Jenis Kategori Aset</span>
+            </li>
+        </ul>
     </div>
 
     {{-- FILTER & TOOLBAR --}}

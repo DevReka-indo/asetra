@@ -238,6 +238,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item {{ request()->routeIs('perbaikan.*') ? 'active_' : '' }}">
+                    <a href="{{ route('perbaikan.index') }}" class="nav-link">
+                        <i class="fas fa-tools"></i>
+                        <p>Pengajuan Perbaikan</p>
+                    </a>
+                </li>
+
                 <li class="nav-item {{ request()->routeIs('stock-opname.index') || request()->routeIs('stock-opname.show') ? 'active_' : '' }}">
                     <a href="{{ route('stock-opname.index') }}" class="nav-link">
                         <i class="fas fa-boxes"></i>
@@ -252,13 +259,6 @@
                         </a>
                     </li>
                 @endif
-
-                <li class="nav-item {{ request()->routeIs('perbaikan.*') ? 'active_' : '' }}">
-                    <a href="{{ route('perbaikan.index') }}" class="nav-link">
-                        <i class="fas fa-tools"></i>
-                        <p>Pengajuan Perbaikan</p>
-                    </a>
-                </li>
 
                 <li class="nav-section">
                     <span class="text-section">Lainnya</span>

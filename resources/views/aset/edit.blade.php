@@ -13,7 +13,7 @@
         <h3 class="fw-bold mb-0">Edit Data Aset</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                 <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
                 </a>                
@@ -47,7 +47,7 @@
                 </div>
             @endif
             
-            <form action="{{ route('aset.update', $aset->id) }}" method="POST" enctype="multipart/form-data" id="formAset" autocomplete="off">
+            <form action="{{ route('aset.update', $aset->id) }}" method="POST" enctype="multipart/form-data" id="formAset" autocomplete="off" novalidate>
                 @csrf
                 @method('PUT')
 
@@ -92,6 +92,7 @@
                                         </optgroup>
                                     </select>
                                 </div>
+                                                                @error('kategori_id')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                               </div>
 
                               <div class="col-md-6">
@@ -100,6 +101,7 @@
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-box-open"></i></span>
                                     <input type="text" name="nama_aset" id="nama_aset" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('nama_aset', $aset->nama_aset) }}" placeholder="Contoh: Gedung Kantor Utama" required>
                                 </div>
+                                                                @error('nama_aset')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-3">
@@ -108,6 +110,7 @@
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
                                     <input type="date" name="tanggal_kapitalisasi" id="id_tahun" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('tanggal_kapitalisasi', optional($aset->tanggal_kapitalisasi)->format('Y-m-d') ?? date('Y-m-d')) }}" required>
                                 </div>
+                                @error('tanggal_kapitalisasi')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-3">
@@ -116,6 +119,7 @@
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
                                     <input type="text" name="merek" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('merek', $aset->merek) }}" placeholder="Lenovo / Honda" required>
                                 </div>
+                                @error('merek')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-12">
@@ -132,6 +136,7 @@
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-align-left"></i></span>
                                     <textarea name="deskripsi" class="form-control border-start-0 ps-0 shadow-none" rows="2" placeholder="Rincian detail aset..." required>{{ old('deskripsi', $aset->deskripsi) }}</textarea>
                                 </div>
+                                @error('deskripsi')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
                         </div>
                     </div>
@@ -150,7 +155,7 @@
                                 <label class="form-label fw-bold text-navy mb-1 small">Lokasi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
-                                    <select name="lokasi_id" id="dropdown_lokasi" class="form-select border-start-0 ps-0 shadow-none" required>
+                                    <select name="lokasi_id" id="dropdown_lokasi" class="form-select border-start-0 ps-0 shadow-none js-searchable-select" data-placeholder="Cari lokasi aset" required>
                                         <option value="" disabled>-- Pilih Lokasi --</option>
                                         @foreach($lokasi as $lok)
                                             <option value="{{ $lok->lokasi_id }}" 
@@ -162,6 +167,7 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                @error('lokasi_id')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-6">
@@ -195,6 +201,7 @@
                                         <option value="Tidak Teridentifikasi" {{ old('status_kondisi', $aset->status_kondisi) == 'Tidak Teridentifikasi' ? 'selected' : '' }}>Tidak Teridentifikasi</option>
                                     </select>
                                 </div>
+                                @error('status_kondisi')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
                             
 
@@ -212,39 +219,42 @@
                                         <option value="Hilang" {{ old('status_aset', $aset->status_aset) == 'Hilang' ? 'selected' : '' }}>Hilang</option>
                                     </select>
                                 </div>
+                                @error('status_aset')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">PIC Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-tie"></i></span>
-                                    <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                    <select name="pic_id" class="form-select border-start-0 ps-0 shadow-none js-searchable-select" data-placeholder="Cari PIC aset" required>
                                         <option value="" selected disabled>-- Pilih User --</option>
                                         @foreach($users as $user)
                                             <option value="{{ $user->id }}" {{ old('pic_id', $aset->pic_id) == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
                                         @endforeach
                                     </select>
                                 </div>
+                                @error('pic_id')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label fw-bold text-navy mb-1 small">Penanggung Jawab Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-user-shield"></i></span>
-                                    <select name="penanggung_jawab_id" class="form-select border-start-0 ps-0 shadow-none" required>
+                                    <select name="penanggung_jawab_id" class="form-select border-start-0 ps-0 shadow-none js-searchable-select" data-placeholder="Cari penanggung jawab aset" required>
                                         <option value="" selected disabled>-- Pilih User --</option>
                                         @foreach($users as $user)
                                             <option value="{{ $user->id }}" {{ old('penanggung_jawab_id', $aset->penanggung_jawab_id) == $user->id ? 'selected' : '' }}>{{ $user->firstname }} {{ $user->lastname }}</option>
                                         @endforeach
                                     </select>
                                 </div>
+                                @error('penanggung_jawab_id')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-12">
                                 <label class="form-label fw-bold text-navy mb-1 small">Struktur Organisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-sitemap"></i></span>
-                                    <select class="form-select border-start-0 ps-0 shadow-none" id="kode_organisasi" name="kode_organisasi" required>
+                                    <select class="form-select border-start-0 ps-0 shadow-none js-org-select2" id="kode_organisasi" name="kode_organisasi" data-placeholder="Cari struktur organisasi" required>
                                         <option value="" disabled>-- Pilih Organisasi --</option>
                                         @php
                                             if (!function_exists('renderOrgOptions')) {
@@ -292,6 +302,7 @@
                                         @endphp
                                     </select>
                                 </div>
+                                @error('kode_organisasi')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
                         </div>
                     </div>
@@ -344,7 +355,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{{ route('aset.index') }}" class="btn btn-outline-secondary px-4 bg-white rounded-pill border">Batal</a>
+                    <a href="{{ route('aset.index') }}" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border">Batal</a>
                     <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
                         <i class="fas fa-save me-1"></i> Simpan Perubahan
                     </button>
@@ -358,6 +369,97 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('formAset');
+
+        function clearFieldError(field) {
+            field.classList.remove('is-invalid');
+            const wrapper = field.closest('.input-group') || field;
+            const next = wrapper.nextElementSibling;
+            if (next && next.classList.contains('invalid-feedback-custom')) {
+                next.remove();
+            }
+        }
+
+        function showFieldError(field, message) {
+            field.classList.add('is-invalid');
+            const wrapper = field.closest('.input-group') || field;
+            let errorEl = wrapper.nextElementSibling;
+
+            if (!errorEl || !errorEl.classList.contains('invalid-feedback-custom')) {
+                errorEl = document.createElement('div');
+                errorEl.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                wrapper.parentNode.insertBefore(errorEl, wrapper.nextSibling);
+            }
+
+            errorEl.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>' + message;
+        }
+
+        function validateRequiredFields() {
+            let firstInvalid = null;
+            const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+            requiredFields.forEach(function(field) {
+                clearFieldError(field);
+
+                const isEmpty = field.tagName === 'SELECT'
+                    ? !field.value
+                    : field.type === 'file'
+                        ? !field.files || field.files.length === 0
+                        : !String(field.value || '').trim();
+
+                if (isEmpty) {
+                    const label = field.closest('.col-md-12, .col-md-6, .col-md-3, .mb-4, .mb-2')?.querySelector('label');
+                    const labelText = label ? label.textContent.replace('*', '').trim() : (field.getAttribute('placeholder') || 'Kolom');
+                    showFieldError(field, labelText + ' wajib diisi.');
+                    if (!firstInvalid) {
+                        firstInvalid = field;
+                    }
+                }
+            });
+
+            return firstInvalid;
+        }
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const firstInvalid = validateRequiredFields();
+                if (firstInvalid) {
+                    e.preventDefault();
+                    firstInvalid.focus();
+                }
+            });
+        }
+
+        if (window.jQuery && $.fn.select2) {
+            $('.js-searchable-select').each(function () {
+                const $select = $(this);
+                $select.select2({
+                    width: '100%',
+                    placeholder: $select.data('placeholder') || '',
+                    allowClear: false
+                });
+            });
+
+            $('#dropdown_lokasi').on('change', function() {
+                const opt = this.options[this.selectedIndex];
+                inputDetail.value = (opt && opt.value !== "") ? (opt.getAttribute('data-detail') || '') : '';
+                updateNomor();
+            });
+        }
+
+        if (window.jQuery && $.fn.select2) {
+            $('.js-org-select2').each(function () {
+                const $select = $(this);
+                const dropdownParent = $select.closest('.modal').length ? $select.closest('.modal') : $(document.body);
+
+                $select.select2({
+                    width: '100%',
+                    dropdownParent: dropdownParent,
+                    placeholder: $select.data('placeholder') || 'Cari struktur organisasi'
+                });
+            });
+        }
+
         const inputDisplay = document.getElementById('nomor_aset_display');
         const inputDetail = document.getElementById('input_detail_lokasi');
         

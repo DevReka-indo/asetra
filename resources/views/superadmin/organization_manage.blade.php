@@ -16,7 +16,23 @@
  </head>
 
 <div class="container-fluid px-1 py-0 mt-0">
-        <h3 class="fw-bold mb-4">Manajemen Struktur Organisasi</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Manajemen Struktur Organisasi</h3>
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
+            <li class="nav-home d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
+                </a>                
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Struktur Organisasi</span>
+            </li>
+        </ul>
+    </div>
         <div class="card shadow-sm border-0">
             <div class="card-body">
 
@@ -156,7 +172,7 @@
                         <label for="parent_id" class="form-label fw-bold small flex-grow-1" style="color: #253070;">PARENT STRUKTUR</label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-project-diagram"></i></span>
-                            <select class="form-select border-start-0 fs-6" id="parent_id" name="parent_id">
+                            <select class="form-select border-start-0 fs-6 js-parent-org-select2" id="parent_id" name="parent_id" data-placeholder="Cari struktur organisasi">
                                 <option value="">-- Pilih induk struktur --</option>
                                 @php
                                     function renderOrgOptions($node, $level = 0)
@@ -441,6 +457,20 @@
             }
             if (deleteModal) {
                 deleteModal.show();
+            }
+        }
+
+        if (window.jQuery && $.fn.select2) {
+            const $parentSelect = $('#parent_id');
+            const $addModal = $('#addUserModal');
+
+            if ($parentSelect.length && !$parentSelect.hasClass('select2-hidden-accessible')) {
+                $parentSelect.select2({
+                    width: '100%',
+                    dropdownParent: $addModal.length ? $addModal : $(document.body),
+                    placeholder: $parentSelect.data('placeholder') || 'Cari struktur organisasi',
+                    allowClear: true
+                });
             }
         }
     </script>

@@ -6,10 +6,10 @@
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold mb-0">Pemindai Barcode Aset</h3>
+        <h3 class="fw-bold mb-0">Scanner Barcode Aset</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ route('superadmin.dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                     <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
                 </a>                
@@ -32,7 +32,7 @@
     </div>
 
     <div class="row pt-2">
-        <div class="col-lg-6 col-md-8 mx-auto">
+        <div class="col-12 mx-auto" style="max-width: 560px;">
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-3 border-0 shadow-sm" role="alert">
                     <i class="fas fa-exclamation-triangle me-2"></i> {{ session('error') }}
@@ -129,7 +129,7 @@
                         <div class="manual-input-group">
                             <input type="text" id="manual_nomor_aset" class="manual-input-field" placeholder="Contoh: 0001/REKA/IT-A/..." required>
                             <button type="button" id="btnManualSubmit" class="btn-search-manual">
-                                <i class="fas fa-search"></i> Proses Aset
+                                <i class="fas fa-search"></i> Cari Aset
                             </button>
                         </div>
                     </div>

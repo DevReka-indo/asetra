@@ -7,6 +7,20 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="fw-bold mb-0">{{ isset($pageTitle) ? $pageTitle : 'Data Aset Perusahaan' }}</h3>
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
+            <li class="nav-home d-flex align-items-center">
+                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>                    
+                </a>                
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">{{ isset($pageTitle) ? $pageTitle : 'Data Aset Perusahaan' }}</span>
+            </li>
+        </ul>
     </div>
 
     {{-- FILTER --}}
@@ -101,7 +115,7 @@
                     </div>
 
                     {{-- Filter Lokasi --}}
-                    @if(!request()->routeIs('aset.pic'))
+                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()))
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -114,7 +128,7 @@
                     @endif
 
                     {{-- Filter Divisi --}}
-                    @if(!request()->routeIs('aset.pic'))
+                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()))
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Divisi</label>
                         <select name="divisi_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -127,7 +141,7 @@
                     @endif
 
                     {{-- Filter Departemen --}}
-                    @if(!request()->routeIs('aset.pic'))
+                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()))
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
                         <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -345,12 +359,12 @@
                     {{-- Pilih Lokasi --}}
                     <div class="mb-4">
                         <label class="form-label fw-bold small text-uppercase" style="color: #253070; font-size: 0.72rem;">
-                            <i class="fas fa-map-marker-alt me-1"></i> Pilih Ruangan (Lokasi) <span class="text-danger">*</span>
+                            <i class="fas fa-map-marker-alt me-1"></i> Pilih Ruangan <span class="text-danger">*</span>
                         </label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
                             <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-door-open"></i></span>
                             <select class="form-select border-0 shadow-none fs-6" id="lokasiSelect" name="lokasi_id" required>
-                                <option value="">-- Pilih Lokasi --</option>
+                                <option value="">-- Pilih Ruangan --</option>
                                 @foreach ($lokasis as $lok)
                                     <option value="{{ $lok->lokasi_id }}">{{ $lok->nama_lokasi ?? $lok->nm_lokasi_aset }}</option>
                                 @endforeach
