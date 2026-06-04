@@ -133,13 +133,6 @@
                         </select>
                     </div>
 
-                    {{-- Tombol Reset --}}
-                    <div class="col-auto ms-auto d-flex gap-2">
-                        {{-- Tombol Reset --}}
-                        <a href="{{ route('aset.index') }}" class="btn px-4 rounded-3 d-flex align-items-center text-white" style="background-color: #1b53a7; border-color: #48abf7;" title="Reset Filter">
-                            <i class="fas fa-undo me-1"></i> Reset
-                        </a>
-                    </div>
                 </div>
 
             </form>
@@ -584,6 +577,21 @@ document.addEventListener('DOMContentLoaded', function() {
     @if(session('warning'))
         Swal.fire({ ...swalConfig, icon: 'warning', title: 'Perhatian!', text: '{{ session('warning') }}' });
     @endif
+
+    // Auto-refresh when search input is cleared
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                this.form.submit();
+            }
+        });
+        searchInput.addEventListener('search', function() {
+            if (this.value.trim() === '') {
+                this.form.submit();
+            }
+        });
+    }
 });
 </script>
 @endsection
