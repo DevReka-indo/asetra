@@ -59,10 +59,6 @@
 
                 <div class="col-auto ms-auto">
                     <div class="d-flex gap-2">
-                        <a href="{{ route('kode-bagian.index') }}" class="btn px-4 rounded-3 d-flex align-items-center text-white" style="background-color: #1b53a7; border-color: #1b53a7;">
-                            <i class="fas fa-undo me-1"></i> Reset
-                        </a>
-
                         <button type="button" class="btn btn-primary px-4 rounded-3 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTambah">
                             <i class="fas fa-plus me-1"></i> Tambah Kode Bagian
                         </button>
@@ -172,15 +168,15 @@
             <div class="modal-body p-4 bg-light">
                 <div class="bg-white rounded-4 p-4 shadow-sm border-0">
                     <div class="row align-items-center mb-3">
+                        <div class="col-5 text-muted small text-uppercase fw-bold"><i class="fas fa-building me-2 text-primary"></i>Nama Bagian</div>
+                        <div class="col-7 fw-bold text-dark fs-6">{{ $row->nama_bagian }}</div>
+                    </div>
+                    <hr class="text-muted opacity-25">
+                    <div class="row align-items-center mb-3">
                         <div class="col-5 text-muted small text-uppercase fw-bold"><i class="fas fa-barcode me-2 text-primary"></i>Kode Bagian</div>
                         <div class="col-7">
                             <span class="badge bg-primary px-3 py-2 fs-6 shadow-sm rounded-pill">{{ $row->kode_bagian }}</span>
                         </div>
-                    </div>
-                    <hr class="text-muted opacity-25">
-                    <div class="row align-items-center mb-3">
-                        <div class="col-5 text-muted small text-uppercase fw-bold"><i class="fas fa-building me-2 text-primary"></i>Nama Bagian</div>
-                        <div class="col-7 fw-bold text-dark fs-6">{{ $row->nama_bagian }}</div>
                     </div>
                     <hr class="text-muted opacity-25">
                     <div class="row align-items-center mb-3">
@@ -208,7 +204,7 @@
 {{-- MODAL TAMBAH --}}
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('kode-bagian.store') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
+        <form action="{{ route('kode-bagian.store') }}" method="POST" id="formTambahKodeBagian" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
             @csrf
             <input type="hidden" name="form_type" value="tambah">
 
@@ -221,21 +217,10 @@
 
             <div class="modal-body p-4 bg-light">
                 <div class="mb-4">
-                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE BAGIAN <span class="text-danger">*</span></label>
-                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
-                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
-                        <input type="text" name="kode_bagian" class="form-control border-start-0 fs-6 @error('kode_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_bagian') : '' }}" placeholder="Contoh: TI"> 
-                    </div>
-                    @if(old('form_type') == 'tambah')
-                        @error('kode_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
-                    @endif
-                </div>
-
-                <div class="mb-4">
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA BAGIAN <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-building"></i></span>
-                        <input type="text" name="nama_bagian" class="form-control border-start-0 fs-6 @error('nama_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_bagian') : '' }}" placeholder="Contoh: Teknologi Informasi">
+                        <input type="text" name="nama_bagian" class="form-control border-start-0 fs-6 @error('nama_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_bagian') : '' }}" placeholder="Contoh: Teknologi Informasi" required maxlength="255">
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('nama_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -243,10 +228,21 @@
                 </div>
 
                 <div class="mb-4">
+                    <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE BAGIAN <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                        <input type="text" name="kode_bagian" class="form-control border-start-0 fs-6 @error('kode_bagian') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_bagian') : '' }}" placeholder="Contoh: TI" required maxlength="20"> 
+                    </div>
+                    @if(old('form_type') == 'tambah')
+                        @error('kode_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                    @endif
+                </div>
+
+                <div class="mb-4">
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KATEGORI</label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tags"></i></span>
-                        <input type="text" name="kategori" class="form-control border-start-0 fs-6 @error('kategori') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kategori') : '' }}" placeholder="Contoh: Departemen">
+                        <input type="text" name="kategori" class="form-control border-start-0 fs-6 @error('kategori') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kategori') : '' }}" placeholder="Contoh: Departemen" maxlength="100">
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('kategori') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -280,7 +276,7 @@
     <!-- Modal Edit -->
     <div class="modal fade" id="modalEdit{{ $row->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form action="{{ route('kode-bagian.update', $row->id) }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
+            <form action="{{ route('kode-bagian.update', $row->id) }}" method="POST" id="formEditKodeBagian{{ $row->id }}" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="form_type" value="edit_{{ $row->id }}">
@@ -293,22 +289,13 @@
                 </div>
 
                 <div class="modal-body p-4 bg-light">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE BAGIAN <span class="text-danger">*</span></label>
-                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
-                            <input type="text" name="kode_bagian" class="form-control border-start-0 fs-6 @error('kode_bagian') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->id ? old('kode_bagian') : $row->kode_bagian }}"> 
-                        </div>
-                        @if(old('form_type') == 'edit_'.$row->id)
-                            @error('kode_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
-                        @endif
-                    </div>
+                    
 
                     <div class="mb-4">
                         <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA BAGIAN <span class="text-danger">*</span></label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-building"></i></span>
-                            <input type="text" name="nama_bagian" class="form-control border-start-0 fs-6 @error('nama_bagian') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->id ? old('nama_bagian') : $row->nama_bagian }}">
+                            <input type="text" name="nama_bagian" class="form-control border-start-0 fs-6 @error('nama_bagian') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->id ? old('nama_bagian') : $row->nama_bagian }}" required maxlength="255">
                         </div>
                         @if(old('form_type') == 'edit_'.$row->id)
                             @error('nama_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -316,10 +303,21 @@
                     </div>
 
                     <div class="mb-4">
+                        <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE BAGIAN <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                            <input type="text" name="kode_bagian" class="form-control border-start-0 fs-6 @error('kode_bagian') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->id ? old('kode_bagian') : $row->kode_bagian }}" required maxlength="20"> 
+                        </div>
+                        @if(old('form_type') == 'edit_'.$row->id)
+                            @error('kode_bagian') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                        @endif
+                    </div>
+
+                    <div class="mb-4">
                         <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KATEGORI</label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tags"></i></span>
-                            <input type="text" name="kategori" class="form-control border-start-0 fs-6 @error('kategori') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->id ? old('kategori') : $row->kategori }}">
+                            <input type="text" name="kategori" class="form-control border-start-0 fs-6 @error('kategori') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->id ? old('kategori') : $row->kategori }}" maxlength="100">
                         </div>
                         @if(old('form_type') == 'edit_'.$row->id)
                             @error('kategori') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -415,6 +413,10 @@
                     const form = this.querySelector('form');
                     if (form) {
                         form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                        form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                        form.querySelectorAll('.input-group').forEach(el => {
+                            el.classList.remove('border', 'border-danger');
+                        });
                         form.reset();
                     }
                 });
@@ -425,6 +427,183 @@
                     const form = this.querySelector('form');
                     if (form) {
                         form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                        form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                        form.querySelectorAll('.input-group').forEach(el => {
+                            el.classList.remove('border', 'border-danger');
+                        });
+                        form.reset();
+                    }
+                });
+            });
+
+            // Client-side and AJAX Validation on Submit
+            const formsToValidate = document.querySelectorAll('#formTambahKodeBagian, form[id^="formEditKodeBagian"]');
+            formsToValidate.forEach(form => {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault(); // Prevent standard submission
+
+                    // Clear any old custom error messages and styles
+                    form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.input-group').forEach(el => {
+                        el.classList.remove('border', 'border-danger');
+                    });
+
+                    let isValid = true;
+                    let firstInvalidEl = null;
+
+                    const fields = form.querySelectorAll('input, select');
+                    fields.forEach(field => {
+                        if (field.type === 'hidden') return;
+                        
+                        // Try to find the associated label text
+                        let labelText = '';
+                        const formGroup = field.closest('.mb-4, .mb-2');
+                        if (formGroup) {
+                            const labelEl = formGroup.querySelector('label');
+                            if (labelEl) {
+                                labelText = labelEl.textContent.replace('*', '').trim();
+                            }
+                        }
+                        
+                        // Fallback to name or placeholder
+                        if (!labelText) {
+                            labelText = field.getAttribute('placeholder') || field.getAttribute('name') || 'Kolom';
+                        }
+
+                        if (field.hasAttribute('required') && (!field.value || (field.tagName === 'SELECT' && field.value === ''))) {
+                            isValid = false;
+                            
+                            // Style input field and group
+                            field.classList.add('is-invalid');
+                            const inputGroup = field.closest('.input-group');
+                            if (inputGroup) {
+                                inputGroup.classList.add('border', 'border-danger');
+                            }
+
+                            // Create inline error message element
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} wajib diisi.`;
+                            
+                            // Insert error message element
+                            const targetAnchor = inputGroup || field;
+                            targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                            if (!firstInvalidEl) {
+                                firstInvalidEl = targetAnchor;
+                            }
+                        } else if (field.value) {
+                            const maxLen = field.getAttribute('maxlength');
+                            if (maxLen && field.value.length > parseInt(maxLen)) {
+                                isValid = false;
+                                
+                                // Style input field and group
+                                field.classList.add('is-invalid');
+                                const inputGroup = field.closest('.input-group');
+                                if (inputGroup) {
+                                    inputGroup.classList.add('border', 'border-danger');
+                                }
+
+                                // Create inline error message element
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                                errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} tidak boleh lebih dari ${maxLen} karakter.`;
+                                
+                                // Insert error message element
+                                const targetAnchor = inputGroup || field;
+                                targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                                if (!firstInvalidEl) {
+                                    firstInvalidEl = targetAnchor;
+                                }
+                            }
+                        }
+                    });
+
+                    if (!isValid) {
+                        if (firstInvalidEl) {
+                            firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return;
+                    }
+
+                    // If client-side validation passes, submit via AJAX (fetch)
+                    Swal.fire({
+                        title: 'Menyimpan...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    try {
+                        const formData = new FormData(form);
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+
+                        const responseData = await response.json();
+
+                        Swal.close();
+
+                        if (response.ok) {
+                            // On success, show SweetAlert and reload the page
+                            await Swal.fire({
+                                ...swalConfig,
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: responseData.message || 'Data berhasil disimpan.'
+                            });
+                            location.reload();
+                        } else if (response.status === 422) {
+                            // Validation error (like duplicate code)
+                            const errors = responseData.errors;
+                            
+                            Object.keys(errors).forEach(fieldName => {
+                                const field = form.querySelector(`[name="${fieldName}"]`);
+                                if (field) {
+                                    field.classList.add('is-invalid');
+                                    const inputGroup = field.closest('.input-group');
+                                    if (inputGroup) {
+                                        inputGroup.classList.add('border', 'border-danger');
+                                    }
+
+                                    // Display error message
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${errors[fieldName].join(', ')}`;
+
+                                    const targetAnchor = inputGroup || field;
+                                    targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+                                }
+                            });
+
+                            // Scroll to first invalid element
+                            const firstErrorField = form.querySelector('.is-invalid');
+                            if (firstErrorField) {
+                                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        } else {
+                            // Other server errors
+                            Swal.fire({
+                                ...swalConfig,
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: responseData.message || 'Terjadi kesalahan pada server.'
+                            });
+                        }
+                    } catch (err) {
+                        Swal.close();
+                        Swal.fire({
+                            ...swalConfig,
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Tidak dapat menghubungi server. Silakan coba lagi.'
+                        });
                     }
                 });
             });
