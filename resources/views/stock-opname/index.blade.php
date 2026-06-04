@@ -51,17 +51,13 @@
     @endphp
     <div class="so-hero d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div class="so-hero-content">
-            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2" style="background: rgba(255,255,255,.15);">
-                <i class="fas fa-clipboard-check"></i>
-                <span class="small fw-semibold">Pusat Kontrol Stock Opname</span>
-            </div>
             <h4 class="fw-bold mb-1">Kelola Periode &amp; Pantau Progres Pengecekan Aset</h4>
             <p class="mb-0 opacity-75">Buat jadwal opname, pantau progres tim per departemen, dan sinkronkan temuan ke master data dengan rapi.</p>
         </div>
         <div class="so-hero-content">
             @if($sesiAktif > 0)
                 <button class="btn btn-light fw-bold px-4 rounded-pill shadow-sm" onclick="Swal.fire('Perhatian', 'Gagal membuat jadwal baru. Harap selesaikan jadwal opname aktif terlebih dahulu.', 'warning')">
-                    <i class="fas fa-exclamation-circle me-2 text-warning"></i> Buat Jadwal Baru
+                    <i class="fas fa-plus-circle me-2 text-warning"></i> Buat Jadwal Baru
                 </button>
             @else
                 <button class="btn btn-light fw-bold px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#createModal">
@@ -155,7 +151,7 @@
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="stockOpnameTable">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
                             <th width="5%" class="text-center">No</th>
                             <th>Periode</th>
@@ -306,14 +302,14 @@
             "order": [],
             "dom": "rtip", // Hides the default length menu 'l' and search box 'f'
             "language": {
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 "infoEmpty": "",
                 "zeroRecords": "Tidak ada data ditemukan",
                 "paginate": {
-                    "first": "Awal",
-                    "last": "Akhir",
-                    "next": "Lanjut",
-                    "previous": "Kembali"
+                    "first": "«",
+                    "last": "»",
+                    "next": "›",
+                    "previous": "‹"
                 }
             }
         });

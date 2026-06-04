@@ -10,22 +10,31 @@
 <div class="container-fluid px-1 py-0 mt-0 page-stock-opname-show">
 
     {{-- Breadcrumb --}}
-    <ul class="breadcrumbs d-flex align-items-center p-0 mb-2" style="list-style: none;">
-        <li class="nav-home d-flex align-items-center">
-            <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
-                <i class="fas fa-home me-2" style="font-size: 14px;"></i>
-                <span style="font-size: 13px; font-weight: 500;">Dashboard</span>
-            </a>
-        </li>
-        <li class="separator text-muted px-2"><span style="font-size: 13px;">-</span></li>
-        <li class="nav-item">
-            <a href="{{ route('stock-opname.index') }}" class="text-muted text-decoration-none" style="font-size: 13px; font-weight: 500;">Stock Opname</a>
-        </li>
-        <li class="separator text-muted px-2"><span style="font-size: 13px;">-</span></li>
-        <li class="nav-item">
-            <span class="text-muted" style="font-size: 13px; font-weight: 500;">{{ $session->periode }}</span>
-        </li>
-    </ul>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0">Detail Stock Opname</h3>
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+            <li class="nav-home d-flex align-items-center">
+                <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
+                </a>
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <a href="{{ route('stock-opname.user-index') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Stock Opname</span>
+                </a>
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item">
+                <span class="text-muted" style="font-size: 13px; font-weight: 500;">{{ $session->periode }}</span>
+            </li>
+        </ul>
+    </div>
 
 
     {{-- HEADER PERIODE --}}
@@ -33,7 +42,6 @@
         <div class="so-header-content row align-items-center g-3">
             <div class="col-md-7">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge-soft-light"><i class="fas fa-clipboard-check me-1"></i> Dashboard Pemantauan</span>
                     @if($session->status == 'aktif')
                         <span class="badge-soft-light" style="background: rgba(40,167,69,.25); border-color: rgba(255,255,255,.4);">
                             <i class="fas fa-circle me-1" style="font-size:.5rem; vertical-align: middle;"></i> Sedang Berjalan
@@ -217,7 +225,7 @@
             <div class="panel-card mb-3">
                 <div class="panel-head">
                     <div class="section-title mb-0">
-                        <span class="dot" style="background:#dc3545;"></span> Atensi Khusus Bagian Umum
+                        <span class="dot" style="background:#dc3545;"></span> Informasi Perubahan
                     </div>
                     @if($totalAnomali > 0)
                         <span class="badge bg-danger rounded-pill px-3 py-2">{{ $totalAnomali }}</span>
@@ -232,7 +240,11 @@
                             <div class="anomali-item lokasi">
                                 <div class="anomali-icon"><i class="fas fa-arrow-right-arrow-left"></i></div>
                                 <div class="flex-grow-1">
-                                    <div class="anomali-aset">{{ $item->aset->nomor_aset }}</div>
+                                    <div class="anomali-aset">
+                                        <a href="{{ route('aset.show', $item->aset->id) }}" class="text-decoration-none" style="color: #253070;">
+                                            {{ $item->aset->nomor_aset }}
+                                        </a>
+                                    </div>
                                     <div class="anomali-meta">
                                         Sistem: <strong>{{ $item->aset->lokasi->nama_lokasi ?? '-' }}</strong><br>
                                         Fisik:&nbsp; <strong class="text-warning">{{ is_numeric($item->lokasi_temuan) ? (\App\Models\LokasiAset::find($item->lokasi_temuan)->nama_lokasi ?? $item->lokasi_temuan) : $item->lokasi_temuan }}</strong>
@@ -241,19 +253,23 @@
                             </div>
                         @endforeach
                         @if(count($anomaliLokasi) > 5)
-                            <small class="text-muted d-block mt-2">+{{ count($anomaliLokasi) - 5 }} anomali lokasi lainnya</small>
+                            <small class="text-muted d-block mt-2">+{{ count($anomaliLokasi) - 5 }} perubahan lokasi lainnya</small>
                         @endif
                     @endif
 
                     @if(count($anomaliKondisi) > 0)
                         <h6 class="small fw-bold text-uppercase text-muted {{ count($anomaliLokasi) > 0 ? 'mt-4' : '' }} mb-3" style="letter-spacing:.04em;">
-                            <i class="fas fa-exclamation-triangle text-danger me-1"></i> Kondisi Turun Drastis
+                            <i class="fas fa-exclamation-triangle text-danger me-1"></i> Perubahan Kondisi
                         </h6>
                         @foreach(collect($anomaliKondisi)->take(5) as $item)
                             <div class="anomali-item">
                                 <div class="anomali-icon"><i class="fas fa-tools"></i></div>
                                 <div class="flex-grow-1">
-                                    <div class="anomali-aset">{{ $item->aset->nomor_aset }}</div>
+                                    <div class="anomali-aset">
+                                        <a href="{{ route('aset.show', $item->aset->id) }}" class="text-decoration-none" style="color: #253070;">
+                                            {{ $item->aset->nomor_aset }}
+                                        </a>
+                                    </div>
                                     <div class="anomali-meta">
                                         Status: <span class="text-danger fw-bold">{{ $item->kondisi_temuan }}</span> 
                                         <span class="text-muted">(sebelumnya Baik)</span>
@@ -265,7 +281,7 @@
                             </div>
                         @endforeach
                         @if(count($anomaliKondisi) > 5)
-                            <small class="text-muted d-block mt-2">+{{ count($anomaliKondisi) - 5 }} penurunan kondisi lainnya</small>
+                            <small class="text-muted d-block mt-2">+{{ count($anomaliKondisi) - 5 }} perubahan kondisi lainnya</small>
                         @endif
                     @endif
 

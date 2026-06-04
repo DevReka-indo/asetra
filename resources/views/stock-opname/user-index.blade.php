@@ -8,19 +8,24 @@
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0 page-stock-opname-user-index">
-    {{-- BREADCRUMB --}}
-    <ul class="breadcrumbs d-flex align-items-center p-0 mb-2" style="list-style: none;">
-        <li class="nav-home d-flex align-items-center">
-            <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
-                <i class="fas fa-home me-2" style="font-size: 14px;"></i>
-                <span style="font-size: 13px; font-weight: 500;">Dashboard</span>
-            </a>
-        </li>
-        <li class="separator text-muted px-2"><span style="font-size: 13px;">-</span></li>
-        <li class="nav-item">
-            <span class="text-muted" style="font-size: 13px; font-weight: 500;">Pelaksanaan Stock Opname</span>
-        </li>
-    </ul>
+    {{-- Breadcrumb --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0">Pelaksanaan Stock Opname</h3>
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+            <li class="nav-home d-flex align-items-center">
+                <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
+                </a>
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                <span class="text-muted" style="font-size: 14px; font-weight: 500; position: relative; top: 2px;"> Pelaksanaan Stock Opname</span>
+            </li>
+        </ul>
+    </div>
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3" role="alert">
@@ -32,7 +37,6 @@
     {{-- HERO --}}
     <div class="so-user-hero d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div class="so-user-hero-content">
-            <span class="so-pill-light mb-2 d-inline-flex"><i class="fas fa-clipboard-list me-1"></i> Pelaksanaan Opname</span>
             <h4 class="fw-bold mt-2 mb-1">Halo, {{ auth()->user()->firstname }}!</h4>
             <p class="mb-0 opacity-90">Pilih jadwal opname yang sedang berjalan untuk mulai memeriksa fisik aset di unit kerja Anda.</p>
         </div>
@@ -52,10 +56,6 @@
     <div class="row g-3">
         {{-- KIRI: Daftar Jadwal --}}
         <div class="col-lg-8">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-tasks me-2 text-primary"></i> Jadwal Tersedia</h5>
-                <small class="text-muted">{{ $sessions->count() }} jadwal aktif ditemukan</small>
-            </div>
 
             <div class="row g-3">
                 @forelse($sessions as $session)
@@ -113,52 +113,6 @@
             </div>
         </div>
 
-        {{-- KANAN: Panduan --}}
-        <div class="col-lg-4">
-            <div class="so-info-card mb-3">
-                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-lightbulb text-warning me-2"></i> Panduan Singkat</h6>
-                <div class="so-info-step">
-                    <div class="step-num">1</div>
-                    <div>
-                        <h6>Pilih Jadwal Aktif</h6>
-                        <p>Klik tombol "Mulai Pengecekan" pada periode opname yang berjalan.</p>
-                    </div>
-                </div>
-                <div class="so-info-step">
-                    <div class="step-num">2</div>
-                    <div>
-                        <h6>Scan Aset</h6>
-                        <p>Gunakan kamera untuk memindai QR code yang menempel pada aset.</p>
-                    </div>
-                </div>
-                <div class="so-info-step">
-                    <div class="step-num">3</div>
-                    <div>
-                        <h6>Catat Temuan</h6>
-                        <p>Isi kondisi, lokasi fisik, dan unggah foto untuk verifikasi.</p>
-                    </div>
-                </div>
-                <div class="so-info-step">
-                    <div class="step-num">4</div>
-                    <div>
-                        <h6>Pastikan Lengkap</h6>
-                        <p>Cek tab "Telah Dicek" untuk memastikan seluruh aset Anda sudah dipindai.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="so-info-card" style="background: linear-gradient(135deg, rgba(37,48,112,.05), rgba(72,171,247,.05)); border-color: rgba(37,48,112,.2);">
-                <div class="d-flex gap-3 align-items-start">
-                    <div style="width:42px;height:42px;background:rgba(37,48,112,.12);color:#253070;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold mb-1">Butuh Bantuan?</h6>
-                        <p class="small text-muted mb-0">Hubungi tim General Affairs jika mengalami kendala saat melakukan pengecekan aset.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

@@ -2,7 +2,7 @@
 
 @section('title', 'Daftar Aset Opname')
 
-@@push('styles')
+@push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/stock-opname.css') }}">
 @endpush
 
@@ -10,23 +10,33 @@
 <div class="container-fluid px-1 py-0 mt-0 page-stock-opname-user-show">
 
     {{-- BREADCRUMB --}}
-    <ul class="breadcrumbs d-flex align-items-center p-0 mb-2" style="list-style: none;">
-        <li class="nav-home d-flex align-items-center">
-            <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
-                <i class="fas fa-home me-2" style="font-size: 14px;"></i>
-                <span style="font-size: 13px; font-weight: 500;">Dashboard</span>
-            </a>
-        </li>
-        <li class="separator text-muted px-2"><span style="font-size: 13px;">-</span></li>
-        <li class="nav-item">
-            <a href="{{ route('stock-opname.user-index') }}" class="text-muted text-decoration-none" style="font-size: 13px; font-weight: 500;">Pelaksanaan Opname</a>
-        </li>
-        <li class="separator text-muted px-2"><span style="font-size: 13px;">-</span></li>
-        <li class="nav-item">
-            <span class="text-muted" style="font-size: 13px; font-weight: 500;">{{ $session->periode }}</span>
-        </li>
-    </ul>
-
+    {{-- HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold mb-0">Pelaksanaan Stock Opname</h3>
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+            <li class="nav-home d-flex align-items-center">
+                <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <i class="fas fa-home me-2" style="font-size: 15px;"></i>
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
+                </a>
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item d-flex align-items-center">
+                    <a href="{{ route('stock-opname.user-index') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                    <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;"> Pelaksanaan Stock Opname</span>
+                </a>
+            </li>
+            <li class="separator text-muted d-flex align-items-center px-2">
+                <span style="font-size: 14px; position: relative; top: 2px;">-</span>
+            </li>
+            <li class="nav-item">
+                <span style="font-size: 14px; position: relative; top: 2px;">{{ $session->periode }}</span>
+            </li>
+        </ul>
+    </div>
+    
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3" role="alert">
             <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
@@ -45,7 +55,6 @@
     <div class="so-detail-hero">
         <div class="so-detail-hero-content row align-items-center g-3">
             <div class="col-md-7">
-                <span class="so-pill-light mb-2 d-inline-flex"><i class="fas fa-clipboard-check me-1"></i> Periode {{ $session->periode }}</span>
                 <h4 class="fw-bold mt-2 mb-1">
                     @if($isAdmin)
                         Daftar Aset Seluruh Departemen
@@ -59,7 +68,6 @@
                     <span class="mx-1">→</span>
                     {{ \Carbon\Carbon::parse($session->tanggal_berakhir)->format('d M Y') }}
                 </p>
-                <p class="mb-0 opacity-75 small">Pindai semua aset di scope Anda. Aset yang berhasil dicek akan otomatis berpindah ke tab "Telah Dicek".</p>
             </div>
             <div class="col-md-5">
                 <div class="d-flex align-items-center justify-content-md-end gap-3">
@@ -203,7 +211,7 @@
 
                         <div class="table-responsive">
                             <table class="table data-table mb-0" id="tableBelum">
-                                <thead>
+                                <thead class="table-light">
                                     <tr>
                                         <th width="5%" class="text-center">No</th>
                                         <th>Aset</th>
@@ -218,15 +226,6 @@
                                 </thead>
                                 <tbody>
                                     @foreach($belumDicek as $aset)
-                                        @php
-                                            $kondisiClass = match($aset->status_kondisi){
-                                                'Baik' => 'badge-cond-baik',
-                                                'Rusak' => 'badge-cond-rusak',
-                                                'Hilang' => 'badge-cond-rusak',
-                                                'Bongkar' => 'badge-cond-warning',
-                                                default => 'badge-cond-grey',
-                                            };
-                                        @endphp
                                         <tr data-dept="{{ $aset->resolved_department_name }}">
                                             <td class="text-center text-muted">{{ $loop->iteration }}</td>
                                             <td>
@@ -249,7 +248,24 @@
                                                 <td class="col-dept"><span class="text-dark small">{{ $aset->resolved_department_name }}</span></td>
                                             @endif
                                             <td>
-                                                <span class="badge-cond {{ $kondisiClass }}">{{ $aset->status_kondisi }}</span>
+                                                @php
+                                                    $kondisi = $aset->status_kondisi;
+                                                @endphp
+                                                @if($kondisi == 'Baik')
+                                                    <span class="badge bg-success rounded-pill px-3">Baik</span>
+                                                @elseif($kondisi == 'Rusak')
+                                                    <span class="badge bg-danger rounded-pill px-3">Rusak</span>
+                                                @elseif($kondisi == 'Bongkar')
+                                                    <span class="badge bg-warning text-white rounded-pill px-3">Bongkar</span>
+                                                @elseif($kondisi == 'Tidak Terpakai')
+                                                    <span class="badge bg-secondary rounded-pill px-3">Tidak Terpakai</span>
+                                                @elseif($kondisi == 'Hilang')
+                                                    <span class="badge bg-dark rounded-pill px-3">Hilang</span>
+                                                @elseif($kondisi == 'Tidak Teridentifikasi')
+                                                    <span class="badge bg-dark rounded-pill px-3">Tidak Teridentifikasi</span>
+                                                @else
+                                                    <span class="badge bg-light text-white border rounded-pill px-3">{{ $kondisi ?? 'Lainnya' }}</span>
+                                                @endif
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" 
@@ -317,7 +333,7 @@
 
                         <div class="table-responsive">
                             <table class="table data-table mb-0" id="tableDitemukan">
-                                <thead>
+                                <thead class="table-light">
                                     <tr>
                                         <th>Aset</th>
                                         <th>Kondisi Temuan</th>
@@ -335,7 +351,6 @@
                                         @php
                                             $kondisiBerubah = $detail->aset && $detail->kondisi_temuan != $detail->aset->status_kondisi;
                                             $kondisiBuruk = in_array($detail->kondisi_temuan, ['Rusak','Hilang','Bongkar','Tidak Teridentifikasi']);
-                                            $kondisiClass = $kondisiBuruk ? 'badge-cond-rusak' : ($kondisiBerubah ? 'badge-cond-warning' : 'badge-cond-baik');
                                             $lokasiTemuanNama = $detail->lokasi_temuan;
                                             if(is_numeric($detail->lokasi_temuan)) {
                                                 $lokasiObj = \App\Models\LokasiAset::find($detail->lokasi_temuan);
@@ -354,10 +369,34 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge-cond {{ $kondisiClass }}">
-                                                    @if($kondisiBuruk)<i class="fas fa-exclamation-triangle"></i>@endif
-                                                    {{ $detail->kondisi_temuan }}
-                                                </span>
+                                                @php
+                                                    $kondisi = $detail->kondisi_temuan;
+                                                @endphp
+                                                @if($kondisi == 'Baik')
+                                                    <span class="badge bg-success rounded-pill px-3">Baik</span>
+                                                @elseif($kondisi == 'Rusak')
+                                                    <span class="badge bg-danger rounded-pill px-3">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>Rusak
+                                                    </span>
+                                                @elseif($kondisi == 'Bongkar')
+                                                    <span class="badge bg-warning text-white rounded-pill px-3">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>Bongkar
+                                                    </span>
+                                                @elseif($kondisi == 'Tidak Terpakai')
+                                                    <span class="badge bg-secondary rounded-pill px-3">Tidak Terpakai</span>
+                                                @elseif($kondisi == 'Hilang')
+                                                    <span class="badge bg-dark rounded-pill px-3">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>Hilang
+                                                    </span>
+                                                @elseif($kondisi == 'Tidak Teridentifikasi')
+                                                    <span class="badge bg-dark rounded-pill px-3">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>Tidak Teridentifikasi
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-light text-white border rounded-pill px-3">
+                                                        @if($kondisiBuruk)<i class="fas fa-exclamation-triangle me-1"></i>@endif{{ $kondisi ?? 'Lainnya' }}
+                                                    </span>
+                                                @endif
                                                 @if($kondisiBerubah && !$kondisiBuruk)
                                                     <small class="d-block text-muted mt-1">Sebelumnya: {{ $detail->aset->status_kondisi }}</small>
                                                 @endif
@@ -465,13 +504,14 @@
                         <textarea name="keterangan" id="so_keterangan" class="form-control shadow-sm rounded-3" rows="2" placeholder="Tambahkan catatan jika perlu..."></textarea>
                     </div>
 
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070; border-color: #253070;">
-                            <i class="fas fa-save me-2"></i> Simpan Temuan
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer bg-white border-top-0 pt-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070;">
+                        <i class="fas fa-save me-2"></i> Simpan Temuan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -487,14 +527,14 @@
             "order": [],
             "dom": "rtip", // Hides the default length menu 'l' and search box 'f'
             "language": {
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 "infoEmpty": "",
                 "zeroRecords": "Tidak ada data ditemukan",
                 "paginate": {
-                    "first": "Awal",
-                    "last": "Akhir",
-                    "next": "Lanjut",
-                    "previous": "Kembali"
+                    "first": "«",
+                    "last": "»",
+                    "next": "›",
+                    "previous": "‹"
                 }
             }
         });
@@ -504,14 +544,14 @@
             "order": [],
             "dom": "rtip", // Hides the default length menu 'l' and search box 'f'
             "language": {
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
                 "infoEmpty": "",
                 "zeroRecords": "Tidak ada data ditemukan",
                 "paginate": {
-                    "first": "Awal",
-                    "last": "Akhir",
-                    "next": "Lanjut",
-                    "previous": "Kembali"
+                    "first": "«",
+                    "last": "»",
+                    "next": "›",
+                    "previous": "‹"
                 }
             }
         });
@@ -530,7 +570,6 @@
             }
         });
 
-        // Wire custom Search input
         $('.custom-search-input').on('keyup', function() {
             const tableName = $(this).data('table');
             const dtInstance = tables[tableName];
@@ -539,7 +578,6 @@
             }
         });
 
-        // Function to dynamically update stats cards and circular progress based on selected department
         function updateStatsForDept(selectedDept) {
             let countBelum = 0;
             let countTelah = 0;
@@ -578,7 +616,6 @@
             $('.ring-bar.hero-progress-circle').css('stroke-dashoffset', offset);
         }
 
-        // Wire custom Department filter (Only for Admin/GA)
         $('.custom-dept-filter').on('change', function() {
             const val = $(this).val();
             
