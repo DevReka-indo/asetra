@@ -24,7 +24,7 @@
             @foreach ($row as $aset)
             <td>
                 @php
-                    $warnaLabel = $aset->kategoriAset->jenisKategori->warna_label ?? '#ea6565';
+                    $warnaLabel = $aset->kategoriAset->jenisKategori->warna_label ?? '#FF5E9B';
                 @endphp
                 <div class="label-container" style="border-color: {{ $warnaLabel }};">
                     

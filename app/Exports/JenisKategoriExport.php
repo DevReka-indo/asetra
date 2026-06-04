@@ -44,7 +44,7 @@ class JenisKategoriExport implements FromCollection, WithHeadings, WithMapping
         return [
             $row->nama_jenis,
             $row->kode_awalan,
-            $row->warna_label ?? '#ea6565',
+            $row->warna_label ?? '#FF5E9B',
         ];
     }
 }
