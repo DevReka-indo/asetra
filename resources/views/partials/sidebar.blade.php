@@ -115,6 +115,47 @@
                     <span class="text-section">Lainnya</span>
                 </li>
 
+                {{-- Pengaturan --}}
+                @php
+                    $isPengaturanActive = request()->is('organization-manage*') || request()->is('kode-bagian*') || request()->is('user-manage*') || request()->is('role-management*') || request()->is('permission-manage*');
+                @endphp
+                <li class="nav-item {{ $isPengaturanActive ? 'active_' : '' }}">
+                    <a href="#pengaturanDrop"
+                        class="nav-link {{ $isPengaturanActive ? '' : 'collapsed' }}"
+                        data-toggle="collapse"
+                        aria-expanded="{{ $isPengaturanActive ? 'true' : 'false' }}">
+                            <i class="fas fa-cog"></i>
+                            <p>Pengaturan</p>
+                            <span class="caret"></span>
+                    </a>
+
+                    <div class="collapse {{ $isPengaturanActive ? 'show' : '' }}"
+                        id="pengaturanDrop">
+                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+                            <li class="{{ request()->routeIs('organization.manageOrganization') ? 'active' : '' }}">
+                                <a href="{{ route('organization.manageOrganization') }}">
+                                    <span class="sub-item">Kelola Struktur</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('kode-bagian.index') || request()->routeIs('kode-bagian.edit') || request()->routeIs('kode-bagian.create') ? 'active' : '' }}">
+                                <a href="{{ route('kode-bagian.index') }}">
+                                    <span class="sub-item">Manajemen Kode Bagian Kerja</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('user.manage') || request()->routeIs('user.create') || request()->routeIs('user-manage.edit') || request()->routeIs('user.show') ? 'active' : '' }}">
+                                <a href="{{ route('user.manage') }}">
+                                    <span class="sub-item">Manajemen Pengguna</span>
+                                </a>
+                            </li>
+                            <li class="{{ request()->routeIs('permissions.manage') ? 'active' : '' }}">
+                                <a href="{{ route('permissions.manage') }}">
+                                    <span class="sub-item">Manajemen Hak Akses</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
                 {{-- Pemulihan di bawah Lainnya --}}
                 <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
                     <a href="#pemulihanDrop"
@@ -261,52 +302,7 @@
                 </li>
             @endif
 
-            <!-- SUPERADMIN ONLY MENU -->
-            @if (Auth::user()->role->nm_role == 'superadmin')
-                <li class="nav-item {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'active_' : '' }}">
-                    <a href="#strukturOrganisasiDrop"
-                        class="nav-link {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? '' : 'collapsed' }}"
-                        data-toggle="collapse"
-                        aria-expanded="{{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'true' : 'false' }}">
-                            <i class="fas fa-sitemap"></i>
-                            <p>Struktur Organisasi</p>
-                            <span class="caret"></span>
-                    </a>
 
-                    <div class="collapse {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'show' : '' }}"
-                        id="strukturOrganisasiDrop">
-                        <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
-
-                            <li class="{{ request()->routeIs('organization.manageOrganization') ? 'active' : '' }}">
-                                <a href="{{ route('organization.manageOrganization') }}">
-                                    <span class="sub-item">Kelola Struktur</span>
-                                </a>
-                            </li>
-
-                            <li class="{{ request()->routeIs('kode-bagian.index') ? 'active' : '' }}">
-                                <a href="{{ route('kode-bagian.index') }}">
-                                    <span class="sub-item">Manajemen Kode Bagian Kerja</span>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </div>
-                </li>
-
-                <li class="nav-item {{ request()->routeIs('user.manage') ? 'active_' : '' }}">
-                    <a href="{{ route('user.manage') }}" class="nav-link">
-                        <i class="fas fa-users"></i>
-                        <p>Manajemen Pengguna</p>
-                    </a>
-                </li>
-
-                <li class="nav-item {{ request()->routeIs('permissions.manage') ? 'active_' : '' }}">
-                    <a href="{{ route('permissions.manage') }}" class="nav-link">
-                        <i class="fas fa-user-shield"></i>
-                        <p>Manajemen Hak Akses</p>
-                    </a>
-                </li>
-            @endif
 
             <!-- MENU STAFF & MANAGER (NON-GA) -->
             @if (Auth::user()->role->nm_role != 'superadmin' && !Auth::user()->isBagianUmum())

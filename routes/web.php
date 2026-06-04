@@ -87,6 +87,7 @@ Route::post('organization-manage/add', [OrganizationController::class, 'store'])
     Route::post('{id}/restore', [KodeBagianController::class, 'restore'])->name('kode-bagian.restore');
 
     // manage user
+    Route::post('/user-manage/sync-sipo', [UserManageController::class, 'syncSipo'])->name('user-manage.sync-sipo');
     Route::get('/user-manage/create', [UserManageController::class, 'create'])->name('user.create');
     Route::get('/user-manage/paginate', [UserManageController::class, 'paginateUsers'])->name('user-manage.paginate');
     Route::get('/user-manage/edit/{id}', [UserController::class, 'edit'])->name('user-manage.edit');

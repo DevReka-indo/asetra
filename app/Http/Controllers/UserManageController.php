@@ -312,4 +312,31 @@ class UserManageController extends Controller
 
         return $result;
     }
+
+    public function syncSipo(Request $request, \App\Services\OrgSyncService $syncService)
+    {
+        try {
+            $stats = $syncService->sync();
+            return redirect()->route('user.manage')->with('success', "Sinkronisasi berhasil! Menyinkronkan {$stats['users']} pengguna.");
+        } catch (\Exception $e) {
+            return redirect()->route('user.manage')->with('error', "Sinkronisasi gagal: " . $e->getMessage());
+        }
+    }
+
+    function fuzzyMatch($input, $list, $threshold = 3)
+    {
+        $best = null;
+        $bestDistance = 999;
+
+        foreach ($list as $key) {
+            $dist = levenshtein($input, $key);
+            //dd($key, $dist);
+            if ($dist < $bestDistance) {
+                $bestDistance = $dist;
+                $best = $key;
+            }
+        }
+        //dd($best, $bestDistance);
+        return $bestDistance <= $threshold ? $best : null;
+    }
 }
