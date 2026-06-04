@@ -159,7 +159,7 @@
                             <th width="80" class="text-center">Kode QR</th>
                             <th>Kode Aset</th>
                             <th>Nama Aset</th>
-                            <th class="text-center">Tipe</th>
+                            <th class="text-center">Jenis Kategori</th>
                             <th>Lokasi Aset</th>
                             <th>Kondisi Aset</th>
                             <th>Status Aset</th>
