@@ -1,20 +1,22 @@
-<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
-    <div class="container-fluid">
+<nav class="navbar bg-white border-bottom shadow-sm">
+    <div class="container-fluid d-flex align-items-center" style="height: 64px;">
 
-        <button type="button" class="custom-toggle-sidebar" aria-label="Toggle sidebar" 
+        <button type="button" class="custom-toggle-sidebar flex-shrink-0" aria-label="Toggle sidebar" 
             style="background: transparent; border: none; padding: 5px 10px; cursor: pointer; outline: none;">
             <i class="fa fa-bars" style="font-size: 20px; color: #253070;"></i>
         </button>
 
         <div class="flex-grow-1"></div>
 
-        <ul class="navbar-nav ms-auto align-items-center" style="gap:24px;">
-            <li class="nav-item dropdown" style="list-style: none;">
-                <a class="nav-link" href="#" id="notifDropdown" role="button"
+        <div class="d-flex align-items-center flex-nowrap" style="gap: 12px;">
+
+            {{-- NOTIFIKASI --}}
+            <div class="nav-item dropdown" style="list-style: none;">
+                <a class="nav-link p-0" href="#" id="notifDropdown" role="button"
                     data-bs-toggle="dropdown" aria-expanded="false"
-                    style="background: #E9E6EB; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; padding: 0;">
+                    style="background: #E9E6EB; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative;">
                     
-                    <i class="fa fa-bell" style="color:#253070; font-size: 22px;"></i>
+                    <i class="fa fa-bell" style="color:#253070; font-size: 20px;"></i>
                     
                     <span id="notif-count" 
                         style="display: none; position: absolute; top: 0px; right: 0px; background: #dc3545; color: white; font-size: 10px; font-weight: bold; min-width: 17px; height: 17px; border-radius: 50%; border: 2px solid white; align-items: center; justify-content: center;">
@@ -31,18 +33,19 @@
                         <li><div id="notif-body" class="px-3 py-3 text-center text-muted small">Memuat...</div></li>
                     </div>
                 </ul>
-            </li>
+            </div>
 
-            <li class="nav-item dropdown" style="list-style: none; margin-left: -20px;"> 
-                <a class="nav-link" href="#" id="profileDropdown" role="button"
+            {{-- PROFIL --}}
+            <div class="nav-item dropdown" style="list-style: none;">
+                <a class="nav-link p-0" href="#" id="profileDropdown" role="button"
                     data-bs-toggle="dropdown" aria-expanded="false"
-                    style="background: transparent; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; padding: 0;">
+                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                     
                     @if (Auth::user()->profile_image)
                         <img src="data:image/png;base64,{{ Auth::user()->profile_image }}" alt="profile"
-                            class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #ddd;">
+                            class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #e9e6eb;">
                     @else
-                        <i class="fa fa-user-circle" style="color:#253070; font-size: 42px;"></i>
+                        <i class="fa fa-user-circle" style="color:#253070; font-size: 40px; line-height: 1;"></i>
                     @endif
                 </a>
 
@@ -60,8 +63,8 @@
                         </form>
                     </li>
                 </ul>
-            </li>
-        </ul>
+            </div>
+        </div>
     </div>
 </nav>
 

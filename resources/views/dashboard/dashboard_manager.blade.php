@@ -21,7 +21,7 @@
                     <h4 class="fw-bold mb-1" style="font-family: 'Public Sans', sans-serif;">Selamat Datang, {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}!</h4>
                     <p class="mb-0 opacity-90 small" style="line-height: 1.5;">
                         Selamat datang di <strong>Sistem Informasi Manajemen Aset</strong>. Anda login sebagai 
-                        <span class="badge bg-white text-navy fw-bold px-2.5 py-1.5 ms-1 rounded-pill" style="color: #1A2355 !important; font-size: 0.75rem; letter-spacing: 0.5px;">{{ auth()->user()->role->nm_role }}</span>
+                        <span class="badge bg-white text-navy fw-bold px-2.5 py-1.5 ms-1 rounded-pill" style="color: #1A2355 !important; font-size: 0.75rem; letter-spacing: 0.5px;">{{ auth()->user()->role_id_role == 1 ? 'Superadmin' : (auth()->user()->role_id_role == 3 ? 'Admin' : 'User') }}</span>
                     </p>
                 </div>
             </div>

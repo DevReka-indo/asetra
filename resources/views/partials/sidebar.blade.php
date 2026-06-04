@@ -27,14 +27,14 @@
         </li>
         <!-- SUPERADMIN & GENERAL AFFAIRS -->
             @if (Auth::user()->role->nm_role == 'superadmin')
-                <li class="nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active_' : '' }}">
+                <li class="nav-item {{ (request()->routeIs('superadmin.dashboard') || request()->routeIs('dashboard')) ? 'active_' : '' }}">
                     <a href="{{ route('superadmin.dashboard') }}" class="nav-link">
                         <i class="fas fa-home"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
             @elseif (Auth::user()->hasPermission('view_dashboard_ga'))
-                <li class="nav-item {{ request()->routeIs('general-affairs.dashboard') ? 'active_' : '' }}">
+                <li class="nav-item {{ (request()->routeIs('general-affairs.dashboard') || request()->routeIs('dashboard')) ? 'active_' : '' }}">
                     <a href="{{ route('general-affairs.dashboard') }}" class="nav-link">
                         <i class="fas fa-home"></i>
                         <p>Dashboard</p>
@@ -307,7 +307,7 @@
             <!-- MENU STAFF & MANAGER (NON-GA) -->
             @if (Auth::user()->role->nm_role != 'superadmin' && !Auth::user()->isBagianUmum())
 
-                <li class="nav-item {{ request()->routeIs('manager.dashboard') || request()->routeIs('staff.dashboard') ? 'active_' : '' }}">
+                <li class="nav-item {{ (request()->routeIs('manager.dashboard') || request()->routeIs('staff.dashboard') || request()->routeIs('admin.dashboard') || request()->routeIs('dashboard')) ? 'active_' : '' }}">
                     <a href="{{ Auth::user()->role_id_role == 3 ? route('manager.dashboard') : route('staff.dashboard') }}" class="nav-link">
                         <i class="fas fa-home"></i>
                         <p>Dashboard</p>

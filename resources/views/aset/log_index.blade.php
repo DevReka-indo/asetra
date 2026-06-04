@@ -39,7 +39,7 @@
                 
                 <div class="row g-2 align-items-end">
                     {{-- Entries --}}
-                    <div class="col-md-1">
+                    <div class="col-6 col-sm-4 col-md-1">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
                         <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
@@ -50,7 +50,7 @@
                     </div>
 
                     {{-- Pencarian --}}
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-8 col-md-3">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                         <div class="input-group input-group-sm input-group-focus rounded-3">
                             <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
@@ -59,7 +59,7 @@
                     </div>
 
                     {{-- Filter Kondisi --}}
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Kondisi Aset</label>
                         <select name="kondisi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Kondisi</option>
@@ -73,7 +73,7 @@
                     </div>
 
                     {{-- Filter Status --}}
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status Aset</label>
                         <select name="status_aset" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Status</option>
@@ -86,7 +86,7 @@
                     </div>
 
                     {{-- Filter Lokasi --}}
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Lokasi</option>

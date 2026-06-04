@@ -21,7 +21,7 @@
                     <h4 class="fw-bold mb-1" style="font-family: 'Public Sans', sans-serif;">Selamat Datang, {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}!</h4>
                     <p class="mb-0 opacity-90 small" style="line-height: 1.5;">
                         Selamat datang di <strong>Sistem Informasi Manajemen Aset</strong>. Anda login sebagai 
-                        <span class="badge bg-white text-navy fw-bold px-2.5 py-1.5 ms-1 rounded-pill" style="color: #1A2355 !important; font-size: 0.75rem; letter-spacing: 0.5px;">{{ auth()->user()->role->nm_role }}</span>
+                        <span class="badge bg-white text-navy fw-bold px-2.5 py-1.5 ms-1 rounded-pill" style="color: #1A2355 !important; font-size: 0.75rem; letter-spacing: 0.5px;">{{ auth()->user()->role_id_role == 1 ? 'Superadmin' : (auth()->user()->role_id_role == 3 ? 'Admin' : 'User') }}</span>
                     </p>
                 </div>
             </div>
@@ -80,36 +80,6 @@
         {{-- BAGIAN KIRI: PROGRESS & MONITORING --}}
         <div class="col-lg-8">
             
-            {{-- Progress Stock Opname --}}
-            <div class="card glass-card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold text-navy mb-0"><i class="fas fa-clipboard-check me-2"></i>Status Stock Opname Departemen Anda</h6>
-                    @if($latestOpname)
-                        <span class="badge bg-light text-dark border"><i class="fas fa-calendar-alt me-1"></i> Sesi Aktif</span>
-                    @endif
-                </div>
-                
-                @if($latestOpname)
-                    <p class="text-muted small mb-2">Progres pengecekan fisik aset untuk <strong>{{ auth()->user()->department->name_department ?? 'Departemen Anda' }}</strong> pada periode <strong>{{ $latestOpname->periode }}</strong>.</p>
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold text-dark">{{ $opnameProgress }}% Telah Dicek</span>
-                        <span class="text-muted small">{{ $deptCheckedCount }} / {{ $totalAsetDept }} Aset</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 10px; border-radius: 10px; background-color: #e9ecef;">
-                        <div class="progress-bar progress-bar-custom" role="progressbar" style="width: {{ $opnameProgress }}%" aria-valuenow="{{ $opnameProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ route('stock-opname.user-show', $latestOpname->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                            <i class="fas fa-qrcode me-2"></i> Lakukan Pengecekan Fisik
-                        </a>
-                    </div>
-                @else
-                    <div class="text-center py-4 text-muted">
-                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                        <p class="mb-0">Saat ini tidak ada sesi Stock Opname yang sedang aktif.</p>
-                    </div>
-                @endif
-            </div>
 
             {{-- Monitoring Terbaru --}}
             <div class="card glass-card p-4">

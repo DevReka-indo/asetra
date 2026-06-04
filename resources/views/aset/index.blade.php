@@ -18,35 +18,35 @@
                 <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center mb-3 pb-3 border-bottom">
                     @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
                         {{-- Tombol Cetak Label Terpilih --}}
-                        <button type="button" id="btnCetakLabelSelected" class="btn btn-dark px-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Terpilih">
-                            <i class="fas fa-tags me-1"></i> Cetak Label 
+                        <button type="button" id="btnCetakLabelSelected" class="btn btn-dark px-2 px-md-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Terpilih">
+                            <i class="fas fa-tags"></i><span class="d-none d-md-inline ms-1"> Cetak Label</span>
                         </button>
 
                         {{-- Tombol Cetak Label Per Ruangan --}}
-                        <button type="button" class="btn btn-secondary px-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Per Ruangan" data-bs-toggle="modal" data-bs-target="#modalCetakPerRuangan">
-                            <i class="fas fa-building me-1"></i> Cetak Per Ruangan
+                        <button type="button" class="btn btn-secondary px-2 px-md-3 rounded-3 d-flex align-items-center text-white" title="Cetak Per Ruangan" data-bs-toggle="modal" data-bs-target="#modalCetakPerRuangan">
+                            <i class="fas fa-building"></i><span class="d-none d-md-inline ms-1"> Cetak Per Ruangan</span>
                         </button>
 
                         {{-- Tombol Import --}}
-                        <button type="button" class="btn btn-warning px-3 rounded-3 d-flex align-items-center text-dark" title="Import Data" data-bs-toggle="modal" data-bs-target="#modalImportAset">
-                            <i class="fas fa-file-import me-1"></i> Import
+                        <button type="button" class="btn btn-warning px-2 px-md-3 rounded-3 d-flex align-items-center text-dark" title="Import Data" data-bs-toggle="modal" data-bs-target="#modalImportAset">
+                            <i class="fas fa-file-import"></i><span class="d-none d-md-inline ms-1"> Import</span>
                         </button>
 
                         {{-- Tombol Export --}}
-                        <a href="{{ route('aset.export', request()->query()) }}" class="btn btn-success px-3 rounded-3 d-flex align-items-center text-white" title="Export Data">
-                            <i class="fas fa-file-excel me-1"></i> Export
+                        <a href="{{ route('aset.export', request()->query()) }}" class="btn btn-success px-2 px-md-3 rounded-3 d-flex align-items-center text-white" title="Export Data">
+                            <i class="fas fa-file-excel"></i><span class="d-none d-md-inline ms-1"> Export</span>
                         </a>
                     @endif
 
                     {{-- Tombol Scan --}}
-                    <a href="{{ route('aset.scanner') }}" class="btn btn-navy px-3 rounded-3 d-flex align-items-center text-white" style="background-color: #253070;">
-                        <i class="fas fa-qrcode me-1"></i> Scan Barcode
+                    <a href="{{ route('aset.scanner') }}" class="btn btn-navy px-2 px-md-3 rounded-3 d-flex align-items-center text-white" style="background-color: #253070;" title="Scan Barcode">
+                        <i class="fas fa-qrcode"></i><span class="d-none d-md-inline ms-1"> Scan Barcode</span>
                     </a>
 
                     @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
                         {{-- Button Tambah --}}
-                        <a href="{{ route('aset.create') }}" class="btn btn-primary px-3 rounded-3 d-flex align-items-center">
-                            <i class="fas fa-plus me-1"></i> Tambah Data Aset
+                        <a href="{{ route('aset.create') }}" class="btn btn-primary px-2 px-md-3 rounded-3 d-flex align-items-center">
+                            <i class="fas fa-plus"></i><span class="d-none d-sm-inline ms-1"> Tambah Data Aset</span>
                         </a>
                     @endif
                 </div>
@@ -54,7 +54,7 @@
                 {{-- Form Filter, Pencarian & Reset --}}
                 <div class="row g-2 align-items-end">
                     {{-- Entries --}}
-                    <div class="col-md-1">
+                    <div class="col-6 col-sm-4 col-md-1">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
                         <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
@@ -65,7 +65,7 @@
                     </div>
 
                     {{-- Pencarian --}}
-                    <div class="col-md-3">
+                    <div class="col-12 col-sm-8 col-md-3">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                         <div class="input-group input-group-sm input-group-focus rounded-3">
                             <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
@@ -74,7 +74,7 @@
                     </div>
 
                     {{-- Filter Kondisi --}}
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Kondisi Aset</label>
                         <select name="kondisi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Kondisi</option>
@@ -88,7 +88,7 @@
                     </div>
 
                     {{-- Filter Status --}}
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status Aset</label>
                         <select name="status_aset" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Status</option>
@@ -102,7 +102,7 @@
 
                     {{-- Filter Lokasi --}}
                     @if(!request()->routeIs('aset.pic'))
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Lokasi</option>
@@ -115,7 +115,7 @@
 
                     {{-- Filter Divisi --}}
                     @if(!request()->routeIs('aset.pic'))
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Divisi</label>
                         <select name="divisi_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Divisi</option>
@@ -128,7 +128,7 @@
 
                     {{-- Filter Departemen --}}
                     @if(!request()->routeIs('aset.pic'))
-                    <div class="col-md-2">
+                    <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
                         <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Departemen</option>
