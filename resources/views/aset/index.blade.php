@@ -101,6 +101,7 @@
                     </div>
 
                     {{-- Filter Lokasi --}}
+                    @if(!request()->routeIs('aset.pic'))
                     <div class="col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -110,8 +111,10 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                     {{-- Filter Divisi --}}
+                    @if(!request()->routeIs('aset.pic'))
                     <div class="col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Divisi</label>
                         <select name="divisi_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -121,8 +124,10 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                     {{-- Filter Departemen --}}
+                    @if(!request()->routeIs('aset.pic'))
                     <div class="col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
                         <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -132,6 +137,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                 </div>
 
