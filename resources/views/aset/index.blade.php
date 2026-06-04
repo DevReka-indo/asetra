@@ -301,7 +301,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
+                                <td colspan="{{ (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()) ? 9 : 8 }}" class="text-center py-5 text-muted">
+                                    <i class="fas fa-box fa-3x mb-3 d-block opacity-25"></i>
                                     Tidak ada data aset.
                                 </td>
                             </tr>
