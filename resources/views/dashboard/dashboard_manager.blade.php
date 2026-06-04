@@ -247,28 +247,7 @@
                 </div>
             </div>
 
-            {{-- Detail Profil Singkat --}}
-            <div class="card glass-card border-0 shadow-sm p-4 mt-4" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-id-card me-2 text-primary"></i>Informasi Struktur</h6>
-                <div class="d-flex flex-column gap-2 small">
-                    <div class="d-flex justify-content-between border-bottom pb-1">
-                        <span class="text-muted">NIP:</span>
-                        <span class="fw-bold text-dark">{{ auth()->user()->nip ?? '-' }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between border-bottom pb-1">
-                        <span class="text-muted">Jabatan:</span>
-                        <span class="fw-bold text-dark text-end">{{ auth()->user()->position->name_position ?? '-' }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between border-bottom pb-1">
-                        <span class="text-muted">Departemen:</span>
-                        <span class="fw-bold text-dark text-end">{{ auth()->user()->department->name_department ?? '-' }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span class="text-muted">Divisi:</span>
-                        <span class="fw-bold text-dark text-end">{{ auth()->user()->divisi->nm_divisi ?? '-' }}</span>
-                    </div>
-                </div>
-            </div>
+
 
         </div>
     </div>

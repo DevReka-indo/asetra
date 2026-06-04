@@ -146,7 +146,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Lokasi Aset <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
@@ -164,18 +164,10 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small text-muted">Detail Lokasi</label>
                                 <input type="text" id="input_detail_lokasi" class="form-control bg-light text-muted border-0 shadow-none rounded-3 px-3 py-2" 
                                        disabled placeholder="Otomatis dari lokasi terpilih" style="cursor: not-allowed; opacity: 0.8;">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold text-navy mb-1 small">Gedung (Opsional)</label>
-                                <div class="input-group input-group-focus rounded-3">
-                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-building"></i></span>
-                                    <input type="text" name="gedung" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('gedung') }}" placeholder="Contoh: Gedung A / Lantai 2">
-                                </div>
                             </div>
                         </div>
                     </div>

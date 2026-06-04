@@ -177,15 +177,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="icon-wrapper me-3">
-                                            <i class="fas fa-building"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Gedung / Lantai</span>
-                                            <span class="info-value fw-semibold">{{ $aset->gedung ?? '-' }}</span>
-                                        </div>
-                                    </div>
+
 
                                     <div class="d-flex align-items-start mb-3">
                                         <div class="icon-wrapper me-3">

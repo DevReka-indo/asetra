@@ -88,7 +88,6 @@ class DataAsetApiController extends BaseApiController
             'kategori_id'          => 'required|integer|exists:kategori_aset,id',
             'kode_organisasi'      => 'required|string',
             'lokasi_id'            => 'required|integer|exists:lokasi_aset,lokasi_id',
-            'gedung'               => 'nullable|string|max:100',
             'merek'                => 'required|string|max:100',
             'deskripsi'            => 'required|string',
             'tanggal_kapitalisasi' => 'required|date',
@@ -103,7 +102,7 @@ class DataAsetApiController extends BaseApiController
         ]);
 
         $data = $request->only(
-            'nama_aset', 'kategori_id', 'lokasi_id', 'gedung', 'merek', 'deskripsi',
+            'nama_aset', 'kategori_id', 'lokasi_id', 'merek', 'deskripsi',
             'tanggal_kapitalisasi', 'pic_id', 'penanggung_jawab_id', 'bast',
             'status_kondisi', 'status_aset', 'keterangan'
         );
@@ -191,7 +190,6 @@ class DataAsetApiController extends BaseApiController
             'kategori_id'          => 'required|integer|exists:kategori_aset,id',
             'kode_organisasi'      => 'required|string',
             'lokasi_id'            => 'required|integer|exists:lokasi_aset,lokasi_id',
-            'gedung'               => 'nullable|string|max:100',
             'merek'                => 'required|string|max:100',
             'deskripsi'            => 'required|string',
             'tanggal_kapitalisasi' => 'required|date',
@@ -208,7 +206,7 @@ class DataAsetApiController extends BaseApiController
         ]);
 
         $data = $request->only(
-            'nama_aset', 'kategori_id', 'lokasi_id', 'gedung', 'merek', 'deskripsi',
+            'nama_aset', 'kategori_id', 'lokasi_id', 'merek', 'deskripsi',
             'tanggal_kapitalisasi', 'pic_id', 'penanggung_jawab_id', 'bast',
             'status_kondisi', 'status_aset', 'keterangan'
         );

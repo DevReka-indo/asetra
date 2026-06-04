@@ -95,48 +95,27 @@ class DataAsetImport implements ToCollection
             }
             $pjId = $pj ? $pj->id : $picId;
 
-            // 5. Parse Organisasi Terikat (Divisi/Dept): Indeks 13
-            $orgName = isset($cells[13]) ? trim((string) $cells[13]) : '';
-            $idDirector = null;
-            $idDivisi = null;
-            $idDepartment = null;
-            $idSection = null;
-            $idUnit = null;
+            // 5. Cari / Buat Lokasi Aset otomatis berdasarkan data Excel
+            // Nama Lokasi: Indeks 13, Kode Lokasi: Indeks 14, Detail Lokasi: Indeks 15
+            $namaLokasi = isset($cells[13]) ? trim((string) $cells[13]) : '';
+            $kodeLokasi = isset($cells[14]) ? trim((string) $cells[14]) : '';
+            $detailLokasi = isset($cells[15]) ? trim((string) $cells[15]) : '';
+            $lokasiId = null;
 
-            if (!empty($orgName)) {
-                if (str_contains($orgName, '_')) {
-                    $parts = explode('_', $orgName);
-                    if (count($parts) === 2) {
-                        $type = $parts[0];
-                        $idVal = $parts[1];
-                        if ($type === 'director') $idDirector = $idVal;
-                        elseif ($type === 'divisi') $idDivisi = $idVal;
-                        elseif ($type === 'department') $idDepartment = $idVal;
-                        elseif ($type === 'section') $idSection = $idVal;
-                        elseif ($type === 'unit') $idUnit = $idVal;
-                    }
-                } else {
-                    // Cari berdasarkan nama departemen
-                    $dept = Department::where('name_department', 'LIKE', "%{$orgName}%")->first();
-                    if ($dept) {
-                        $idDepartment = $dept->id_department;
-                        $idDivisi = $dept->divisi_id_divisi;
-                    } else {
-                        // Cari berdasarkan nama divisi
-                        $div = Divisi::where('nm_divisi', 'LIKE', "%{$orgName}%")->first();
-                        if ($div) {
-                            $idDivisi = $div->id_divisi;
-                        }
-                    }
-                }
+            if (!empty($kodeLokasi)) {
+                $lokasi = LokasiAset::updateOrCreate(
+                    ['kode_lokasi' => $kodeLokasi],
+                    [
+                        'nama_lokasi' => $namaLokasi ?: $kodeLokasi,
+                        'detail_lokasi' => $detailLokasi
+                    ]
+                );
+                $lokasiId = $lokasi->lokasi_id;
+            } else {
+                $lokasiId = LokasiAset::first()->lokasi_id ?? null;
             }
 
-            // 6. Cari Lokasi Aset berdasarkan Kode: Indeks 14
-            $kodeLokasi = isset($cells[14]) ? trim((string) $cells[14]) : '';
-            $lokasi = LokasiAset::where('kode_lokasi', $kodeLokasi)->first();
-            $lokasiId = $lokasi ? $lokasi->lokasi_id : (LokasiAset::first()->lokasi_id ?? null);
-
-            // 7. Simpan atau Update Data Aset
+            // 6. Simpan atau Update Data Aset
             // Nomor Aset: Indeks 3 (Kode Aset -> Nomor)
             $nomorAset = isset($cells[3]) ? trim((string) $cells[3]) : '';
             $aset = null;
@@ -150,13 +129,12 @@ class DataAsetImport implements ToCollection
                 'deskripsi'            => isset($cells[4]) ? trim((string) $cells[4]) : '',
                 'merek'                => isset($cells[5]) ? trim((string) $cells[5]) : '',
                 'tanggal_kapitalisasi' => $tanggalKapitalisasi,
-                'id_director'          => $idDirector,
-                'id_divisi'            => $idDivisi,
-                'id_department'        => $idDepartment,
-                'id_section'           => $idSection,
-                'id_unit'              => $idUnit,
+                'id_director'          => $aset ? $aset->id_director : null,
+                'id_divisi'            => $aset ? $aset->id_divisi : null,
+                'id_department'        => $aset ? $aset->id_department : null,
+                'id_section'           => $aset ? $aset->id_section : null,
+                'id_unit'              => $aset ? $aset->id_unit : null,
                 'lokasi_id'            => $lokasiId,
-                'gedung'               => isset($cells[15]) ? trim((string) $cells[15]) : '',
                 'pic_id'               => $picId,
                 'penanggung_jawab_id'  => $pjId,
                 'bast'                 => isset($cells[17]) ? trim((string) $cells[17]) : '',
@@ -173,7 +151,7 @@ class DataAsetImport implements ToCollection
                 $aset = DataAset::create($asetData);
             }
 
-            // 8. Simpan/Update Link Foto Google Drive: Indeks 20 (Dokumentasi Aset)
+            // 7. Simpan/Update Link Foto Google Drive: Indeks 20 (Dokumentasi Aset)
             $photosRaw = isset($cells[20]) ? trim((string) $cells[20]) : '';
             if (!empty($photosRaw)) {
                 // Pisahkan string koma menjadi array URL

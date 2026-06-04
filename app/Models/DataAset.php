@@ -25,7 +25,6 @@ class DataAset extends Model
         'id_section',
         'id_unit',
         'lokasi_id',
-        'gedung',
         'pic_id',
         'penanggung_jawab_id',
         'bast',
