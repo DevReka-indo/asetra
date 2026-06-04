@@ -4,10 +4,27 @@
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3 class="fw-bold mb-0 text-dark">Dashboard</h3>
-            <p class="text-muted mb-0">Selamat datang kembali, {{ auth()->user()->firstname }}. Berikut ringkasan aset Anda hari ini.</p>
+        </div>
+    </div>
+
+    {{-- Welcome Card --}}
+    <div class="card border-0 mb-4 overflow-hidden" style="border-radius: 1rem; background: linear-gradient(135deg, #1A2355 0%, #2A367C 100%); box-shadow: 0 8px 24px rgba(26, 35, 85, 0.12); color: #ffffff;">
+        <div class="card-body p-4 d-flex align-items-center position-relative">
+            <div class="d-flex align-items-center w-100 position-relative" style="z-index: 1;">
+                <div class="me-3 d-none d-md-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded-circle" style="width: 55px; height: 55px; backdrop-filter: blur(5px);">
+                    <span class="fs-3">👋</span>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-1" style="font-family: 'Public Sans', sans-serif;">Selamat Datang, {{ auth()->user()->firstname }} {{ auth()->user()->lastname }}!</h4>
+                    <p class="mb-0 opacity-90 small" style="line-height: 1.5;">
+                        Selamat datang di <strong>Sistem Informasi Manajemen Aset</strong>. Anda login sebagai 
+                        <span class="badge bg-white text-navy fw-bold px-2.5 py-1.5 ms-1 rounded-pill" style="color: #1A2355 !important; font-size: 0.75rem; letter-spacing: 0.5px;">{{ auth()->user()->role->nm_role }}</span>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
