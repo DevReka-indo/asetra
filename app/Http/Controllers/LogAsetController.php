@@ -74,8 +74,12 @@ class LogAsetController extends Controller
         }
 
         // Filter by lokasi if provided
-        if ($request->has('lokasi') && $request->lokasi != '') {
-            $query->where('log_aset.lokasi_id', $request->lokasi);
+        $lokasiId = $request->input('lokasi');
+        if (!$isAdmin) {
+            $lokasiId = null;
+        }
+        if ($lokasiId != '') {
+            $query->where('log_aset.lokasi_id', $lokasiId);
         }
 
         // Apply sorting

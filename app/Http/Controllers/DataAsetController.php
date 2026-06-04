@@ -95,12 +95,19 @@ class DataAsetController extends Controller
             $query->where('kategori_id', $kategoriId);
         }
 
-        if ($request->has('lokasi') && $request->input('lokasi') != '') {
-            $query->where('lokasi_id', $request->input('lokasi'));
-        }
-
+        $lokasiId = $request->input('lokasi');
         $divisiId = $request->input('divisi_id');
         $departmentId = $request->input('department_id');
+
+        if (!$isAdmin) {
+            $lokasiId = null;
+            $divisiId = null;
+            $departmentId = null;
+        }
+
+        if ($lokasiId != '') {
+            $query->where('lokasi_id', $lokasiId);
+        }
 
         if ($divisiId) {
             if ($departmentId) {
