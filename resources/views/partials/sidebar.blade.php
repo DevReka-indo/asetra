@@ -11,7 +11,7 @@
                     overflow:hidden;
                     width:100%;
                 ">
-                <img src="/assets/img/Logo-reka.png" alt="SIPO"
+                <img src="{{ asset('assets/img/logo-reka.png') }}" alt="Logo"
                     style="display:block; max-width:100%; height:auto; max-height:60px; margin:0;" />
             </div>
         </a>
@@ -45,7 +45,7 @@
             <!-- SUPERADMIN & GENERAL AFFAIRS MENU -->
             @if (Auth::user()->role->nm_role == 'superadmin')
 
-                
+
 
                 <li class="nav-item {{ request()->routeIs('lokasi-aset.*') ? 'active_' : '' }}">
                     <a href="{{ route('lokasi-aset.index') }}" class="nav-link">
@@ -81,7 +81,7 @@
                         <p>Aset PIC</p>
                     </a>
                 </li>
-                
+
                 <li class="nav-item {{ request()->routeIs('log-aset.index') ? 'active_' : '' }}">
                     <a href="{{ route('log-aset.index') }}" class="nav-link">
                         <i class="fas fa-clipboard-check"></i>
@@ -118,7 +118,7 @@
                 {{-- Pemulihan di bawah Lainnya --}}
                 <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
                     <a href="#pemulihanDrop"
-                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
+                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}"
                         data-toggle="collapse"
                         aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
                             <i class="fas fa-trash-restore"></i>
@@ -126,7 +126,7 @@
                             <span class="caret"></span>
                     </a>
 
-                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
+                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}"
                         id="pemulihanDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
                             <li class="{{ request()->routeIs('pemulihan.lokasi-aset') ? 'active' : '' }}">
@@ -189,7 +189,7 @@
                         <p>Aset PIC</p>
                     </a>
                 </li>
-                
+
                 <li class="nav-item {{ request()->routeIs('log-aset.index') ? 'active_' : '' }}">
                     <a href="{{ route('log-aset.index') }}" class="nav-link">
                         <i class="fas fa-clipboard-check"></i>
@@ -222,10 +222,10 @@
                 <li class="nav-section">
                     <span class="text-section">Lainnya</span>
                 </li>
-                
+
                 <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
                     <a href="#pemulihanDrop"
-                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
+                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}"
                         data-toggle="collapse"
                         aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
                             <i class="fas fa-trash-restore"></i>
@@ -233,7 +233,7 @@
                             <span class="caret"></span>
                     </a>
 
-                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
+                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}"
                         id="pemulihanDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
                             <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
@@ -265,7 +265,7 @@
             @if (Auth::user()->role->nm_role == 'superadmin')
                 <li class="nav-item {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'active_' : '' }}">
                     <a href="#strukturOrganisasiDrop"
-                        class="nav-link {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? '' : 'collapsed' }}" 
+                        class="nav-link {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? '' : 'collapsed' }}"
                         data-toggle="collapse"
                         aria-expanded="{{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'true' : 'false' }}">
                             <i class="fas fa-sitemap"></i>
@@ -273,7 +273,7 @@
                             <span class="caret"></span>
                     </a>
 
-                    <div class="collapse {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'show' : '' }}" 
+                    <div class="collapse {{ request()->routeIs('organization.manageOrganization') || request()->routeIs('kode-bagian.index') ? 'show' : '' }}"
                         id="strukturOrganisasiDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
 
@@ -310,7 +310,7 @@
 
             <!-- MENU STAFF & MANAGER (NON-GA) -->
             @if (Auth::user()->role->nm_role != 'superadmin' && !Auth::user()->isBagianUmum())
-                
+
                 <li class="nav-item {{ request()->routeIs('manager.dashboard') || request()->routeIs('staff.dashboard') ? 'active_' : '' }}">
                     <a href="{{ Auth::user()->role_id_role == 3 ? route('manager.dashboard') : route('staff.dashboard') }}" class="nav-link">
                         <i class="fas fa-home"></i>
@@ -331,7 +331,7 @@
                         <p>Aset PIC</p>
                     </a>
                 </li>
-                
+
                 <li class="nav-item {{ request()->routeIs('log-aset.index') ? 'active_' : '' }}">
                     <a href="{{ route('log-aset.index') }}" class="nav-link">
                         <i class="fas fa-clipboard-check"></i>
@@ -357,7 +357,7 @@
                         </a>
                     </li>
                 @endif
-                
+
                 <li class="nav-section">
                     <span class="text-section">Lainnya</span>
                 </li>
@@ -365,7 +365,7 @@
                 {{-- Untuk General Affairs, Lainnya hanya berisi Pemulihan --}}
                 <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
                     <a href="#pemulihanDrop"
-                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}" 
+                        class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}"
                         data-toggle="collapse"
                         aria-expanded="{{ request()->is('pemulihan*') ? 'true' : 'false' }}">
                             <i class="fas fa-trash-restore"></i>
@@ -373,7 +373,7 @@
                             <span class="caret"></span>
                     </a>
 
-                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}" 
+                    <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}"
                         id="pemulihanDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
                             <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
