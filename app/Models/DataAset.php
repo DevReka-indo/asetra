@@ -38,6 +38,26 @@ class DataAset extends Model
         'tanggal_kapitalisasi' => 'date',
     ];
 
+    public function generateNomorAset(): string
+    {
+        // No urut: ID aset diformat 5 digit
+        $noUrut = str_pad($this->id, 5, '0', STR_PAD_LEFT);
+
+        // Tahun kapitalisasi (ambil tahunnya saja untuk nomor aset)
+        $tahun = $this->tanggal_kapitalisasi ? date('Y', strtotime($this->tanggal_kapitalisasi)) : date('Y');
+
+        // Kode kategori aset (101, 102, 201, ...)
+        $kategori = \App\Models\KategoriAset::find($this->kategori_id);
+        $kodeKategori = $kategori ? $kategori->kode : 'XXX';
+
+        // Kode lokasi aset
+        $lokAset    = \App\Models\LokasiAset::find($this->lokasi_id);
+        $kodeLokasi = $lokAset ? ($lokAset->kode_lokasi ?? 'LOK') : 'LOK';
+
+        // Susun nomor aset
+        return "{$kodeKategori}/{$noUrut}/{$kodeLokasi}/{$tahun}";
+    }
+
     /**
      * Generate nomor_aset format baru: [KODE_KLASIFIKASI]/[ID_5DIGIT]/[KODE_LOKASI]/[TAHUN]
      * Contoh: 101/00001/SDU/2019
@@ -45,23 +65,14 @@ class DataAset extends Model
     protected static function booted()
     {
         static::created(function ($aset) {
-            // No urut: ID aset diformat 5 digit
-            $noUrut = str_pad($aset->id, 5, '0', STR_PAD_LEFT);
-
-            // Tahun kapitalisasi (ambil tahunnya saja untuk nomor aset)
-            $tahun = $aset->tanggal_kapitalisasi ? date('Y', strtotime($aset->tanggal_kapitalisasi)) : date('Y');
-
-            // Kode kategori aset (101, 102, 201, ...)
-            $kategori = \App\Models\KategoriAset::find($aset->kategori_id);
-            $kodeKategori = $kategori ? $kategori->kode : 'XXX';
-
-            // Kode lokasi aset
-            $lokAset    = \App\Models\LokasiAset::find($aset->lokasi_id);
-            $kodeLokasi = $lokAset ? ($lokAset->kode_lokasi ?? 'LOK') : 'LOK';
-
-            // Susun nomor aset
-            $aset->nomor_aset = "{$kodeKategori}/{$noUrut}/{$kodeLokasi}/{$tahun}";
+            $aset->nomor_aset = $aset->generateNomorAset();
             $aset->saveQuietly();
+        });
+
+        static::updating(function ($aset) {
+            if ($aset->isDirty('lokasi_id') || $aset->isDirty('kategori_id') || $aset->isDirty('tanggal_kapitalisasi')) {
+                $aset->nomor_aset = $aset->generateNomorAset();
+            }
         });
     }
 
