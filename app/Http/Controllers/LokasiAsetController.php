@@ -16,6 +16,17 @@ class LokasiAsetController extends Controller
     {
         $perPage = $request->input('per_page', 10);
         $search  = $request->input('search');
+        $sortBy  = $request->input('sort_by', 'nama_lokasi');
+        $orderBy = $request->input('order_by', 'asc');
+
+        // Whitelist columns to prevent SQL injection
+        $allowedSortColumns = ['nama_lokasi', 'kode_lokasi', 'detail_lokasi'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'nama_lokasi';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'asc';
+        }
 
         $query = LokasiAset::query();
 
@@ -27,7 +38,7 @@ class LokasiAsetController extends Controller
             });
         }
 
-        $data = $query->oldest()->paginate($perPage)->withQueryString();
+        $data = $query->orderBy($sortBy, $orderBy)->paginate($perPage)->withQueryString();
         
         return view('lokasi_aset.index', compact('data'));
     }
@@ -44,10 +55,13 @@ class LokasiAsetController extends Controller
             'nama_lokasi' => 'required|string|max:100|unique:lokasi_aset,nama_lokasi',
             'detail_lokasi' => 'nullable|string|max:255',
         ], [
-            'kode_lokasi.required' => 'Kolom Kode Lokasi tidak boleh kosong.',
+            'kode_lokasi.required' => 'Kode Lokasi tidak boleh kosong.',
+            'kode_lokasi.max'      => 'Kode Lokasi tidak boleh lebih dari 45 karakter.',
             'kode_lokasi.unique'   => 'Kode Lokasi ini sudah digunakan. Silakan masukkan kode lain.',
-            'nama_lokasi.required' => 'Kolom Nama Lokasi tidak boleh kosong.',
+            'nama_lokasi.required' => 'Nama Lokasi tidak boleh kosong.',
+            'nama_lokasi.max'      => 'Nama Lokasi tidak boleh lebih dari 100 karakter.',
             'nama_lokasi.unique'   => 'Nama Lokasi ini sudah terdaftar. Silakan masukkan nama lain.',
+            'detail_lokasi.max'    => 'Detail Lokasi tidak boleh lebih dari 255 karakter.',
         ]);
 
         LokasiAset::create($request->only('kode_lokasi', 'nama_lokasi', 'detail_lokasi'));
@@ -83,10 +97,13 @@ class LokasiAsetController extends Controller
             ],
             'detail_lokasi' => 'nullable|string|max:255',
         ], [
-            'kode_lokasi.required' => 'Kolom Kode Lokasi tidak boleh kosong.',
+            'kode_lokasi.required' => 'Kode Lokasi tidak boleh kosong.',
+            'kode_lokasi.max'      => 'Kode Lokasi tidak boleh lebih dari 45 karakter.',
             'kode_lokasi.unique'   => 'Kode Lokasi ini sudah digunakan. Silakan masukkan kode lain.',
-            'nama_lokasi.required' => 'Kolom Nama Lokasi tidak boleh kosong.',
+            'nama_lokasi.required' => 'Nama Lokasi tidak boleh kosong.',
+            'nama_lokasi.max'      => 'Nama Lokasi tidak boleh lebih dari 100 karakter.',
             'nama_lokasi.unique'   => 'Nama Lokasi ini sudah terdaftar. Silakan masukkan nama lain.',
+            'detail_lokasi.max'    => 'Detail Lokasi tidak boleh lebih dari 255 karakter.',
         ]);
 
         $lokasiAset = LokasiAset::findOrFail($id);

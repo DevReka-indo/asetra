@@ -67,6 +67,13 @@ class KodeBagianController extends Controller
             'is_active'   => $request->is_active,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode bagian kerja berhasil ditambahkan'
+            ]);
+        }
+
         return redirect()->route('kode-bagian.index')
             ->with('success', 'Kode bagian kerja berhasil ditambahkan');
     }
@@ -97,6 +104,13 @@ class KodeBagianController extends Controller
             'kategori'    => $request->kategori,
             'is_active'   => $request->is_active,
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode bagian kerja berhasil diperbarui'
+            ]);
+        }
 
         return redirect()->route('kode-bagian.index')
             ->with('success', 'Kode bagian kerja berhasil diperbarui');

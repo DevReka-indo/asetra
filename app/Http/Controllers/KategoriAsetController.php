@@ -21,6 +21,17 @@ class KategoriAsetController extends Controller
         $perPage    = $request->input('per_page', 10);
         $search     = $request->input('search');
         $jenisId    = $request->input('jenis_kategori_id');
+        $sortBy     = $request->input('sort_by', 'kode');
+        $orderBy    = $request->input('order_by', 'asc');
+
+        // Whitelist columns to prevent SQL injection
+        $allowedSortColumns = ['nama', 'kode', 'jenis_kategori_id'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'kode';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'asc';
+        }
 
         $query = KategoriAset::with('jenisKategori');
 
@@ -35,7 +46,7 @@ class KategoriAsetController extends Controller
             });
         }
 
-        $data       = $query->oldest()->paginate($perPage)->withQueryString();
+        $data       = $query->orderBy($sortBy, $orderBy)->paginate($perPage)->withQueryString();
         $jenisList  = JenisKategori::orderBy('kode_awalan')->get();
         $jenisAktif = $jenisId ? JenisKategori::find($jenisId) : null;
 
@@ -52,9 +63,11 @@ class KategoriAsetController extends Controller
             'nama'              => 'required|string|max:100',
             'jenis_kategori_id' => 'required|exists:jenis_kategori,id',
         ], [
-            'kode.required'              => 'Kolom Kode tidak boleh kosong.',
+            'kode.required'              => 'Kode tidak boleh kosong.',
+            'kode.max'                   => 'Kode tidak boleh lebih dari 10 karakter.',
             'kode.unique'                => 'Kode tersebut sudah digunakan.',
-            'nama.required'              => 'Kolom Nama tidak boleh kosong.',
+            'nama.required'              => 'Nama tidak boleh kosong.',
+            'nama.max'                   => 'Nama tidak boleh lebih dari 100 karakter.',
             'jenis_kategori_id.required' => 'Jenis Kategori harus dipilih.',
             'jenis_kategori_id.exists'   => 'Jenis Kategori tidak valid.',
         ]);
@@ -86,9 +99,11 @@ class KategoriAsetController extends Controller
             'nama'              => 'required|string|max:100',
             'jenis_kategori_id' => 'required|exists:jenis_kategori,id',
         ], [
-            'kode.required'              => 'Kolom Kode tidak boleh kosong.',
+            'kode.required'              => 'Kode Kategori tidak boleh kosong.',
+            'kode.max'                   => 'Kode Kategori tidak boleh lebih dari 10 karakter.',
             'kode.unique'                => 'Kode tersebut sudah digunakan.',
-            'nama.required'              => 'Kolom Nama tidak boleh kosong.',
+            'nama.required'              => 'Nama Kategori tidak boleh kosong.',
+            'nama.max'                   => 'Nama Kategori tidak boleh lebih dari 100 karakter.',
             'jenis_kategori_id.required' => 'Jenis Kategori harus dipilih.',
         ]);
 

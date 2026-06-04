@@ -39,9 +39,19 @@ class PengajuanPerbaikanController extends Controller
      */
     public function index(Request $request)
     {
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $orderBy = $request->input('order_by', 'desc');
+
+        $allowedSortColumns = ['created_at', 'tanggal_pengajuan', 'tingkat_urgensi', 'status', 'aset_id', 'nama_aset', 'nomor_aset', 'pengaju_name'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'desc';
+        }
+
         $user  = Auth::user();
-        $query = PengajuanPerbaikan::with(['aset', 'pengaju', 'pemroses'])
-                    ->latest();
+        $query = PengajuanPerbaikan::with(['aset', 'pengaju', 'pemroses']);
 
         if (!$this->canProcess()) {
             // Staf lihat pengajuan untuk aset di departemennya yang ia ajukan sendiri
@@ -70,6 +80,33 @@ class PengajuanPerbaikanController extends Controller
         // Filter status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // Filter urgensi
+        if ($request->filled('urgensi')) {
+            $query->where('tingkat_urgensi', $request->urgensi);
+        }
+
+        // Search by asset name or number
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->whereHas('aset', function($q) use ($searchTerm) {
+                $q->where('nomor_aset', 'like', "%{$searchTerm}%")
+                  ->orWhere('nama_aset', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Apply sorting
+        if ($sortBy === 'nama_aset' || $sortBy === 'nomor_aset') {
+            $query->leftJoin('data_aset', 'pengajuan_perbaikan.aset_id', '=', 'data_aset.id')
+                  ->select('pengajuan_perbaikan.*')
+                  ->orderBy('data_aset.' . $sortBy, $orderBy);
+        } elseif ($sortBy === 'pengaju_name') {
+            $query->leftJoin('users', 'pengajuan_perbaikan.diajukan_oleh', '=', 'users.id')
+                  ->select('pengajuan_perbaikan.*')
+                  ->orderBy('users.firstname', $orderBy);
+        } else {
+            $query->orderBy('pengajuan_perbaikan.' . $sortBy, $orderBy);
         }
 
         $pengajuans = $query->paginate(15)->withQueryString();

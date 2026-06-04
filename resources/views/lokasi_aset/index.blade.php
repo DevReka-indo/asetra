@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Lokasi Aset')
+@section('title', 'Mengelola Lokasi Aset')
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold mb-0">Kelola Lokasi Aset</h3>
+        <h3 class="fw-bold mb-0">Mengelola Lokasi Aset</h3>
     </div>
 
     {{-- FILTER --}}
@@ -28,7 +28,7 @@
                     <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                     <div class="input-group input-group-sm input-group-focus rounded-3">
                         <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari kode, nama, atau detail..." value="{{ request('search') }}">
+                        <input type="search" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari kode, nama, atau detail..." value="{{ request('search') }}">
                     </div>
                 </div>
 
@@ -58,14 +58,42 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body">
+            @php
+                $sortBy = request('sort_by', 'nama_lokasi');
+                $orderBy = request('order_by', 'asc');
+            @endphp
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th>Nama Lokasi</th>
-                            <th>Kode Lokasi</th>
-                            <th>Detail Lokasi</th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_lokasi', 'order_by' => ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Nama Lokasi
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'kode_lokasi', 'order_by' => ($sortBy == 'kode_lokasi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Kode Lokasi
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'kode_lokasi' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'kode_lokasi' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'kode_lokasi' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'kode_lokasi' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'detail_lokasi', 'order_by' => ($sortBy == 'detail_lokasi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Detail Lokasi
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'detail_lokasi' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'detail_lokasi' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'detail_lokasi' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'detail_lokasi' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -129,7 +157,7 @@
 {{-- MODAL TAMBAH --}}
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('lokasi-aset.store') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
+        <form action="{{ route('lokasi-aset.store') }}" method="POST" id="formTambahLokasi" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
             @csrf
             <input type="hidden" name="form_type" value="tambah">
 
@@ -145,7 +173,7 @@
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA LOKASI <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
-                        <input type="text" name="nama_lokasi" class="form-control border-start-0 fs-6 @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_lokasi') : '' }}" placeholder="Contoh: Ruang Keuangan">
+                        <input type="text" name="nama_lokasi" class="form-control border-start-0 fs-6 @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('nama_lokasi') : '' }}" placeholder="Contoh: Ruang Keuangan" required maxlength="100">
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('nama_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -155,7 +183,7 @@
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE LOKASI <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
-                        <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_lokasi') : '' }}" placeholder="Contoh: Keu"> 
+                        <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'tambah' ? old('kode_lokasi') : '' }}" placeholder="Contoh: Keu" required maxlength="45"> 
                     </div>
                     @if(old('form_type') == 'tambah')
                         @error('kode_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -166,7 +194,7 @@
                     <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">DETAIL LOKASI</label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-start">
                         <span class="input-group-text bg-white border-end-0 text-muted pt-3"><i class="fas fa-align-left"></i></span>
-                        <textarea name="detail_lokasi" class="form-control border-start-0 fs-6" rows="3" placeholder="Contoh: Gedung pusat, Lt.1 Ruang Keuangan">{{ old('form_type') == 'tambah' ? old('detail_lokasi') : '' }}</textarea>
+                        <textarea name="detail_lokasi" class="form-control border-start-0 fs-6" rows="3" placeholder="Contoh: Gedung pusat, Lt.1 Ruang Keuangan" maxlength="255">{{ old('form_type') == 'tambah' ? old('detail_lokasi') : '' }}</textarea>
                     </div>
                 </div>
             </div>
@@ -237,7 +265,7 @@
                     Batal
                 </button>
                 <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
-                    <i class="fas fa-upload me-1"></i> Import Sekarang
+                    <i class="fas fa-upload me-1"></i> Imprt Data
                 </button>
             </div>
         </form>
@@ -282,7 +310,7 @@
     <!-- Modal Edit -->
     <div class="modal fade" id="modalEdit{{ $row->getKey() }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form action="{{ route('lokasi-aset.update', $row->getKey()) }}" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
+            <form action="{{ route('lokasi-aset.update', $row->getKey()) }}" method="POST" id="formEditLokasi{{ $row->getKey() }}" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="form_type" value="edit_{{ $row->getKey() }}">
@@ -299,7 +327,7 @@
                         <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE LOKASI <span class="text-danger">*</span></label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
-                            <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('kode_lokasi') : $row->kode_lokasi }}"> 
+                            <input type="text" name="kode_lokasi" class="form-control border-start-0 fs-6 @error('kode_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('kode_lokasi') : $row->kode_lokasi }}" required maxlength="45"> 
                         </div>
                         @if(old('form_type') == 'edit_'.$row->getKey())
                             @error('kode_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -310,7 +338,7 @@
                         <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA LOKASI <span class="text-danger">*</span></label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-map-marker-alt"></i></span>
-                            <input type="text" name="nama_lokasi" class="form-control border-start-0 fs-6 @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('nama_lokasi') : $row->nama_lokasi }}">
+                            <input type="text" name="nama_lokasi" class="form-control border-start-0 fs-6 @error('nama_lokasi') is-invalid @enderror" value="{{ old('form_type') == 'edit_'.$row->getKey() ? old('nama_lokasi') : $row->nama_lokasi }}" required maxlength="100">
                         </div>
                         @if(old('form_type') == 'edit_'.$row->getKey())
                             @error('nama_lokasi') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
@@ -321,7 +349,7 @@
                         <label class="form-label fw-bold small flex-grow-1" style="color: #253070;">DETAIL LOKASI</label>
                         <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-start">
                             <span class="input-group-text bg-white border-end-0 text-muted pt-3"><i class="fas fa-align-left"></i></span>
-                            <textarea name="detail_lokasi" class="form-control border-start-0 fs-6" rows="3">{{ old('form_type') == 'edit_'.$row->getKey() ? old('detail_lokasi') : $row->detail_lokasi }}</textarea>
+                            <textarea name="detail_lokasi" class="form-control border-start-0 fs-6" rows="3" maxlength="255">{{ old('form_type') == 'edit_'.$row->getKey() ? old('detail_lokasi') : $row->detail_lokasi }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -368,6 +396,20 @@
 @push('scripts')
     <script>
         window.addEventListener('load', function() {
+            // Auto-refresh when search input is cleared
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.trim() === '') {
+                        this.form.submit();
+                    }
+                });
+                searchInput.addEventListener('search', function() {
+                    if (this.value.trim() === '') {
+                        this.form.submit();
+                    }
+                });
+            }
             
             const swalConfig = {
                 showConfirmButton: true,
@@ -419,6 +461,96 @@
                     const form = this.querySelector('form');
                     if (form) {
                         form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    }
+                });
+            });
+
+            // Client-side Validation on Submit
+            const formsToValidate = document.querySelectorAll('#formTambahLokasi, form[id^="formEditLokasi"]');
+            formsToValidate.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // Clear any old custom error messages and styles
+                    form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.input-group').forEach(el => {
+                        el.classList.remove('border', 'border-danger');
+                    });
+
+                    let isValid = true;
+                    let firstInvalidEl = null;
+
+                    const fields = form.querySelectorAll('input, select, textarea');
+                    fields.forEach(field => {
+                        // Try to find the associated label text
+                        let labelText = '';
+                        const formGroup = field.closest('.mb-2, .mb-4');
+                        if (formGroup) {
+                            const labelEl = formGroup.querySelector('label');
+                            if (labelEl) {
+                                labelText = labelEl.textContent.replace('*', '').trim();
+                            }
+                        }
+                        
+                        // Fallback to name or placeholder
+                        if (!labelText) {
+                            labelText = field.getAttribute('placeholder') || field.getAttribute('name') || 'Kolom';
+                        }
+
+                        if (field.hasAttribute('required') && (!field.value || (field.tagName === 'SELECT' && field.value === ''))) {
+                            isValid = false;
+                            
+                            // Style input field and group
+                            field.classList.add('is-invalid');
+                            const inputGroup = field.closest('.input-group');
+                            if (inputGroup) {
+                                inputGroup.classList.add('border', 'border-danger');
+                            }
+
+                            // Create inline error message element
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} wajib diisi.`;
+                            
+                            // Insert error message element
+                            const targetAnchor = inputGroup || field;
+                            targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                            if (!firstInvalidEl) {
+                                firstInvalidEl = targetAnchor;
+                            }
+                        } else if (field.value) {
+                            const maxLen = field.getAttribute('maxlength');
+                            if (maxLen && field.value.length > parseInt(maxLen)) {
+                                isValid = false;
+                                
+                                // Style input field and group
+                                field.classList.add('is-invalid');
+                                const inputGroup = field.closest('.input-group');
+                                if (inputGroup) {
+                                    inputGroup.classList.add('border', 'border-danger');
+                                }
+
+                                // Create inline error message element
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                                errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} tidak boleh lebih dari ${maxLen} karakter.`;
+                                
+                                // Insert error message element
+                                const targetAnchor = inputGroup || field;
+                                targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                                if (!firstInvalidEl) {
+                                    firstInvalidEl = targetAnchor;
+                                }
+                            }
+                        }
+                    });
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        if (firstInvalidEl) {
+                            firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
                     }
                 });
             });

@@ -31,6 +31,19 @@ class DataAsetController extends Controller
         $search  = $request->input('search');
         $kondisi = $request->input('kondisi');
         $status  = $request->input('status_aset');
+        $jenisKategoriId = $request->input('jenis_kategori_id');
+        $kategoriId = $request->input('kategori_id');
+        $sortBy  = $request->input('sort_by', 'nomor_aset');
+        $orderBy = $request->input('order_by', 'asc');
+
+        // Whitelist columns to prevent SQL injection
+        $allowedSortColumns = ['nomor_aset', 'nama_aset', 'status_kondisi', 'status_aset', 'lokasi_id'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'nomor_aset';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'asc';
+        }
 
         $query = DataAset::with(['kategoriAset', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
 
@@ -70,6 +83,16 @@ class DataAsetController extends Controller
 
         if ($status) {
             $query->where('status_aset', $status);
+        }
+
+        if ($jenisKategoriId != '') {
+            $query->whereHas('kategoriAset', function($q) use ($jenisKategoriId) {
+                $q->where('jenis_kategori_id', $jenisKategoriId);
+            });
+        }
+
+        if ($kategoriId != '') {
+            $query->where('kategori_id', $kategoriId);
         }
 
         if ($request->has('lokasi') && $request->input('lokasi') != '') {
@@ -113,7 +136,7 @@ class DataAsetController extends Controller
             });
         }
 
-        $asets = $query->latest()
+        $asets = $query->orderBy($sortBy, $orderBy)
                        ->paginate($perPage)
                        ->withQueryString();
 
@@ -126,9 +149,16 @@ class DataAsetController extends Controller
         $departments = $departmentsQuery->get();
 
         $divisis = \App\Models\Divisi::all();
-        $pageTitle = "Data Aset Departemen";
+        $jenisList = JenisKategori::orderBy('nama_jenis')->get();
+        $kategoriQuery = KategoriAset::query();
+        if ($jenisKategoriId != '') {
+            $kategoriQuery->where('jenis_kategori_id', $jenisKategoriId);
+        }
+        $kategoris = $kategoriQuery->orderBy('nama')->get();
 
-        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle'));
+        $pageTitle = $isAdmin ? "Data Aset Perusahaan" : "Data Aset Departemen";
+
+        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris'));
     }
 
     public function picIndex(Request $request)
@@ -137,6 +167,8 @@ class DataAsetController extends Controller
         $search  = $request->input('search');
         $kondisi = $request->input('kondisi');
         $status  = $request->input('status_aset');
+        $jenisKategoriId = $request->input('jenis_kategori_id');
+        $kategoriId = $request->input('kategori_id');
 
         $query = DataAset::with(['kategoriAset', 'director', 'divisi', 'department', 'section', 'unit', 'lokasi', 'pic', 'fotoPertama']);
 
@@ -164,6 +196,16 @@ class DataAsetController extends Controller
             $query->where('status_aset', $status);
         }
 
+        if ($jenisKategoriId != '') {
+            $query->whereHas('kategoriAset', function($q) use ($jenisKategoriId) {
+                $q->where('jenis_kategori_id', $jenisKategoriId);
+            });
+        }
+
+        if ($kategoriId != '') {
+            $query->where('kategori_id', $kategoriId);
+        }
+
         if ($request->has('lokasi') && $request->input('lokasi') != '') {
             $query->where('lokasi_id', $request->input('lokasi'));
         }
@@ -175,9 +217,16 @@ class DataAsetController extends Controller
         $lokasis = LokasiAset::all();
         $departments = \App\Models\Department::all();
         $divisis = \App\Models\Divisi::all();
+        $jenisList = JenisKategori::orderBy('nama_jenis')->get();
+        $kategoriQuery = KategoriAset::query();
+        if ($jenisKategoriId != '') {
+            $kategoriQuery->where('jenis_kategori_id', $jenisKategoriId);
+        }
+        $kategoris = $kategoriQuery->orderBy('nama')->get();
+
         $pageTitle = "Data Aset PIC Saya";
 
-        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle'));
+        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris'));
     }
 
     /**

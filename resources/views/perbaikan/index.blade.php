@@ -38,56 +38,140 @@
         </div>
     @endif
 
-    <div class="card shadow-sm border-0">
+    {{-- FILTER CARD --}}
+    <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-
-            {{-- Entries --}}
-            <form method="GET" action="{{ route('perbaikan.index') }}" class="row g-2 align-items-end mb-3">
-                <div class="col-md-1">
-                    <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
-                    <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
-                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                    </select>
-                </div>
-                <div class="col-md-11">
-                    {{-- STATUS BUTTONS --}}
-                    <div class="d-flex flex-wrap gap-2">
+            <form method="GET" action="{{ route('perbaikan.index') }}" id="filterForm">
                 @php
-                    $statuses = [
-                        ''          => ['label' => 'Semua',          'icon' => 'fa-list'],
-                        'menunggu'  => ['label' => 'Menunggu Review', 'icon' => 'fa-clock'],
-                        'disetujui' => ['label' => 'Disetujui',       'icon' => 'fa-check-circle'],
-                        'ditolak'   => ['label' => 'Ditolak',         'icon' => 'fa-times-circle'],
-                        'selesai'   => ['label' => 'Selesai',         'icon' => 'fa-flag-checkered'],
-                    ];
                     $activeStatus = request('status', '');
                 @endphp
+                <input type="hidden" name="status" id="filterStatus" value="{{ $activeStatus }}">
+                
+                {{-- Keep sort fields in form so sorting isn't lost on filter submit --}}
+                <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
+                <input type="hidden" name="order_by" value="{{ request('order_by') }}">
 
-                @foreach($statuses as $val => $info)
-                    <a href="{{ route('perbaikan.index', array_merge(request()->except('page'), ['status' => $val])) }}"
-                       class="btn btn-sm rounded-pill {{ $activeStatus === $val ? 'btn-navy text-white' : 'btn-outline-secondary' }}"
-                       style="{{ $activeStatus === $val ? 'background-color:#253070;' : '' }}">
-                        <i class="fas {{ $info['icon'] }} me-1"></i>{{ $info['label'] }}
-                    </a>
-                @endforeach
+                <div class="row g-2 align-items-end">
+                    {{-- Entries --}}
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
+                        <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                        </select>
+                    </div>
+
+                    {{-- Pencarian --}}
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
+                        <div class="input-group input-group-sm input-group-focus rounded-3">
+                            <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
+                            <input type="search" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari nomor atau nama aset..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+
+                    {{-- Filter Urgensi --}}
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Urgensi</label>
+                        <select name="urgensi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Urgensi</option>
+                            <option value="rendah" {{ request('urgensi') == 'rendah' ? 'selected' : '' }}>Rendah</option>
+                            <option value="sedang" {{ request('urgensi') == 'sedang' ? 'selected' : '' }}>Sedang</option>
+                            <option value="tinggi" {{ request('urgensi') == 'tinggi' ? 'selected' : '' }}>Tinggi</option>
+                        </select>
+                    </div>
+
+                    {{-- Status Buttons --}}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status Pengajuan</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @php
+                                $statuses = [
+                                    ''          => ['label' => 'Semua',          'icon' => 'fa-list'],
+                                    'menunggu'  => ['label' => 'Menunggu Review', 'icon' => 'fa-clock'],
+                                    'disetujui' => ['label' => 'Disetujui',       'icon' => 'fa-check-circle'],
+                                    'ditolak'   => ['label' => 'Ditolak',         'icon' => 'fa-times-circle'],
+                                    'selesai'   => ['label' => 'Selesai',         'icon' => 'fa-flag-checkered'],
+                                ];
+                            @endphp
+
+                            @foreach($statuses as $val => $info)
+                                <button type="button" 
+                                        class="btn btn-sm rounded-pill {{ $activeStatus === $val ? 'btn-navy text-white' : 'btn-outline-secondary' }}"
+                                        style="{{ $activeStatus === $val ? 'background-color:#253070;' : '' }}"
+                                        onclick="setStatusAndSubmit('{{ $val }}')">
+                                    <i class="fas {{ $info['icon'] }} me-1"></i>{{ $info['label'] }}
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
 
+    {{-- TABLE CARD --}}
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            @php
+                $sortBy = request('sort_by', 'created_at');
+                $orderBy = request('order_by', 'desc');
+            @endphp
             {{-- TABEL --}}
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>No</th>
-                            <th>Aset</th>
-                            <th>Pengaju</th>
-                            <th>Urgensi</th>
-                            <th>Tanggal Pengajuan</th>
-                            <th>Status</th>
+                            <th width="60">No</th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_aset', 'order_by' => ($sortBy == 'nama_aset' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Aset
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_aset' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_aset' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_aset' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_aset' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'pengaju_name', 'order_by' => ($sortBy == 'pengaju_name' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Pengaju
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'pengaju_name' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'pengaju_name' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'pengaju_name' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'pengaju_name' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'tingkat_urgensi', 'order_by' => ($sortBy == 'tingkat_urgensi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Urgensi
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'tingkat_urgensi' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'tingkat_urgensi' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'tingkat_urgensi' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'tingkat_urgensi' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'tanggal_pengajuan', 'order_by' => ($sortBy == 'tanggal_pengajuan' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Tanggal Pengajuan
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'tanggal_pengajuan' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'tanggal_pengajuan' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'tanggal_pengajuan' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'tanggal_pengajuan' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'status', 'order_by' => ($sortBy == 'status' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Status
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'status' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'status' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'status' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'status' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>Dokumentasi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -118,6 +202,15 @@
                                 </span>
                             </td>
                             <td>
+                                @if($p->foto_kerusakan)
+                                    <a href="{{ asset('storage/' . $p->foto_kerusakan) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill py-1 px-3">
+                                        <i class="fas fa-image me-1"></i>Lihat Foto
+                                    </a>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
+                            <td>
                                 <a href="{{ route('perbaikan.show', $p->id) }}"
                                    class="btn btn-info btn-sm rounded-circle text-white border-0" 
                                     style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
@@ -139,12 +232,44 @@
             </div>
 
             {{-- PAGINATION --}}
-            <div class="d-flex justify-content-end mt-3">
-                {{ $pengajuans->links() }}
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Menampilkan {{ $pengajuans->firstItem() ?? 0 }} sampai {{ $pengajuans->lastItem() ?? 0 }} dari {{ $pengajuans->total() }} data
+                </div>
+                <div>
+                    {{ $pengajuans->appends(request()->query())->links('pagination::bootstrap-5') }}
+                </div>
             </div>
 
         </div>
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+function setStatusAndSubmit(statusVal) {
+    document.getElementById('filterStatus').value = statusVal;
+    document.getElementById('filterForm').submit();
+}
+
+// Auto-refresh
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                this.form.submit();
+            }
+        });
+        searchInput.addEventListener('search', function() {
+            if (this.value.trim() === '') {
+                this.form.submit();
+            }
+        });
+    }
+});
+</script>
+@endpush
+
 @endsection

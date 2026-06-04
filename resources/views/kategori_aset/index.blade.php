@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Kategori Aset')
+@section('title', 'Mengelola Kategori Aset')
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
         <h3 class="fw-bold mb-0">
-            Kelola Kategori Aset
+            Mengelola Kategori Aset
             @if($jenisAktif)
                 <span class="badge bg-{{ $jenisAktif->warna_badge_safe }} ms-2 fs-6">{{ $jenisAktif->nama_jenis }}</span>
             @endif
@@ -46,7 +46,7 @@
                     <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
                     <div class="input-group input-group-sm input-group-focus rounded-3">
                         <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                        <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent"
+                        <input type="search" name="search" class="form-control border-0 shadow-none bg-transparent"
                             placeholder="Cari kode atau nama..." value="{{ request('search') }}">
                     </div>
                 </div>
@@ -72,15 +72,43 @@
 
     {{-- TABEL DATA --}}
     <div class="card shadow-sm border-0">
-        <div class="card-body">
+         <div class="card-body">
+            @php
+                $sortBy = request('sort_by', 'kode');
+                $orderBy = request('order_by', 'asc');
+            @endphp
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th width="60" class="text-center">No</th>
-                            <th width="200">Nama Kategori</th>
-                            <th width="130">Kode</th>
-                            <th width="160" class="text-center">Jenis Kategori</th>
+                            <th width="200">
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama', 'order_by' => ($sortBy == 'nama' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Nama Kategori
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th width="130">
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'kode', 'order_by' => ($sortBy == 'kode' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Kode
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'kode' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'kode' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'kode' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'kode' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th width="160" class="text-center">
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'jenis_kategori_id', 'order_by' => ($sortBy == 'jenis_kategori_id' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-center">
+                                    Jenis Kategori
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'jenis_kategori_id' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'jenis_kategori_id' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'jenis_kategori_id' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'jenis_kategori_id' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -127,7 +155,7 @@
                                     <i class="fas fa-boxes fa-3x mb-3 d-block opacity-25"></i>
                                     Belum ada data Kategori Aset
                                     @if(request('jenis_kategori_id'))
-                                        untuk jenis ini
+                                        untuk jenis kategori ini
                                     @endif
                                 </td>
                             </tr>
@@ -219,7 +247,7 @@
                         Batal
                     </button>
                     <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
-                        <i class="fas fa-upload me-1"></i> Import Sekarang
+                        <i class="fas fa-upload me-1"></i> Import Data
                     </button>
                 </div>
             </form>
@@ -229,8 +257,8 @@
 {{-- MODAL TAMBAH --}}
 <div class="modal fade" id="modalTambahKategori" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('kategori-aset.store') }}" method="POST"
-            class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
+        <form action="{{ route('kategori-aset.store') }}" method="POST" id="formTambahKategori"
+            class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
             @csrf
             <input type="hidden" name="form_type" value="tambah">
 
@@ -244,7 +272,7 @@
             <div class="modal-body p-4 bg-light">
                 {{-- Dropdown Jenis Kategori --}}
                 <div class="mb-4">
-                    <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI ASET <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
                         <select name="jenis_kategori_id" id="addJenisSelect"
@@ -264,25 +292,25 @@
 
                 {{-- Nama --}}
                 <div class="mb-2">
-                    <label class="form-label fw-bold small" style="color: #253070;">NAMA KLASIFIKASI <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold small" style="color: #253070;">NAMA KATEGORI ASET <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
                         <input type="text" name="nama"
                             class="form-control border-start-0 fs-6 @error('nama') is-invalid @enderror"
-                            placeholder="Contoh: Tanah" value="{{ old('form_type') == 'tambah' ? old('nama') : '' }}">
+                            placeholder="Contoh: Tanah" value="{{ old('form_type') == 'tambah' ? old('nama') : '' }}" required maxlength="100">
                     </div>
                     @if(old('form_type') == 'tambah') @error('nama') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror @endif
                 </div>
 
                 {{-- Kode --}}
                 <div class="mb-4">
-                    <label class="form-label fw-bold small" style="color: #253070;">KODE <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold small" style="color: #253070;">KODE KATEGORI ASET <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
                         <input type="text" name="kode" id="addKodeInput"
                             class="form-control border-start-0 fs-6 @error('kode') is-invalid @enderror"
                             placeholder="Contoh: 101" maxlength="10"
-                            value="{{ old('form_type') == 'tambah' ? old('kode') : '' }}">
+                            value="{{ old('form_type') == 'tambah' ? old('kode') : '' }}" required>
                     </div>
                     <small class="text-muted mt-1 d-block" id="addKodeHint">Pilih Jenis Kategori dulu untuk melihat awalan kode yang benar</small>
                     @if(old('form_type') == 'tambah') @error('kode') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror @endif
@@ -317,7 +345,7 @@
                         <table class="table table-borderless mb-0">
                             <tbody>
                                 <tr class="border-bottom">
-                                    <th class="bg-white px-4 py-3 text-muted small text-uppercase">Jenis Kategori</th>
+                                    <th class="bg-white px-4 py-3 text-muted small text-uppercase">Jenis Kategori Aset</th>
                                     <td class="px-4 py-3">
                                         <span class="badge bg-{{ $item->tipe_badge_color }}">
                                             {{ $item->tipe_label }}
@@ -325,11 +353,11 @@
                                     </td>
                                 </tr>
                                 <tr class="border-bottom">
-                                    <th class="bg-white px-4 py-3 text-muted small text-uppercase">Nama Kategori</th>
+                                    <th class="bg-white px-4 py-3 text-muted small text-uppercase">Nama Kategori Aset</th>
                                     <td class="px-4 py-3 fw-bold text-dark">{{ $item->nama }}</td>
                                 </tr>
                                 <tr class="border-bottom">
-                                    <th class="bg-white px-4 py-3 text-muted small text-uppercase" width="160">Kode Kategori</th>
+                                    <th class="bg-white px-4 py-3 text-muted small text-uppercase" width="160">Kode Kategori Aset</th>
                                     <td class="px-4 py-3 fw-bold text-primary fs-5">{{ $item->kode }}</td>
                                 </tr>
                                 
@@ -348,8 +376,8 @@
 {{-- MODAL EDIT --}}
 <div class="modal fade" id="editModal{{ $item->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('kategori-aset.update', $item->id) }}" method="POST"
-            class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off">
+        <form action="{{ route('kategori-aset.update', $item->id) }}" method="POST" id="formEditKategori{{ $item->id }}"
+            class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
             @csrf @method('PUT')
             <input type="hidden" name="form_type_edit" value="{{ $item->id }}">
 
@@ -363,7 +391,7 @@
             <div class="modal-body p-4 bg-light">
                 {{-- Dropdown Jenis --}}
                 <div class="mb-4">
-                    <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold small" style="color: #253070;">JENIS KATEGORI ASET <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-layer-group"></i></span>
                         <select name="jenis_kategori_id"
@@ -383,24 +411,24 @@
 
                 {{-- Nama --}}
                 <div class="mb-2">
-                    <label class="form-label fw-bold small" style="color: #253070;">NAMA KLASIFIKASI <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold small" style="color: #253070;">NAMA KATEGORI ASET <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-tag"></i></span>
                         <input type="text" name="nama"
                             class="form-control border-start-0 fs-6 @error('nama') is-invalid @enderror"
-                            value="{{ session('form_type_edit') == $item->id ? old('nama') : $item->nama }}">
+                            value="{{ session('form_type_edit') == $item->id ? old('nama') : $item->nama }}" required maxlength="100">
                     </div>
                     @if(session('form_type_edit') == $item->id) @error('nama') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror @endif
                 </div>
 
                 {{-- Kode --}}
                 <div class="mb-4">
-                    <label class="form-label fw-bold small" style="color: #253070;">KODE <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold small" style="color: #253070;">KODE KATEGORI ASET <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
                         <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
                         <input type="text" name="kode" maxlength="10"
                             class="form-control border-start-0 fs-6 @error('kode') is-invalid @enderror"
-                            value="{{ session('form_type_edit') == $item->id ? old('kode') : $item->kode }}">
+                            value="{{ session('form_type_edit') == $item->id ? old('kode') : $item->kode }}" required>
                     </div>
                     <small class="text-muted mt-1 d-block edit-kode-hint-{{ $item->id }}">
                         Awalan kode harus sesuai jenis: <strong>{{ $item->jenisKategori?->kode_awalan }}</strong>
@@ -453,6 +481,21 @@
 @push('scripts')
 <script>
     window.addEventListener('load', function() {
+        // Auto-refresh when search input is cleared
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                if (this.value.trim() === '') {
+                    this.form.submit();
+                }
+            });
+            searchInput.addEventListener('search', function() {
+                if (this.value.trim() === '') {
+                    this.form.submit();
+                }
+            });
+        }
+
         const swalConfig = {
             showConfirmButton: true, confirmButtonText: 'OK',
             confirmButtonColor: '#253070', customClass: { popup: 'rounded-4 shadow' }
@@ -504,6 +547,96 @@
                 }
             }, 200);
         @endif
+
+        // Client-side Validation on Submit
+        const formsToValidate = document.querySelectorAll('#formTambahKategori, form[id^="formEditKategori"]');
+        formsToValidate.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // Clear any old custom error messages and styles
+                form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                form.querySelectorAll('.input-group').forEach(el => {
+                    el.classList.remove('border', 'border-danger');
+                });
+
+                let isValid = true;
+                let firstInvalidEl = null;
+
+                const requiredFields = form.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    // Try to find the associated label text
+                    let labelText = '';
+                    const formGroup = field.closest('.mb-2, .mb-4');
+                    if (formGroup) {
+                        const labelEl = formGroup.querySelector('label');
+                        if (labelEl) {
+                            labelText = labelEl.textContent.replace('*', '').trim();
+                        }
+                    }
+                    
+                    // Fallback to name or placeholder
+                    if (!labelText) {
+                        labelText = field.getAttribute('placeholder') || field.getAttribute('name') || 'Kolom Wajib';
+                    }
+
+                    if (!field.value || (field.tagName === 'SELECT' && field.value === '')) {
+                        isValid = false;
+                        
+                        // Style input field and group
+                        field.classList.add('is-invalid');
+                        const inputGroup = field.closest('.input-group');
+                        if (inputGroup) {
+                            inputGroup.classList.add('border', 'border-danger');
+                        }
+
+                        // Create inline error message element
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} wajib diisi.`;
+                        
+                        // Insert error message element
+                        const targetAnchor = inputGroup || field;
+                        targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                        if (!firstInvalidEl) {
+                            firstInvalidEl = targetAnchor;
+                        }
+                    } else {
+                        const maxLen = field.getAttribute('maxlength');
+                        if (maxLen && field.value.length > parseInt(maxLen)) {
+                            isValid = false;
+                            
+                            // Style input field and group
+                            field.classList.add('is-invalid');
+                            const inputGroup = field.closest('.input-group');
+                            if (inputGroup) {
+                                inputGroup.classList.add('border', 'border-danger');
+                            }
+
+                            // Create inline error message element
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} tidak boleh lebih dari ${maxLen} karakter.`;
+                            
+                            // Insert error message element
+                            const targetAnchor = inputGroup || field;
+                            targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                            if (!firstInvalidEl) {
+                                firstInvalidEl = targetAnchor;
+                            }
+                        }
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    if (firstInvalidEl) {
+                        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+        });
     });
 </script>
 @endpush

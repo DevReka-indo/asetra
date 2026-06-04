@@ -19,6 +19,17 @@ class JenisKategoriController extends Controller
     {
         $perPage = $request->input('per_page', 10);
         $search  = $request->input('search');
+        $sortBy  = $request->input('sort_by', 'nama_jenis');
+        $orderBy = $request->input('order_by', 'asc');
+
+        // Whitelist columns to prevent SQL injection
+        $allowedSortColumns = ['nama_jenis', 'kode_awalan', 'kategori_aset_count'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'nama_jenis';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'asc';
+        }
 
         $query = JenisKategori::withCount('kategoriAset');
 
@@ -29,7 +40,7 @@ class JenisKategoriController extends Controller
             });
         }
 
-        $data = $query->latest()->paginate($perPage)->withQueryString();
+        $data = $query->orderBy($sortBy, $orderBy)->paginate($perPage)->withQueryString();
 
         return view('jenis_kategori.index', compact('data'));
     }
@@ -42,16 +53,20 @@ class JenisKategoriController extends Controller
         $request->validate([
             'kode_awalan' => 'required|string|max:10|unique:jenis_kategori,kode_awalan',
             'nama_jenis'  => 'required|string|max:100',
-            'warna_label' => 'nullable|string|max:7',
+            'warna_label' => 'required|string|max:7',
         ], [
             'kode_awalan.required' => 'Kode Awalan tidak boleh kosong.',
+            'kode_awalan.max'      => 'Kode Awalan tidak boleh lebih dari 10 karakter.',
             'kode_awalan.unique'   => 'Kode Awalan tersebut sudah digunakan.',
             'nama_jenis.required'  => 'Nama Jenis tidak boleh kosong.',
+            'nama_jenis.max'      => 'Nama Jenis tidak boleh lebih dari 100 karakter.',
+            'warna_label.required' => 'Warna Label tidak boleh kosong.',
+            'warna_label.max'      => 'Warna Label tidak boleh lebih dari 7 karakter.',
         ]);
 
         $data = $request->only('kode_awalan', 'nama_jenis', 'warna_label');
         if (empty($data['warna_label'])) {
-            $data['warna_label'] = '#ea6565';
+            $data['warna_label'] = '#FF5E9B';
         }
 
         JenisKategori::create($data);
@@ -71,18 +86,22 @@ class JenisKategoriController extends Controller
                 Rule::unique('jenis_kategori', 'kode_awalan')->ignore($id),
             ],
             'nama_jenis'  => 'required|string|max:100',
-            'warna_label' => 'nullable|string|max:7',
+            'warna_label' => 'required|string|max:7',
         ], [
             'kode_awalan.required' => 'Kode Awalan tidak boleh kosong.',
+            'kode_awalan.max'      => 'Kode Awalan tidak boleh lebih dari 10 karakter.',
             'kode_awalan.unique'   => 'Kode Awalan tersebut sudah digunakan.',
             'nama_jenis.required'  => 'Nama Jenis tidak boleh kosong.',
+            'nama_jenis.max'      => 'Nama Jenis tidak boleh lebih dari 100 karakter.',
+            'warna_label.required' => 'Warna Label tidak boleh kosong.',
+            'warna_label.max'      => 'Warna Label tidak boleh lebih dari 7 karakter.',
         ]);
 
         $jenis = JenisKategori::findOrFail($id);
         
         $data = $request->only('kode_awalan', 'nama_jenis', 'warna_label');
         if (empty($data['warna_label'])) {
-            $data['warna_label'] = '#ea6565';
+            $data['warna_label'] = '#FF5E9B';
         }
 
         $jenis->update($data);

@@ -16,21 +16,38 @@ class PemulihanController extends Controller
      */
     public function kategoriAsetIndex(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
-        $search  = $request->input('search');
+        $perPage    = $request->input('per_page', 10);
+        $search     = $request->input('search');
+        $jenisId    = $request->input('jenis_kategori_id');
+        $sortBy     = $request->input('sort_by', 'deleted_at');
+        $orderBy    = $request->input('order_by', 'desc');
 
-        $query = KategoriAset::onlyTrashed();
+        $allowedSortColumns = ['nama', 'kode', 'jenis_kategori_id', 'deleted_at'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'deleted_at';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'desc';
+        }
+
+        $query = KategoriAset::onlyTrashed()->with('jenisKategori');
+
+        if ($jenisId) {
+            $query->where('jenis_kategori_id', $jenisId);
+        }
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('kode', 'LIKE', "%{$search}%")
                   ->orWhere('nama', 'LIKE', "%{$search}%");
             });
         }
 
-        $data = $query->latest('deleted_at')->paginate($perPage)->withQueryString();
+        $data       = $query->orderBy($sortBy, $orderBy)->paginate($perPage)->withQueryString();
+        $jenisList  = JenisKategori::orderBy('kode_awalan')->get();
+        $jenisAktif = $jenisId ? JenisKategori::find($jenisId) : null;
         
-        return view('pemulihan.kategori_aset', compact('data'));
+        return view('pemulihan.kategori_aset', compact('data', 'jenisList', 'jenisAktif'));
     }
 
     /**
