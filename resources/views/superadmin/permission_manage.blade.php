@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Manajemen Hak Akses')
 
@@ -334,6 +334,7 @@
     <script>
         // STATE
         let initialFormSnapshot = null;
+        let isDirty = false;
 
         // DEPT/SECTION COLLAPSE
         function toggleDept(deptKey, btn) {
@@ -412,7 +413,7 @@
         async function resetForm() {
             const confirmed = await confirmReset('Reset perubahan?', 'Semua perubahan akan dikembalikan ke kondisi terakhir tersimpan.');
             if (!confirmed) return;
-            document.body.classList.remove('perm-dirty');
+            clearDirty();
             window.location.reload();
         }
 
@@ -487,33 +488,46 @@
         // DIRTY TRACKING
         function markDirty() {
             document.body.classList.add('perm-dirty');
+            isDirty = true;
+        }
+
+        function clearDirty() {
+            document.body.classList.remove('perm-dirty');
+            isDirty = false;
         }
 
         function setupDirtyTracking() {
             const form = document.getElementById('permissionForm');
             if (!form) return;
 
-            // ambil snapshot awal
-            initialFormSnapshot = serializeForm(form);
+            // Take initial snapshot only on first user interaction with the form
+            const initSnapshot = () => {
+                if (initialFormSnapshot === null) {
+                    initialFormSnapshot = serializeForm(form);
+                }
+            };
 
+            form.addEventListener('focusin', initSnapshot, { once: true });
+            form.addEventListener('click', initSnapshot, { once: true });
             form.addEventListener('change', () => {
+                initSnapshot();
                 const now = serializeForm(form);
                 if (now !== initialFormSnapshot) {
                     markDirty();
                 } else {
-                    document.body.classList.remove('perm-dirty');
+                    clearDirty();
                 }
             });
 
             window.addEventListener('beforeunload', e => {
-                if (document.body.classList.contains('perm-dirty')) {
+                if (isDirty) {
                     e.preventDefault();
                     e.returnValue = '';
                 }
             });
 
             form.addEventListener('submit', () => {
-                document.body.classList.remove('perm-dirty');
+                clearDirty();
             });
         }
 
