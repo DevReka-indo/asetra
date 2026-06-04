@@ -126,20 +126,23 @@
 
     <!-- Modal Tambah Struktur Organisasi -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form method="POST" action="{{ route('organization-manage/add') }}">
+        <div class="modal-dialog modal-dialog-centered">
+            <form method="POST" action="{{ route('organization-manage/add') }}" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
                 @csrf
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addUserModalLabel">Tambah Struktur Organisasi</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                    </div>
-                    <div class="modal-body">
+                <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                    <h5 class="modal-title fw-bold text-white" id="addUserModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i> Tambah Struktur Organisasi
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
 
-                        <div class="mb-3">
-                            <label for="type" class="form-label">Jenis Struktur</label>
-                            <select class="form-select" id="type" name="type" required>
-                                <option value="">-- Pilih --</option>
+                    <div class="mb-4">
+                        <label for="type" class="form-label fw-bold small flex-grow-1" style="color: #253070;">JENIS STRUKTUR <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-sitemap"></i></span>
+                            <select class="form-select border-start-0 fs-6" id="type" name="type" required>
+                                <option value="" disabled selected>-- Pilih --</option>
                                 <option value="Director">Direktur</option>
                                 <option value="Divisi">Divisi</option>
                                 <option value="Department">Departemen</option>
@@ -147,10 +150,13 @@
                                 <option value="Unit">Unit</option>
                             </select>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="parent_id" class="form-label">Parent Struktur</label>
-                            <select class="form-select" id="parent_id" name="parent_id">
+                    <div class="mb-4">
+                        <label for="parent_id" class="form-label fw-bold small flex-grow-1" style="color: #253070;">PARENT STRUKTUR</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-project-diagram"></i></span>
+                            <select class="form-select border-start-0 fs-6" id="parent_id" name="parent_id">
                                 <option value="">-- Pilih induk struktur --</option>
                                 @php
                                     function renderOrgOptions($node, $level = 0)
@@ -217,24 +223,30 @@
                                 @endphp
                             </select>
                         </div>
-
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nama Struktur</label>
-                            <input type="text" class="form-control" id="name" name="name" required
-                                placeholder="Masukkan nama struktur...">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="kode" class="form-label">Kode Struktur</label>
-                            <input type="text" class="form-control" id="kode" name="kode"
-                                placeholder="Masukkan kode struktur...">
-                        </div>
-
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+
+                    <div class="mb-4">
+                        <label for="name" class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA STRUKTUR <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-font"></i></span>
+                            <input type="text" class="form-control border-start-0 fs-6" id="name" name="name" required placeholder="Masukkan nama struktur...">
+                        </div>
                     </div>
+
+                    <div class="mb-2">
+                        <label for="kode" class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE STRUKTUR</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                            <input type="text" class="form-control border-start-0 fs-6" id="kode" name="kode" placeholder="Masukkan kode struktur...">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light border-top-0 pt-3 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
+                        <i class="fas fa-save me-1"></i> Simpan
+                    </button>
                 </div>
             </form>
         </div>
@@ -242,32 +254,69 @@
 
     <!-- Modal Edit -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="editForm" method="POST">
+        <div class="modal-dialog modal-dialog-centered">
+            <form id="editForm" method="POST" class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" autocomplete="off" novalidate>
                 @csrf
                 @method('PUT')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Edit Struktur Organisasi</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="type" id="editType">
-                        <input type="hidden" name="id" id="editId">
-                        <div class="mb-3">
-                            <label for="editName" class="form-label">Nama</label>
-                            <input type="text" class="form-control" id="editName" name="name" required>
+                <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                    <h5 class="modal-title fw-bold text-white">
+                        <i class="fas fa-edit me-2"></i> Edit Struktur Organisasi
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <input type="hidden" name="type" id="editType">
+                    <input type="hidden" name="id" id="editId">
+                    
+                    <div class="mb-4">
+                        <label for="editName" class="form-label fw-bold small flex-grow-1" style="color: #253070;">NAMA <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-font"></i></span>
+                            <input type="text" class="form-control border-start-0 fs-6" id="editName" name="name" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="editKode" class="form-label">Kode</label>
-                            <input type="text" class="form-control" id="editKode" name="kode">
-                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    
+                    <div class="mb-2">
+                        <label for="editKode" class="form-label fw-bold small flex-grow-1" style="color: #253070;">KODE</label>
+                        <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                            <input type="text" class="form-control border-start-0 fs-6" id="editKode" name="kode">
+                        </div>
                     </div>
                 </div>
+                <div class="modal-footer bg-light border-top-0 pt-3 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
+                        <i class="fas fa-save me-1"></i> Simpan Perubahan
+                    </button>
+                </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Hapus -->
+    <div class="modal fade" id="deleteOrgModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-body p-5 text-center bg-light">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f1f3f5;">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
+                    <p class="text-muted mb-3" style="font-size: 1rem;">
+                        Anda yakin ingin menghapus data <br>
+                        <strong id="deleteOrgName" class="text-danger fs-5"></strong>?
+                    </p>
+                    <div class="alert alert-warning border-0 rounded-3 small text-start mb-4">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        Semua data di bawahnya juga akan ikut terhapus secara permanen.
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                        <button type="button" id="btnConfirmDeleteOrg" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -327,32 +376,72 @@
             });
         });
 
-        function confirmDelete(url) {
-            Swal.fire({
-                title: 'Anda yakin?',
-                text: "Semua data di bawahnya juga akan dihapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, hapus!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        }
-                    }).then(res => {
-                        if (res.ok) {
+        let activeDeleteUrl = '';
+        let deleteModal = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteOrgModal'));
+            
+            document.getElementById('btnConfirmDeleteOrg').addEventListener('click', function() {
+                if (!activeDeleteUrl) return;
+                
+                Swal.fire({
+                    title: 'Menghapus...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                fetch(activeDeleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                }).then(res => {
+                    Swal.close();
+                    deleteModal.hide();
+                    if (res.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Struktur organisasi berhasil dihapus.',
+                            confirmButtonColor: '#253070',
+                            customClass: { popup: 'rounded-4 shadow' }
+                        }).then(() => {
                             location.reload();
-                        } else {
-                            Swal.fire('Gagal!', 'Tidak dapat menghapus data.', 'error');
-                        }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Tidak dapat menghapus data.',
+                            confirmButtonColor: '#253070',
+                            customClass: { popup: 'rounded-4 shadow' }
+                        });
+                    }
+                }).catch(() => {
+                    Swal.close();
+                    deleteModal.hide();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Terjadi kesalahan saat menghubungi server.',
+                        confirmButtonColor: '#253070',
+                        customClass: { popup: 'rounded-4 shadow' }
                     });
-                }
+                });
             });
+        });
+
+        function confirmDelete(url, name) {
+            activeDeleteUrl = url;
+            const nameEl = document.getElementById('deleteOrgName');
+            if (nameEl) {
+                nameEl.textContent = name;
+            }
+            if (deleteModal) {
+                deleteModal.show();
+            }
         }
     </script>
 

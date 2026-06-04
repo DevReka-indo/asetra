@@ -48,7 +48,7 @@ class OrganizationController extends Controller
                 <div class="custom-node-actions">
                     <button class="custom-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="' . $type . '" data-id="' . $id . '" data-name="' . htmlspecialchars($name, ENT_QUOTES) . '" data-kode="' . htmlspecialchars($kode, ENT_QUOTES) . '"><i class="far fa-edit" style="color: white;" alt="Edit"></i>
 </button>
-                    <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
+                    <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\', \'' . htmlspecialchars($name, ENT_QUOTES) . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
                 </div>
             </div>',
             'stackChildren' => true,
@@ -76,7 +76,7 @@ class OrganizationController extends Controller
                     <div class="custom-node-title">' . htmlspecialchars($name) . '</div>
                     <div class="custom-node-actions">
                         <button class="custom-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="' . $type . '" data-id="' . $id . '" data-name="' . htmlspecialchars($name, ENT_QUOTES) . '" data-kode="' . htmlspecialchars($kode, ENT_QUOTES) . '"><i class="far fa-edit" style="color: white;" alt="Edit"></i></button>
-                        <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
+                        <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\', \'' . htmlspecialchars($name, ENT_QUOTES) . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
                     </div>
                 </div>',
                 'stackChildren' => true,
@@ -136,7 +136,7 @@ class OrganizationController extends Controller
                 <div class="custom-node-title">' . htmlspecialchars($name) . '</div>
                 <div class="custom-node-actions">
                     <button class="custom-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="' . $type . '" data-id="' . $id . '" data-name="' . htmlspecialchars($name, ENT_QUOTES) . '" data-kode="' . htmlspecialchars($kode, ENT_QUOTES) . '"><i class="far fa-edit" style="color: white;" alt="Edit"></i></button>
-                    <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
+                    <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\', \'' . htmlspecialchars($name, ENT_QUOTES) . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
                 </div>
             </div>',
             'stackChildren' => true,
@@ -166,7 +166,7 @@ class OrganizationController extends Controller
                     <div class="custom-node-title">' . htmlspecialchars($name) . '</div>
                     <div class="custom-node-actions">
                         <button class="custom-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="' . $type . '" data-id="' . $id . '" data-name="' . htmlspecialchars($name, ENT_QUOTES) . '" data-kode="' . htmlspecialchars($kode, ENT_QUOTES) . '"><i class="far fa-edit" style="color: white;" alt="Edit"></i></button>
-                        <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
+                        <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\', \'' . htmlspecialchars($name, ENT_QUOTES) . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
                     </div>
                 </div>',
                 'stackChildren' => true,
@@ -187,7 +187,7 @@ class OrganizationController extends Controller
                         <div class="custom-node-title">' . htmlspecialchars($name) . '</div>
                         <div class="custom-node-actions">
                             <button class="custom-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="' . $type . '" data-id="' . $id . '" data-name="' . htmlspecialchars($name, ENT_QUOTES) . '" data-kode="' . htmlspecialchars($kode, ENT_QUOTES) . '"><i class="far fa-edit" style="color: white;" alt="Edit"></i></button>
-                            <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
+                            <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\', \'' . htmlspecialchars($name, ENT_QUOTES) . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
                         </div>
                     </div>',
                     'stackChildren' => true,
@@ -213,7 +213,7 @@ class OrganizationController extends Controller
                         <div class="custom-node-title">' . htmlspecialchars($name) . '</div>
                         <div class="custom-node-actions">
                             <button class="custom-btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="' . $type . '" data-id="' . $id . '" data-name="' . htmlspecialchars($name, ENT_QUOTES) . '" data-kode="' . htmlspecialchars($kode, ENT_QUOTES) . '"><i class="far fa-edit" style="color: white;" alt="Edit"></i></button>
-                            <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
+                            <button class="custom-btn delete-btn" onclick="confirmDelete(\'' . $deleteUrl . '\', \'' . htmlspecialchars($name, ENT_QUOTES) . '\')"><i class="far fa-trash-alt" style="color: white;" alt="Delete"></i></button>
                         </div>
                     </div>',
                     'stackChildren' => true,
