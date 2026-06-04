@@ -215,7 +215,7 @@
                         <span class="text-muted small">{{ \App\Models\StockOpnameDetail::where('stock_opname_id', $latestOpname->id)->count() }} / {{ $totalAset }} Aset</span>
                     </div>
                     <div class="progress" style="height: 10px; border-radius: 10px; background-color: #e9ecef;">
-                        <div class="progress-bar progress-bar-custom progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ $opnameProgress }}%" aria-valuenow="{{ $opnameProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar progress-bar-custom" role="progressbar" style="width: {{ $opnameProgress }}%" aria-valuenow="{{ $opnameProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 @else
                     <div class="text-center py-4 text-muted">

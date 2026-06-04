@@ -96,7 +96,7 @@
                         <span class="text-muted small">{{ $deptCheckedCount }} / {{ $totalAsetDept }} Aset</span>
                     </div>
                     <div class="progress mb-3" style="height: 10px; border-radius: 10px; background-color: #e9ecef;">
-                        <div class="progress-bar progress-bar-custom progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ $opnameProgress }}%" aria-valuenow="{{ $opnameProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar progress-bar-custom" role="progressbar" style="width: {{ $opnameProgress }}%" aria-valuenow="{{ $opnameProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <div class="d-flex justify-content-end">
                         <a href="{{ route('stock-opname.user-show', $latestOpname->id) }}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
