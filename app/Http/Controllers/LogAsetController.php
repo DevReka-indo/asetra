@@ -18,8 +18,18 @@ class LogAsetController extends Controller
      */
     public function index(Request $request)
     {
-        $query = LogAset::with(['aset', 'dicatatOleh', 'lokasi', 'director', 'divisi', 'department', 'section', 'unit'])
-                    ->latest('created_at');
+        $sortBy  = $request->input('sort_by', 'created_at');
+        $orderBy = $request->input('order_by', 'desc');
+
+        $allowedSortColumns = ['created_at', 'tanggal_cek', 'kondisi', 'nama_aset', 'nama_lokasi', 'dicatat_oleh_name'];
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+        if (!in_array($orderBy, ['asc', 'desc'])) {
+            $orderBy = 'desc';
+        }
+
+        $query = LogAset::with(['aset', 'dicatatOleh', 'lokasi', 'director', 'divisi', 'department', 'section', 'unit']);
 
         $user = auth()->user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
@@ -45,8 +55,8 @@ class LogAsetController extends Controller
         }
 
         // Filter
-        if ($request->has('condition') && $request->condition != '') {
-            $query->where('kondisi', $request->condition);
+        if ($request->has('kondisi') && $request->kondisi != '') {
+            $query->where('log_aset.kondisi', $request->kondisi);
         }
 
         // Search by aset nomor or nama
@@ -60,12 +70,29 @@ class LogAsetController extends Controller
 
         // Filter
         if ($request->has('status_aset') && $request->status_aset != '') {
-            $query->where('status_aset', $request->status_aset);
+            $query->where('log_aset.status_aset', $request->status_aset);
         }
 
         // Filter by lokasi if provided
         if ($request->has('lokasi') && $request->lokasi != '') {
-            $query->where('lokasi_id', $request->lokasi);
+            $query->where('log_aset.lokasi_id', $request->lokasi);
+        }
+
+        // Apply sorting
+        if ($sortBy === 'nama_aset') {
+            $query->leftJoin('data_aset', 'log_aset.aset_id', '=', 'data_aset.id')
+                  ->select('log_aset.*')
+                  ->orderBy('data_aset.nama_aset', $orderBy);
+        } elseif ($sortBy === 'dicatat_oleh_name') {
+            $query->leftJoin('users', 'log_aset.dicatat_oleh', '=', 'users.id')
+                  ->select('log_aset.*')
+                  ->orderBy('users.firstname', $orderBy);
+        } elseif ($sortBy === 'nama_lokasi') {
+            $query->leftJoin('lokasi_aset', 'log_aset.lokasi_id', '=', 'lokasi_aset.lokasi_id')
+                  ->select('log_aset.*')
+                  ->orderBy('lokasi_aset.nama_lokasi', $orderBy);
+        } else {
+            $query->orderBy('log_aset.' . $sortBy, $orderBy);
         }
 
         // Pagination

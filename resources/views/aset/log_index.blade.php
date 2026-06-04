@@ -34,6 +34,8 @@
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('log-aset.index') }}">
+                <input type="hidden" name="sort_by" value="{{ request('sort_by') }}">
+                <input type="hidden" name="order_by" value="{{ request('order_by') }}">
                 
                 <div class="row g-2 align-items-end">
                     {{-- Entries --}}
@@ -108,15 +110,59 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body">
+            @php
+                $sortBy = request('sort_by', 'created_at');
+                $orderBy = request('order_by', 'desc');
+            @endphp
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="ps-4">No</th>
-                            <th>Tanggal Pengecekan</th>
-                            <th>Identitas Aset</th>
-                            <th>Kondisi Fisik & Status</th>
-                            <th>Lokasi & Penempatan</th>
-                            <th>Pelapor</th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'tanggal_cek', 'order_by' => ($sortBy == 'tanggal_cek' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Tanggal Pengecekan
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'tanggal_cek' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'tanggal_cek' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'tanggal_cek' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'tanggal_cek' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_aset', 'order_by' => ($sortBy == 'nama_aset' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Identitas Aset
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_aset' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_aset' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_aset' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_aset' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'kondisi', 'order_by' => ($sortBy == 'kondisi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Kondisi Fisik & Status
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'kondisi' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'kondisi' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'kondisi' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'kondisi' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_lokasi', 'order_by' => ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Lokasi & Penempatan
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'nama_lokasi' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'dicatat_oleh_name', 'order_by' => ($sortBy == 'dicatat_oleh_name' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    Pelapor
+                                    <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
+                                        <span style="position: absolute; right: 10px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'dicatat_oleh_name' && $orderBy == 'asc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'dicatat_oleh_name' && $orderBy == 'asc') ? '#253070' : '#888888' }};">↑</span>
+                                        <span style="position: absolute; right: 2px; bottom: 0.1em; font-size: 15px; font-weight: normal; opacity: {{ ($sortBy == 'dicatat_oleh_name' && $orderBy == 'desc') ? '0.9' : '0.3' }}; color: {{ ($sortBy == 'dicatat_oleh_name' && $orderBy == 'desc') ? '#253070' : '#888888' }};">↓</span>
+                                    </span>
+                                </a>
+                            </th>
                             <th>Catatan & Perubahan</th>
                             <th class="text-center pe-4">Aksi</th>
                         </tr>
