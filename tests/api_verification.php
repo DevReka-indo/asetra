@@ -27,6 +27,11 @@ DB::beginTransaction();
 
 try {
     // 1. Setup mock user and token
+    $lokasiId = null;
+    $jenisId = null;
+    $kategoriId = null;
+    $asetId = null;
+
     $role = Role::firstOrCreate(['id_role' => 1], ['nm_role' => 'Superadmin', 'desc_role' => 'Superadmin']);
     $position = Position::firstOrCreate(['id_position' => 1], ['nm_position' => 'Staff IT', 'desc_position' => 'Staff IT']);
     
@@ -137,7 +142,6 @@ try {
         'kategori_id' => $kategoriId,
         'kode_organisasi' => 'director_1',
         'lokasi_id' => $lokasiId,
-        'gedung' => 'Verify Gedung',
         'merek' => 'Verify Merek',
         'deskripsi' => 'Verify Deskripsi',
         'tanggal_kapitalisasi' => '2026-05-01',
@@ -170,11 +174,12 @@ try {
 
     // Test 8: Submit Repair request
     echo "8. Testing POST /api/perbaikan ... ";
+    $photoPerbaikan = UploadedFile::fake()->image('broken_verify.jpg');
     $req = Request::create('/api/perbaikan', 'POST', [
         'aset_id' => $asetId,
         'deskripsi_kerusakan' => 'Power supply verify',
         'tingkat_urgensi' => 'sedang'
-    ], [], [], $headers);
+    ], [], ['foto_kerusakan' => $photoPerbaikan], $headers);
     $resp = $kernel->handle($req);
     $content = json_decode($resp->getContent(), true);
     if ($resp->getStatusCode() === 210) {

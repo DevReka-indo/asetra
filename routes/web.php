@@ -91,64 +91,6 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     // manage user
     Route::post('/user-manage/sync-sipo', [UserManageController::class, 'syncSipo'])->name('user-manage.sync-sipo');
     Route::get('/user-manage/create', [UserManageController::class, 'create'])->name('user.create');
-    Route::get('/debug-sync', function() {
-        $syncService = app(\App\Services\OrgSyncService::class);
-        try {
-            $stats = $syncService->syncStructureAndBagianKerja();
-            return response()->json([
-                'status' => 'success',
-                'stats' => $stats,
-                'database_counts' => [
-                    'directors' => \App\Models\Director::count(),
-                    'divisis' => \App\Models\Divisi::count(),
-                    'departments' => \App\Models\Department::count(),
-                    'sections' => \App\Models\Section::count(),
-                    'units' => \App\Models\Unit::count(),
-                    'bagian_kerja' => \App\Models\BagianKerja::count(),
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ], 500);
-        }
-    });
-
-    Route::get('/debug-sipo-raw', function() {
-        $baseUrl = config('services.external_api.base_url');
-        $login = config('services.external_api.login');
-        $password = config('services.external_api.password');
-        try {
-            $loginResponse = \Illuminate\Support\Facades\Http::withHeaders([
-                'Accept' => 'application/json',
-            ])->post("{$baseUrl}/login", [
-                'login' => $login,
-                'password' => $password,
-            ]);
-            if ($loginResponse->failed()) {
-                return "Login failed: Status " . $loginResponse->status() . " Body " . $loginResponse->body();
-            }
-            $token = $loginResponse->json()['token'] ?? null;
-            if (!$token) {
-                return "No token in login response: " . $loginResponse->body();
-            }
-            
-            $orgResp = \Illuminate\Support\Facades\Http::withHeaders([
-                'Accept' => 'application/json',
-                'Authorization' => "Bearer {$token}",
-            ])->get("{$baseUrl}/struktur-organisasi");
-            
-            return response()->json([
-                'token_received' => !empty($token),
-                'org_status' => $orgResp->status(),
-                'org_data' => $orgResp->json()
-            ]);
-        } catch (\Exception $e) {
-            return "Exception: " . $e->getMessage() . "\n" . $e->getTraceAsString();
-        }
-    });
     Route::get('/user-manage/paginate', [UserManageController::class, 'paginateUsers'])->name('user-manage.paginate');
     Route::get('/user-manage/edit/{id}', [UserController::class, 'edit'])->name('user-manage.edit');
     Route::get('/role-management', [UserController::class, 'showRole'])->name('user.role');
