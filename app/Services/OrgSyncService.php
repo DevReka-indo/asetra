@@ -413,7 +413,7 @@ class OrgSyncService
                 }
             } catch (\Exception $e) {
                 Log::error("Gagal menyinkronkan struktur organisasi. Error: " . $e->getMessage());
-                $stats['errors']++;
+                throw $e;
             }
 
             // b. Sinkronisasi Bagian Kerja
@@ -434,7 +434,7 @@ class OrgSyncService
                 }
             } catch (\Exception $e) {
                 Log::error("Gagal menyinkronkan bagian kerja. Error: " . $e->getMessage());
-                $stats['errors']++;
+                throw $e;
             }
         });
 
