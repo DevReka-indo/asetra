@@ -303,8 +303,9 @@
             {{-- AKSI ADMIN BAGIAN UMUM --}}
             @php
                 $user = Auth::user();
+                $isSuperAdmin = $user->role_id_role === 1 || strtolower($user->role->nm_role ?? '') === 'superadmin';
                 $isAdmin = in_array(strtolower($user->role->nm_role ?? ''), ['admin', 'superadmin']);
-                $canProcess = $isAdmin && $user->isBagianUmum();
+                $canProcess = $isSuperAdmin || ($isAdmin && $user->isBagianUmum());
             @endphp
 
             @if($canProcess)
