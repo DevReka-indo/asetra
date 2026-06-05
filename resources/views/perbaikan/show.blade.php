@@ -35,18 +35,6 @@
 <div class="card shadow-sm border-0">
     <div class="card-body">
     {{-- ALERT --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <div class="row g-4">
 
@@ -345,7 +333,7 @@
                         <h6 class="fw-bold text-success mb-0"><i class="fas fa-flag-checkered me-2"></i>Tandai Selesai</h6>
                     </div>
                     <div class="card-body px-4 py-3">
-                        <form action="{{ route('perbaikan.selesai', $pengajuan->id) }}" method="POST">
+                        <form action="{{ route('perbaikan.selesai', $pengajuan->id) }}" method="POST" id="formSelesai" novalidate>
                             @csrf
                             @method('PUT')
 
@@ -354,10 +342,13 @@
                                 <select name="kondisi_setelah" class="form-select form-select-sm bg-light border-0 shadow-sm" required>
                                     <option value="">-- Pilih kondisi --</option>
                                     <option value="Baik">🟢 Baik</option>
-                                    <option value="Cukup">🟡 Cukup</option>
-                                    <option value="Rusak Ringan">🟠 Rusak Ringan</option>
+                                    <option value="Rusak">🔴 Rusak</option>
+                                    <option value="Bongkar">🔨 Bongkar</option>
                                     <option value="Tidak Terpakai">⚪ Tidak Terpakai</option>
+                                    <option value="Hilang">❌ Hilang</option>
+                                    <option value="Tidak Teridentifikasi">🔍 Tidak Teridentifikasi</option>
                                 </select>
+                                <div class="text-danger small mt-1 d-none" id="errorKondisiSetelah">Kondisi aset setelah perbaikan wajib dipilih!</div>
                             </div>
 
                             <div class="mb-3">
@@ -474,34 +465,66 @@ function executeProses() {
     document.getElementById('formProses').submit();
 }
 
-window.addEventListener('load', function() {
-    const swalConfig = {
-        showConfirmButton: true,
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#253070',
-        customClass: {
-            popup: 'rounded-4 shadow'
+    function showNotification(type, title, message) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#253070',
+                customClass: {
+                    popup: 'rounded-4 shadow'
+                },
+                icon: type,
+                title: title,
+                text: message
+            });
+        } else if (typeof swal !== 'undefined') {
+            swal(title, message, type);
+        } else {
+            alert(title + ": " + message);
         }
-    };
+    }
 
-    @if (session('success'))
-        Swal.fire({
-            ...swalConfig,
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}'
-        });
-    @endif
+    window.addEventListener('load', function() {
+        const navigation = performance.getEntriesByType("navigation")[0];
+        const isBackForward = navigation && navigation.type === 'back_forward';
 
-    @if (session('error'))
-        Swal.fire({
-            ...swalConfig,
-            icon: 'error',
-            title: 'Gagal!',
-            text: '{{ session('error') }}'
-        });
-    @endif
-});
+        if (!isBackForward) {
+            @if (session('success'))
+                showNotification('success', 'Berhasil!', {!! json_encode(session('success')) !!});
+            @endif
+
+            @if (session('error'))
+                showNotification('error', 'Gagal!', {!! json_encode(session('error')) !!});
+            @endif
+        }
+
+        // Validasi formSelesai
+        const formSelesai = document.getElementById('formSelesai');
+        if (formSelesai) {
+            formSelesai.addEventListener('submit', function(e) {
+                const selectKondisi = this.querySelector('select[name="kondisi_setelah"]');
+                const errorDiv = document.getElementById('errorKondisiSetelah');
+                if (!selectKondisi.value) {
+                    e.preventDefault();
+                    selectKondisi.classList.add('is-invalid');
+                    errorDiv.classList.remove('d-none');
+                } else {
+                    selectKondisi.classList.remove('is-invalid');
+                    errorDiv.classList.add('d-none');
+                }
+            });
+
+            const selectKondisi = formSelesai.querySelector('select[name="kondisi_setelah"]');
+            selectKondisi?.addEventListener('change', function() {
+                const errorDiv = document.getElementById('errorKondisiSetelah');
+                if (this.value) {
+                    this.classList.remove('is-invalid');
+                    errorDiv.classList.add('d-none');
+                }
+            });
+        }
+    });
 </script>
 @endpush
 @endsection

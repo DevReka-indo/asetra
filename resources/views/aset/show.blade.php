@@ -635,32 +635,52 @@
             });
         }
 
-        const swalConfig = {
-            showConfirmButton: true,
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#253070',
-            customClass: {
-                popup: 'rounded-4 shadow'
+        function showNotification(type, title, message, isHtml = false) {
+            if (typeof Swal !== 'undefined') {
+                const config = {
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#253070',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    },
+                    icon: type,
+                    title: title
+                };
+                if (isHtml) {
+                    config.html = message;
+                } else {
+                    config.text = message;
+                }
+                Swal.fire(config);
+            } else if (typeof swal !== 'undefined') {
+                swal(title, message, type);
+            } else {
+                alert(title + ": " + message);
             }
-        };
+        }
 
-        @if (session('success'))
-            Swal.fire({
-                ...swalConfig,
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}'
-            });
-        @endif
+        const navigation = performance.getEntriesByType("navigation")[0];
+        const isBackForward = navigation && navigation.type === 'back_forward';
 
-        @if (session('error'))
-            Swal.fire({
-                ...swalConfig,
-                icon: 'error',
-                title: 'Gagal!',
-                text: '{{ session('error') }}'
-            });
-        @endif
+        if (!isBackForward) {
+            @if (session('success'))
+                showNotification('success', 'Berhasil!', {!! json_encode(session('success')) !!});
+            @endif
+
+            @if (session('error'))
+                showNotification('error', 'Gagal!', {!! json_encode(session('error')) !!});
+            @endif
+
+            @if ($errors->any())
+                const errorHtml = `<ul class="text-start mb-0 small">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>`;
+                showNotification('error', 'Gagal Validasi!', errorHtml, true);
+            @endif
+        }
     });
 </script>
 @endpush

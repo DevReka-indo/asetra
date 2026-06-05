@@ -301,21 +301,23 @@ class PengajuanPerbaikanController extends Controller
         ]);
 
         //Update master data_aset
-        $pengajuan->aset->update([
-            'status_kondisi' => $request->kondisi_setelah,
-            'status_aset'    => 'Aktif',
-        ]);
+        if ($pengajuan->aset) {
+            $pengajuan->aset->update([
+                'status_kondisi' => $request->kondisi_setelah,
+                'status_aset'    => 'Aktif',
+            ]);
 
-        //log_aset otomatis sebagai histori
-        LogAset::create([
-            'aset_id'      => $pengajuan->aset_id,
-            'tanggal_cek'  => now()->toDateString(),
-            'kondisi'      => $request->kondisi_setelah,
-            'status_aset'  => 'Aktif',
-            'keterangan'   => 'Selesai perbaikan — ref. Pengajuan #' . $pengajuan->id
-                              . ($request->catatan ? ' | Catatan: ' . $request->catatan : ''),
-            'dicatat_oleh' => Auth::id(),
-        ]);
+            //log_aset otomatis sebagai histori
+            LogAset::create([
+                'aset_id'      => $pengajuan->aset_id,
+                'tanggal_cek'  => now()->toDateString(),
+                'kondisi'      => $request->kondisi_setelah,
+                'status_aset'  => 'Aktif',
+                'keterangan'   => 'Selesai perbaikan — ref. Pengajuan #' . $pengajuan->id
+                                  . ($request->catatan ? ' | Catatan: ' . $request->catatan : ''),
+                'dicatat_oleh' => Auth::id(),
+            ]);
+        }
 
         // Notify the user who requested
         $pengajuUser = $pengajuan->pengaju;

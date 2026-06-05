@@ -190,5 +190,21 @@
             });
         });
     </script>
+    <script>
+        window.addEventListener('pageshow', function(event) {
+            let isBackForward = false;
+            if (event.persisted) {
+                isBackForward = true;
+            } else {
+                const perfEntries = performance.getEntriesByType("navigation");
+                if (perfEntries.length > 0 && perfEntries[perfEntries.length - 1].type === 'back_forward') {
+                    isBackForward = true;
+                }
+            }
+            if (isBackForward) {
+                window.location.reload();
+            }
+        });
+    </script>
 </body>
 </html>
