@@ -54,7 +54,7 @@
                 {{-- INFORMASI DATA ASET --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                        <h6 class="mb-0 fw-semibold text-primary">
+                        <h6 class="mb-0 fw-semibold text-navy">
                             <i class="fas fa-box-open me-2"></i> Informasi Data Aset
                         </h6>
                     </div>
@@ -63,7 +63,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Nomor Aset Saat Ini</label>
                                 <div class="input-group">
-                                    <input type="text" id="nomor_aset_display" class="form-control bg-light text-primary fw-bold border-0 shadow-none rounded-3 px-3 py-2" 
+                                    <input type="text" id="nomor_aset_display" class="form-control bg-light text-navy fw-bold border-0 shadow-none rounded-3 px-3 py-2" 
                                            value="{{ $aset->nomor_aset }}" disabled style="cursor: not-allowed; opacity: 1;">
                                     <span class="input-group-text bg-light border-0 rounded-3 text-muted small"><i class="fas fa-info-circle"></i></span>
                                 </div>
@@ -145,7 +145,7 @@
                 {{-- PENEMPATAN ASET --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                        <h6 class="mb-0 fw-semibold text-primary">
+                        <h6 class="mb-0 fw-semibold text-navy">
                             <i class="fas fa-map-marker-alt me-2"></i> Penempatan Aset
                         </h6>
                     </div>
@@ -183,7 +183,7 @@
                 {{-- STATUS & STRUKTUR --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                        <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-shield-alt me-2"></i> Kondisi & Struktur</h6>
+                        <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-shield-alt me-2"></i> Kondisi & Struktur</h6>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -311,7 +311,7 @@
                 {{-- DOKUMENTASI FOTO --}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                        <h6 class="mb-0 fw-semibold text-primary"><i class="fas fa-camera me-2"></i> Foto Aset</h6>
+                        <h6 class="mb-0 fw-semibold text-navy"><i class="fas fa-camera me-2"></i> Foto Aset</h6>
                     </div>
                     <div class="card-body">
                         {{-- List foto saat ini --}}
@@ -338,7 +338,7 @@
                         <div class="upload-container border border-2 border-dashed rounded-3 p-4 text-center bg-light position-relative mb-2" id="dropzone" style="border-color: #253070 !important; cursor: pointer; transition: all 0.3s ease;">
                             <input type="file" name="foto_baru[]" id="fileInput" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" accept="image/*" multiple style="cursor: pointer; z-index: 10;">
                             <div class="upload-prompt">
-                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <i class="fas fa-cloud-upload-alt fa-3x text-navy mb-3"></i>
                                 <h6 class="fw-bold text-navy">Tarik & Lepas Foto di Sini</h6>
                                 <p class="text-muted small mb-0">atau klik untuk memilih file dari komputer</p>
                                 <span class="badge bg-secondary mt-2">Maks. 10 Foto Baru</span>

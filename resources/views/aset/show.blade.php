@@ -44,7 +44,7 @@
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm mb-4 text-center">
                         <div class="card-header bg-white pt-3 pb-2">
-                            <h6 class="fw-bold text-primary mb-0">Label QR Aset</h6>
+                            <h6 class="fw-bold text-navy mb-0"><i class="fas fa-qrcode me-2"></i>Label QR Aset</h6>
                         </div>
                         <div class="card-body pt-3">
                             <div class="d-inline-block p-3 bg-white border rounded mb-3">
@@ -66,7 +66,7 @@
 
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white pt-3 pb-2">
-                            <h6 class="fw-bold text-primary mb-0">Dokumentasi Aset</h6>
+                            <h6 class="fw-bold text-navy mb-0"><i class="fas fa-camera me-2"></i>Dokumentasi Aset</h6>
                         </div>
                         <div class="card-body p-0 text-center">
                             @php
@@ -109,7 +109,7 @@
                         
                         {{-- HEADER DISAMAKAN PERSIS DENGAN SISI KIRI --}}
                         <div class="card-header bg-white pt-3 pb-2 border-bottom-0">
-                            <h6 class="fw-bold text-primary mb-0"><i class="fas fa-info-circle me-2"></i> Detail Informasi Aset</h6>
+                            <h6 class="fw-bold text-navy mb-0"><i class="fas fa-info-circle me-2"></i>Detail Informasi Aset</h6>
                         </div>
                         
                         <div class="card-body px-4 pb-4 pt-3">
@@ -117,7 +117,7 @@
                             <div class="row g-3 mb-4 border-bottom pb-3">
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="icon-wrapper text-primary me-3" style="width: 40px; height: 40px; background: rgba(37, 48, 112, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="icon-wrapper text-navy me-3" style="width: 40px; height: 40px; background: rgba(37, 48, 112, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-box-open fa-lg"></i>
                                         </div>
                                         <div>
@@ -128,7 +128,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="icon-wrapper text-primary me-3" style="width: 40px; height: 40px; background: rgba(37, 48, 112, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="icon-wrapper text-navy me-3" style="width: 40px; height: 40px; background: rgba(37, 48, 112, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-tag fa-lg"></i>
                                         </div>
                                         <div>
@@ -139,7 +139,7 @@
                                 </div>
                             </div>
 
-                            <h6 class="fw-bold mb-3 text-navy border-bottom pb-2">Spesifikasi Detail</h6>
+                            <h6 class="fw-bold mb-3 text-navy border-bottom pb-2"><i class="fas fa-list me-2"></i>Detail Aset</h6>
 
                             {{-- Row 2: Detail --}}
                             <div class="row g-4">
@@ -177,6 +177,26 @@
                                             <span class="info-value fw-semibold">{{ $aset->bast ?? '-' }}</span>
                                         </div>
                                     </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">PIC Aset</span>
+                                            <span class="info-value fw-semibold">{{ $aset->pic ? $aset->pic->firstname . ' ' . $aset->pic->lastname : '-' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start mb-3">
+                                        <div class="icon-wrapper me-3">
+                                            <i class="fas fa-user-shield"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="info-label d-block fw-bold">Penanggung Jawab Aset</span>
+                                            <span class="info-value fw-semibold">{{ $aset->penanggungJawab ? $aset->penanggungJawab->firstname . ' ' . $aset->penanggungJawab->lastname : '-' }}</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Kolom Kanan --}}
@@ -190,8 +210,6 @@
                                             <span class="info-value fw-semibold">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
                                         </div>
                                     </div>
-
-
 
                                     <div class="d-flex align-items-start mb-3">
                                         <div class="icon-wrapper me-3">
@@ -218,26 +236,6 @@
                                             @else
                                                 <span class="badge bg-secondary px-2 py-1 rounded-pill"><i class="fas fa-times-circle me-1"></i> {{ $aset->status_aset ?? '-' }}</span>
                                             @endif
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="icon-wrapper me-3">
-                                            <i class="fas fa-user-tie"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">PIC Aset</span>
-                                            <span class="info-value fw-semibold">{{ $aset->pic ? $aset->pic->firstname . ' ' . $aset->pic->lastname : '-' }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start mb-3">
-                                        <div class="icon-wrapper me-3">
-                                            <i class="fas fa-user-shield"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Penanggung Jawab Aset</span>
-                                            <span class="info-value fw-semibold">{{ $aset->penanggungJawab ? $aset->penanggungJawab->firstname . ' ' . $aset->penanggungJawab->lastname : '-' }}</span>
                                         </div>
                                     </div>
 
@@ -307,7 +305,7 @@
             {{-- BAGIAN TABEL RIWAYAT MONITORING (LOG ASET) --}}
             <div class="mt-5">
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                    <h5 class="fw-bold text-navy mb-0"><i class="fas fa-history me-2"></i> Riwayat Monitoring & Kondisi</h5>
+                    <h6 class="fw-bold text-navy mb-0"><i class="fas fa-history me-2"></i>Riwayat Monitoring & Kondisi</h6>
                     <small class="text-muted">{{ $aset->logAset->count() }} catatan</small>
                 </div>
                 
@@ -545,8 +543,8 @@
                 <div class="modal-body p-4 bg-light">
 
                     {{-- Info Aset --}}
-                    <div class="alert alert-secondary d-flex align-items-center py-2 px-3 mb-4 rounded-3 shadow-sm" role="alert">
-                        <i class="fas fa-box fa-lg me-3 text-secondary"></i>
+                    <div class="alert d-flex align-items-center py-2 px-3 mb-4 rounded-3 shadow-sm" role="alert" style="border-left: 4px solid #253070; background-color: rgba(37, 48, 112, 0.05); border-top: 0; border-right: 0; border-bottom: 0;">
+                        <i class="fas fa-box fa-lg me-3" style="color: #253070;"></i>
                         <span class="small m-0 text-dark">
                             Mengajukan perbaikan untuk aset:
                             <strong>{{ $aset->nama_aset }}</strong>
@@ -570,9 +568,11 @@
 
                         {{-- Upload Foto --}}
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-navy mb-1 small">Foto Kerusakan</label>
+                            <label class="form-label fw-bold text-navy mb-1 small">
+                                Foto Kerusakan <span class="text-danger">*</span>
+                            </label>
                             <input type="file" name="foto_kerusakan" class="form-control bg-white border-0 shadow-sm"
-                                   accept="image/*" capture="environment">
+                                   accept="image/*" capture="environment" required>
                             <small class="text-muted d-block mt-1">
                                 <i class="fas fa-mobile-alt me-1"></i>Jika dari HP, bisa langsung buka kamera.
                             </small>
