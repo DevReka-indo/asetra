@@ -470,6 +470,7 @@ class OrgSyncService
                 ['id_director' => $id],
                 [
                     'name_director' => $name,
+                    'kode_director' => $kode ?? '',
                     'parent_director_id' => $parentDirectorId,
                     'is_main' => ($parentDirectorId === null) ? 1 : 0
                 ]
