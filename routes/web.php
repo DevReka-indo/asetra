@@ -75,7 +75,8 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::put('/organization/{type}/{id}', [OrganizationController::class, 'update'])->name('organization.update');
     Route::delete('/organization/{type}/{id}', [OrganizationController::class, 'delete'])->name('organization.delete');
     Route::get('/organization-manage', [OrganizationController::class, 'index'])->name('organization.manageOrganization');
-Route::post('organization-manage/add', [OrganizationController::class, 'store'])->name('organization-manage/add');
+    Route::post('organization-manage/add', [OrganizationController::class, 'store'])->name('organization-manage/add');
+    Route::post('/organization-manage/sync-sipo', [OrganizationController::class, 'syncSipo'])->name('organization.sync-sipo');
 
 // Kode Bagian Controller
     Route::get('/kode-bagian', [KodeBagianController::class, 'index'])->name('kode-bagian.index');
@@ -85,6 +86,7 @@ Route::post('organization-manage/add', [OrganizationController::class, 'store'])
     Route::put('/kode-bagian/{id}', [KodeBagianController::class, 'update'])->name('kode-bagian.update');
     Route::delete('/kode-bagian/{id}', [KodeBagianController::class, 'destroy'])->name('kode-bagian.destroy');
     Route::post('{id}/restore', [KodeBagianController::class, 'restore'])->name('kode-bagian.restore');
+    Route::post('/kode-bagian/sync-sipo', [KodeBagianController::class, 'syncSipo'])->name('kode-bagian.sync-sipo');
 
     // manage user
     Route::post('/user-manage/sync-sipo', [UserManageController::class, 'syncSipo'])->name('user-manage.sync-sipo');

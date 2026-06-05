@@ -383,4 +383,14 @@ class OrganizationController extends Controller
         $node->delete();
         return response()->json(['success' => true]);
     }
+
+    public function syncSipo(Request $request, \App\Services\OrgSyncService $syncService)
+    {
+        try {
+            $stats = $syncService->syncStructureAndBagianKerja();
+            return redirect()->route('organization.manageOrganization')->with('success', "Sinkronisasi struktur organisasi berhasil!");
+        } catch (\Exception $e) {
+            return redirect()->route('organization.manageOrganization')->with('error', "Sinkronisasi gagal: " . $e->getMessage());
+        }
+    }
 }

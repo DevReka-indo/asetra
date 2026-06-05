@@ -143,4 +143,14 @@ class KodeBagianController extends Controller
         return redirect()->route('kode-bagian.index')
             ->with('success', 'Kode bagian kerja berhasil dipulihkan');
     }
+
+    public function syncSipo(Request $request, \App\Services\OrgSyncService $syncService)
+    {
+        try {
+            $stats = $syncService->syncStructureAndBagianKerja();
+            return redirect()->route('kode-bagian.index')->with('success', "Sinkronisasi bagian kerja berhasil!");
+        } catch (\Exception $e) {
+            return redirect()->route('kode-bagian.index')->with('error', "Sinkronisasi gagal: " . $e->getMessage());
+        }
+    }
 }
