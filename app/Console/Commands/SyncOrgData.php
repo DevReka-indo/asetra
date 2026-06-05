@@ -29,7 +29,7 @@ class SyncOrgData extends Command
         $this->info('Memulai proses sinkronisasi dari API eksternal...');
         
         try {
-            $stats = $syncService->sync();
+            $stats = $syncService->syncStructureAndBagianKerja();
             
             $this->newLine();
             $this->info('Sinkronisasi selesai dengan sukses!');

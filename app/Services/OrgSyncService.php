@@ -363,4 +363,216 @@ class OrgSyncService
 
         throw new \Exception("Format respon user tidak valid (bukan array): " . json_encode($data));
     }
+
+    /**
+     * Jalankan proses sinkronisasi struktur organisasi dan bagian kerja.
+     */
+    public function syncStructureAndBagianKerja(): array
+    {
+        Log::info('Memulai sinkronisasi data struktur organisasi dan bagian kerja dari API eksternal.');
+
+        if (empty($this->login) || empty($this->password)) {
+            throw new \Exception('Kredensial API eksternal (NIP/Password) belum diset di file .env.');
+        }
+
+        // 1. Login untuk mendapatkan token
+        $token = $this->getAccessToken();
+        Log::info('Berhasil login ke API eksternal, memulai pengambilan data...');
+
+        $stats = [
+            'directors' => 0,
+            'divisis' => 0,
+            'departments' => 0,
+            'sections' => 0,
+            'units' => 0,
+            'roles' => 0,
+            'positions' => 0,
+            'bagian_kerja' => 0,
+            'users' => 0,
+            'errors' => 0,
+        ];
+
+        Model::unguard();
+
+        DB::transaction(function () use ($token, &$stats) {
+            // a. Sinkronisasi Struktur Organisasi
+            try {
+                $orgData = $this->fetchOrgStructure($token);
+                if (is_array($orgData)) {
+                    if (isset($orgData['type'])) {
+                        // Single node
+                        $this->processOrgNode($orgData, null, null, null, null, $stats);
+                    } else {
+                        // Array of nodes
+                        foreach ($orgData as $node) {
+                            if (is_array($node)) {
+                                $this->processOrgNode($node, null, null, null, null, $stats);
+                            }
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Gagal menyinkronkan struktur organisasi. Error: " . $e->getMessage());
+                $stats['errors']++;
+            }
+
+            // b. Sinkronisasi Bagian Kerja
+            try {
+                $bagianKerjaData = $this->fetchBagianKerja($token);
+                if (is_array($bagianKerjaData)) {
+                    foreach ($bagianKerjaData as $item) {
+                        BagianKerja::updateOrCreate(
+                            ['kode_bagian' => $item['kode_bagian']],
+                            [
+                                'nama_bagian' => $item['nama_bagian'] ?? '',
+                                'kategori' => $item['kategori'] ?? null,
+                                'is_active' => $item['is_active'] ?? true,
+                            ]
+                        );
+                        $stats['bagian_kerja']++;
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Gagal menyinkronkan bagian kerja. Error: " . $e->getMessage());
+                $stats['errors']++;
+            }
+        });
+
+        Model::reguard();
+
+        Log::info('Sinkronisasi struktur organisasi dan bagian kerja selesai.', $stats);
+
+        return $stats;
+    }
+
+    /**
+     * Traversal rekursif untuk memproses node struktur organisasi.
+     */
+    protected function processOrgNode(array $node, ?int $parentDirectorId, ?int $parentDivisiId, ?int $parentDeptId, ?int $parentSectionId, array &$stats)
+    {
+        $type = $node['type'] ?? null;
+        $id = $node['id'] ?? null;
+        $name = $node['name'] ?? null;
+        $kode = $node['kode'] ?? null;
+
+        $directorId = $parentDirectorId;
+        $divisiId = $parentDivisiId;
+        $deptId = $parentDeptId;
+        $sectionId = $parentSectionId;
+
+        if ($type === 'director') {
+            Director::updateOrCreate(
+                ['id_director' => $id],
+                [
+                    'name_director' => $name,
+                    'parent_director_id' => $parentDirectorId
+                ]
+            );
+            $directorId = $id;
+            $stats['directors']++;
+        } elseif ($type === 'divisi') {
+            Divisi::updateOrCreate(
+                ['id_divisi' => $id],
+                [
+                    'nm_divisi' => $name,
+                    'kode_divisi' => $kode,
+                    'director_id_director' => $parentDirectorId
+                ]
+            );
+            $divisiId = $id;
+            $stats['divisis']++;
+        } elseif ($type === 'department') {
+            Department::updateOrCreate(
+                ['id_department' => $id],
+                [
+                    'name_department' => $name,
+                    'kode_department' => $kode,
+                    'divisi_id_divisi' => $parentDivisiId,
+                    'director_id_director' => $parentDirectorId
+                ]
+            );
+            $deptId = $id;
+            $stats['departments']++;
+        } elseif ($type === 'section') {
+            Section::updateOrCreate(
+                ['id_section' => $id],
+                [
+                    'name_section' => $name,
+                    'department_id_department' => $parentDeptId
+                ]
+            );
+            $sectionId = $id;
+            $stats['sections']++;
+        } elseif ($type === 'unit') {
+            Unit::updateOrCreate(
+                ['id_unit' => $id],
+                [
+                    'name_unit' => $name,
+                    'department_id_department' => $parentDeptId,
+                    'section_id_section' => $parentSectionId
+                ]
+            );
+            $stats['units']++;
+        }
+
+        if (isset($node['children']) && is_array($node['children'])) {
+            foreach ($node['children'] as $child) {
+                $this->processOrgNode($child, $directorId, $divisiId, $deptId, $sectionId, $stats);
+            }
+        }
+    }
+
+    /**
+     * Tarik struktur organisasi dari API.
+     */
+    protected function fetchOrgStructure(string $token): array
+    {
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$token}",
+        ])->get("{$this->baseUrl}/struktur-organisasi");
+
+        if ($response->failed()) {
+            throw new \Exception("Gagal mengambil data struktur organisasi dari API: HTTP Status {$response->status()} | Respon: {$response->body()}");
+        }
+
+        $data = $response->json();
+
+        if (isset($data['data']) && is_array($data['data'])) {
+            return $data['data'];
+        }
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        throw new \Exception("Format respon struktur organisasi tidak valid (bukan array): " . json_encode($data));
+    }
+
+    /**
+     * Tarik bagian kerja dari API.
+     */
+    protected function fetchBagianKerja(string $token): array
+    {
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$token}",
+        ])->get("{$this->baseUrl}/bagian-kerja");
+
+        if ($response->failed()) {
+            throw new \Exception("Gagal mengambil data bagian kerja dari API: HTTP Status {$response->status()} | Respon: {$response->body()}");
+        }
+
+        $data = $response->json();
+
+        if (isset($data['data']) && is_array($data['data'])) {
+            return $data['data'];
+        }
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        throw new \Exception("Format respon bagian kerja tidak valid (bukan array): " . json_encode($data));
+    }
 }

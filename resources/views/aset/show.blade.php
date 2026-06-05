@@ -515,7 +515,7 @@
                 <div class="modal-footer bg-white border-top-0 pt-0 pb-4 px-4">
                     <button type="button" class="btn btn-light px-4 rounded-pill fw-bold" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-navy px-4 rounded-pill fw-bold text-white shadow-sm" style="background-color: #253070;">
-                        <i class="fas fa-save me-2"></i> Simpan Catatan
+                        <i class="fas fa-save me-2"></i> Simpan
                     </button>
                 </div>
             </form>

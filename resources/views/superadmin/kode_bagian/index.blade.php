@@ -73,6 +73,12 @@
 
                 <div class="col-auto ms-auto">
                     <div class="d-flex gap-2">
+                        <form method="POST" action="{{ route('user-manage.sync-sipo') }}" id="syncForm" class="d-inline m-0">
+                            @csrf
+                            <button type="submit" class="btn text-white px-3 rounded-3 d-flex align-items-center" onclick="showSyncLoading(event)" style="background-color: #e67e22; border-color: #e67e22;">
+                                <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari SIPO
+                            </button>
+                        </form>
                         <button type="button" class="btn btn-primary px-4 rounded-3 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalTambah">
                             <i class="fas fa-plus me-1"></i> Tambah Kode Bagian
                         </button>
@@ -622,5 +628,21 @@
                 });
             });
         });
+
+        function showSyncLoading(event) {
+            event.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Menyinkronkan Data...',
+                    text: 'Harap tunggu, sedang mengambil data dari API SIPO.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+            document.getElementById('syncForm').submit();
+        }
     </script>
 @endpush

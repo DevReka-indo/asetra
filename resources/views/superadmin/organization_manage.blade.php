@@ -47,8 +47,16 @@
                     {{-- Button Zoom --}}
                     <div class="treant-zoom-controls">
                         <button class="btn btn-light" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);font-size:14px;font-weight:bold" onclick="zoomTreant(1.1)">+</button>
-                        <button class="btn btn-light" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);font-size:14px;font-weight:bold"onclick="zoomTreant(0.9)">−</button>
+                        <button class="btn btn-light" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);font-size:14px;font-weight:bold" onclick="zoomTreant(0.9)">−</button>
                         <button class="btn btn-light" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);font-size:14px;font-weight:bold" onclick="resetZoom()">Reset</button>
+                        
+                        <form method="POST" action="{{ route('user-manage.sync-sipo') }}" id="syncForm" class="d-inline m-0">
+                            @csrf
+                            <button type="submit" class="btn text-white rounded-3 fw-bold" onclick="showSyncLoading(event)" style="background-color: #e67e22; border-color: #e67e22; font-size:14px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);">
+                                <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari SIPO
+                            </button>
+                        </form>
+
                         <!-- Add User Button to Open Modal -->
                         <button type="button" class="btn btn-black rounded-3" data-bs-toggle="modal"
                             data-bs-target="#addUserModal">+ Tambah Struktur
@@ -472,6 +480,22 @@
                     allowClear: true
                 });
             }
+        }
+
+        function showSyncLoading(event) {
+            event.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Menyinkronkan Data...',
+                    text: 'Harap tunggu, sedang mengambil data dari API SIPO.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+            document.getElementById('syncForm').submit();
         }
     </script>
 

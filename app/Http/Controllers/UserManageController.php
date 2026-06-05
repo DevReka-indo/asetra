@@ -316,8 +316,8 @@ class UserManageController extends Controller
     public function syncSipo(Request $request, \App\Services\OrgSyncService $syncService)
     {
         try {
-            $stats = $syncService->sync();
-            return redirect()->route('user.manage')->with('success', "Sinkronisasi berhasil! Menyinkronkan {$stats['users']} pengguna.");
+            $stats = $syncService->syncStructureAndBagianKerja();
+            return redirect()->route('user.manage')->with('success', "Sinkronisasi struktur organisasi dan bagian kerja berhasil!");
         } catch (\Exception $e) {
             return redirect()->route('user.manage')->with('error', "Sinkronisasi gagal: " . $e->getMessage());
         }
