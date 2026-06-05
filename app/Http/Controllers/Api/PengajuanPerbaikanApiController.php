@@ -84,7 +84,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
             'aset_id'             => 'required|exists:data_aset,id',
             'deskripsi_kerusakan' => 'required|string|max:2000',
             'tingkat_urgensi'     => 'required|in:rendah,sedang,tinggi',
-            'foto_kerusakan'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'foto_kerusakan'      => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         // Mencegah duplikasi pengajuan untuk aset yang sama yang masih dalam proses
