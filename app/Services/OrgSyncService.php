@@ -398,18 +398,23 @@ class OrgSyncService
             // a. Sinkronisasi Struktur Organisasi
             try {
                 $orgData = $this->fetchOrgStructure($token);
+                Log::info('Org structure API response: ' . json_encode($orgData));
                 if (is_array($orgData)) {
                     if (isset($orgData['type'])) {
                         // Single node
+                        Log::info('Processing single org node: ' . ($orgData['name'] ?? 'no-name'));
                         $this->processOrgNode($orgData, null, null, null, null, $stats);
                     } else {
                         // Array of nodes
+                        Log::info('Processing multiple org nodes. Count: ' . count($orgData));
                         foreach ($orgData as $node) {
                             if (is_array($node)) {
                                 $this->processOrgNode($node, null, null, null, null, $stats);
                             }
                         }
                     }
+                } else {
+                    Log::warning('Org structure API response is not an array.');
                 }
             } catch (\Exception $e) {
                 Log::error("Gagal menyinkronkan struktur organisasi. Error: " . $e->getMessage());

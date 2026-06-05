@@ -36,6 +36,28 @@
         <div class="card shadow-sm border-0">
             <div class="card-body">
 
+                @if(config('app.debug'))
+                <div class="alert alert-info py-2 px-3 mb-3 rounded-3" style="font-size: 13px; border-left: 4px solid #0dcaf0;">
+                    <strong>[Debug Info] Database Stats:</strong> 
+                    Directors: {{ $directorCount }} | 
+                    Divisions: {{ $divisiCount }} | 
+                    Departments: {{ $departmentCount }} | 
+                    Sections: {{ $sectionCount }} | 
+                    Units: {{ $unitCount }}
+                    <hr class="my-1">
+                    <strong>Directors in DB:</strong>
+                    @if(count($directorsDebug) > 0)
+                        <ul class="mb-0 ps-3">
+                            @foreach($directorsDebug as $dir)
+                                <li>ID: {{ $dir['id_director'] }} - {{ $dir['name_director'] }} (parent: {{ $dir['parent_director_id'] ?? 'null' }}, is_main: {{ $dir['is_main'] }})</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <span>No directors in DB</span>
+                    @endif
+                </div>
+                @endif
+
                 <form method="GET" action="{{ route('organization.manageOrganization') }}"
                     class="search-filter d-flex gap-2">
                 </form>
@@ -360,7 +382,7 @@
         });
     </script>
     <script>
-        let treantScale = 1;
+        // treantScale is declared globally above
 
         function zoomTreant(factor) {
 

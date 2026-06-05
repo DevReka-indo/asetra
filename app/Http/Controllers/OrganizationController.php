@@ -25,13 +25,21 @@ class OrganizationController extends Controller
             'department.unit'
         ])->where('is_main', 1)->first();
 
+        // Diagnostics
+        $directorCount = Director::count();
+        $divisiCount = Divisi::count();
+        $departmentCount = Department::count();
+        $sectionCount = Section::count();
+        $unitCount = Unit::count();
+        $directorsDebug = Director::select('id_director', 'name_director', 'parent_director_id', 'is_main')->get()->toArray();
 
+        \Illuminate\Support\Facades\Log::info("Organization Index Diagnostics: Directors={$directorCount}, Divisis={$divisiCount}, Departments={$departmentCount}, Sections={$sectionCount}, Units={$unitCount}, MainDirector=" . ($mainDirector ? 'Found (' . $mainDirector->name_director . ')' : 'None'));
 
         $formatDirector = $mainDirector ? $this->formatDirector($mainDirector) : [
             'text' => ['name' => 'Tidak ada data direktur']
         ];
         $formatDirector['stackChildren'] = true;
-        return view('superadmin.organization_manage', compact('mainDirector', 'formatDirector'));
+        return view('superadmin.organization_manage', compact('mainDirector', 'formatDirector', 'directorCount', 'divisiCount', 'departmentCount', 'sectionCount', 'unitCount', 'directorsDebug'));
     }
     public function formatDirector($director)
     {
