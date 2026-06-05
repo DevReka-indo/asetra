@@ -465,7 +465,8 @@ class OrgSyncService
                 ['id_director' => $id],
                 [
                     'name_director' => $name,
-                    'parent_director_id' => $parentDirectorId
+                    'parent_director_id' => $parentDirectorId,
+                    'is_main' => ($parentDirectorId === null) ? 1 : 0
                 ]
             );
             $directorId = $id;
