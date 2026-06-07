@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class StockOpnameApiController extends BaseApiController
 {
+    use \App\Traits\HandlesImageUploads;
     /**
      * List all Stock Opname sessions
      */
@@ -206,7 +207,7 @@ class StockOpnameApiController extends BaseApiController
 
         $fotoPath = null;
         if ($request->hasFile('foto_temuan')) {
-            $fotoPath = $request->file('foto_temuan')->store('stock_opname_foto', 'public');
+            $fotoPath = $this->compressAndStore($request->file('foto_temuan'), 'stock_opname_foto');
         }
 
         $detail = StockOpnameDetail::create([

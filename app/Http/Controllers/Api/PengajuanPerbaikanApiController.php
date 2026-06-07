@@ -15,6 +15,7 @@ use App\Notifications\SystemNotification;
 
 class PengajuanPerbaikanApiController extends BaseApiController
 {
+    use \App\Traits\HandlesImageUploads;
     /**
      * Check if user is General Affairs / superadmin
      */
@@ -106,7 +107,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
         ];
 
         if ($request->hasFile('foto_kerusakan')) {
-            $data['foto_kerusakan'] = $request->file('foto_kerusakan')->store('perbaikan', 'public');
+            $data['foto_kerusakan'] = $this->compressAndStore($request->file('foto_kerusakan'), 'perbaikan');
         }
 
         $pengajuan = PengajuanPerbaikan::create($data);

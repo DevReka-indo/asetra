@@ -16,6 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StockOpnameController extends Controller
 {
+    use \App\Traits\HandlesImageUploads;
     /**
      * Menampilkan daftar periode Stock Opname
      */
@@ -340,7 +341,7 @@ class StockOpnameController extends Controller
 
         $fotoPath = null;
         if ($request->hasFile('foto_temuan')) {
-            $fotoPath = $request->file('foto_temuan')->store('stock_opname_foto', 'public');
+            $fotoPath = $this->compressAndStore($request->file('foto_temuan'), 'stock_opname_foto');
         }
 
         StockOpnameDetail::create([

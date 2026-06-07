@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 
 class DataAsetImport implements ToCollection
 {
+    use \App\Traits\HandlesImageUploads;
     public function collection(Collection $rows)
     {
         // Skip 2 baris pertama karena merupakan header bertingkat (Row 1 dan Row 2)
@@ -185,15 +186,15 @@ class DataAsetImport implements ToCollection
                                 $tempFile = tempnam($tempDir, 'aset_img_');
                                 file_put_contents($tempFile, $content);
                                 
-                                // Unggah ke Google Drive Sistem
-                                $filename = time() . '_' . uniqid() . '.jpg';
-                                $driveService = app(\App\Services\GoogleDriveService::class);
-                                $systemDriveUrl = $driveService->uploadFile($tempFile, $filename);
+                                // Kompresi dan simpan ke Storage lokal
+                                $filename = 'import_' . time() . '_' . uniqid() . '.jpg';
+                                $localFolder = 'dokumentasi_aset';
+                                $savedPath = $this->compressAndStore($tempFile, $localFolder, $filename);
                                 
                                 @unlink($tempFile);
                                 
-                                if ($systemDriveUrl) {
-                                    $finalUrl = $systemDriveUrl;
+                                if ($savedPath) {
+                                    $finalUrl = $savedPath;
                                 } else {
                                     $finalUrl = "https://lh3.googleusercontent.com/d/" . $driveId;
                                 }

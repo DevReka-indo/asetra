@@ -11,7 +11,6 @@ use App\Models\LokasiAset;
 use App\Models\User;
 use App\Models\Director;
 use Illuminate\Support\Facades\Storage;
-use App\Services\GoogleDriveService;
 use App\Exports\DataAsetExport;
 use App\Imports\DataAsetImport;
 use App\Exports\TemplateExport;
@@ -19,12 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DataAsetController extends Controller
 {
-    protected $driveService;
-
-    public function __construct(GoogleDriveService $driveService)
-    {
-        $this->driveService = $driveService;
-    }
+    use \App\Traits\HandlesImageUploads;
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -285,12 +279,17 @@ class DataAsetController extends Controller
             'bast'                 => 'nullable|string|max:255',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
-
+            'nomor_urut'           => 'nullable|digits_between:1,5',
             'keterangan'           => 'nullable|string',
             // Multi-foto
             'foto'                 => 'required|array|min:1|max:10',
             'foto.*'               => 'image|mimes:jpeg,png,jpg|max:4096',
         ]);
+
+        // Ambil nomor_urut sebelum create (tidak masuk fillable)
+        $nomorUrutOverride = $request->filled('nomor_urut')
+            ? str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT)
+            : null;
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
@@ -302,26 +301,28 @@ class DataAsetController extends Controller
             unset($validatedData['kode_organisasi']);
         }
 
+        unset($validatedData['nomor_urut']); // bukan kolom DB langsung
+
         $aset = DataAset::create($validatedData);
+
+        // Jika ada override nomor urut, regenerate nomor_aset dengan no urut custom
+        if ($nomorUrutOverride) {
+            $aset->nomor_aset = $aset->generateNomorAset($nomorUrutOverride);
+            $aset->saveQuietly();
+        }
 
         // Simpan foto
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $i => $file) {
-                // 1. Simpan di lokal sebagai cadangan
-                $localPath = $file->store('dokumentasi_aset', 'public');
+                $savedPath = $this->compressAndStore($file, 'dokumentasi_aset');
                 
-                // 2. Unggah ke Google Drive
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $driveUrl = $this->driveService->uploadFile($file, $filename);
-                
-                // Fallback ke path lokal jika upload ke Drive gagal
-                $savedPath = $driveUrl ?? $localPath;
-
-                AsetFoto::create([
-                    'aset_id'   => $aset->id,
-                    'path_foto' => $savedPath,
-                    'urutan'    => $i + 1,
-                ]);
+                if ($savedPath) {
+                    AsetFoto::create([
+                        'aset_id'   => $aset->id,
+                        'path_foto' => $savedPath,
+                        'urutan'    => $i + 1,
+                    ]);
+                }
             }
         }
 
@@ -474,7 +475,7 @@ class DataAsetController extends Controller
             'bast'                 => 'nullable|string|max:255',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
-
+            'nomor_urut'           => 'nullable|digits_between:1,5',
             'keterangan'           => 'nullable|string',
             // Tambah foto baru
             'foto_baru'            => 'nullable|array|max:10',
@@ -483,6 +484,13 @@ class DataAsetController extends Controller
             'hapus_foto'           => 'nullable|array',
             'hapus_foto.*'         => 'integer|exists:aset_foto,id',
         ]);
+
+        // Ambil nomor_urut override sebelum proses (tidak masuk fillable)
+        $nomorUrutOverride = $request->filled('nomor_urut')
+            ? str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT)
+            : null;
+
+        unset($validatedData['nomor_urut']);
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
@@ -505,6 +513,14 @@ class DataAsetController extends Controller
 
         $aset->update($validatedData);
 
+        // Jika ada override nomor urut, regenerate nomor_aset dengan no urut custom
+        if ($nomorUrutOverride) {
+            $aset->nomor_aset = $aset->generateNomorAset($nomorUrutOverride);
+            $aset->saveQuietly();
+        }
+
+
+
         // Hapus foto yang diminta
         if ($request->has('hapus_foto')) {
             foreach ($request->hapus_foto as $fotoId) {
@@ -523,21 +539,15 @@ class DataAsetController extends Controller
         if ($request->hasFile('foto_baru')) {
             $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
             foreach ($request->file('foto_baru') as $i => $file) {
-                // 1. Simpan di lokal sebagai cadangan
-                $localPath = $file->store('dokumentasi_aset', 'public');
-                
-                // 2. Unggah ke Google Drive
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $driveUrl = $this->driveService->uploadFile($file, $filename);
-                
-                // Fallback ke path lokal jika upload ke Drive gagal
-                $savedPath = $driveUrl ?? $localPath;
+                $savedPath = $this->compressAndStore($file, 'dokumentasi_aset');
 
-                AsetFoto::create([
-                    'aset_id'   => $aset->id,
-                    'path_foto' => $savedPath,
-                    'urutan'    => $urutanTerakhir + $i + 1,
-                ]);
+                if ($savedPath) {
+                    AsetFoto::create([
+                        'aset_id'   => $aset->id,
+                        'path_foto' => $savedPath,
+                        'urutan'    => $urutanTerakhir + $i + 1,
+                    ]);
+                }
             }
         }
 

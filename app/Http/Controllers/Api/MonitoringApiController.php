@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class MonitoringApiController extends BaseApiController
 {
+    use \App\Traits\HandlesImageUploads;
     public function index(Request $request)
     {
         $query = LogAset::with(['aset', 'dicatatOleh', 'lokasi', 'director', 'divisi', 'department', 'section', 'unit'])
@@ -130,7 +131,7 @@ class MonitoringApiController extends BaseApiController
         }
 
         if ($request->hasFile('foto_bukti')) {
-            $logData['foto_bukti'] = $request->file('foto_bukti')->store('log_aset', 'public');
+            $logData['foto_bukti'] = $this->compressAndStore($request->file('foto_bukti'), 'log_aset');
         }
 
         if (count($perubahan) > 0) {

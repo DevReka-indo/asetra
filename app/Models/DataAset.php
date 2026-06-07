@@ -38,10 +38,10 @@ class DataAset extends Model
         'tanggal_kapitalisasi' => 'date',
     ];
 
-    public function generateNomorAset(): string
+    public function generateNomorAset(?string $noUrut = null): string
     {
-        // No urut: ID aset diformat 5 digit
-        $noUrut = str_pad($this->id, 5, '0', STR_PAD_LEFT);
+        // No urut: dari parameter override, atau fallback ke ID aset (5 digit)
+        $noUrut = $noUrut ?? str_pad($this->id, 5, '0', STR_PAD_LEFT);
 
         // Tahun kapitalisasi (ambil tahunnya saja untuk nomor aset)
         $tahun = $this->tanggal_kapitalisasi ? date('Y', strtotime($this->tanggal_kapitalisasi)) : date('Y');

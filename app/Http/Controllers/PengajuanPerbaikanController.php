@@ -14,6 +14,7 @@ use App\Notifications\SystemNotification;
 
 class PengajuanPerbaikanController extends Controller
 {
+    use \App\Traits\HandlesImageUploads;
     /**
      * Cek apakah user yang sedang login berhak memproses pengajuan (bagian umum/ga).
      */
@@ -145,8 +146,7 @@ class PengajuanPerbaikanController extends Controller
         ];
 
         if ($request->hasFile('foto_kerusakan')) {
-            $data['foto_kerusakan'] = $request->file('foto_kerusakan')
-                ->store('perbaikan', 'public');
+            $data['foto_kerusakan'] = $this->compressAndStore($request->file('foto_kerusakan'), 'perbaikan');
         }
 
         $pengajuan = PengajuanPerbaikan::create($data);

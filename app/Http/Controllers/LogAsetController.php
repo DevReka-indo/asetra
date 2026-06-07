@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 
 class LogAsetController extends Controller
 {
+    use \App\Traits\HandlesImageUploads;
     /**
      * Display a listing of the resource.
      */
@@ -171,7 +172,7 @@ class LogAsetController extends Controller
         }
 
         if ($request->hasFile('foto_bukti')) {
-            $logData['foto_bukti'] = $request->file('foto_bukti')->store('log_aset', 'public');
+            $logData['foto_bukti'] = $this->compressAndStore($request->file('foto_bukti'), 'log_aset');
         }
 
         // Tentukan flag perubahan

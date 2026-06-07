@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class DataAsetApiController extends BaseApiController
 {
+    use \App\Traits\HandlesImageUploads;
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
@@ -121,26 +122,15 @@ class DataAsetApiController extends BaseApiController
         // Upload photos
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $i => $file) {
-                $localPath = $file->store('dokumentasi_aset', 'public');
-                $savedPath = null;
+                $savedPath = $this->compressAndStore($file, 'dokumentasi_aset');
                 
-                try {
-                    $driveService = app(\App\Services\GoogleDriveService::class);
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $savedPath = $driveService->uploadFile($file, $filename);
-                } catch (\Exception $e) {
-                    Log::warning("Google Drive upload failed: " . $e->getMessage());
+                if ($savedPath) {
+                    AsetFoto::create([
+                        'aset_id'   => $aset->id,
+                        'path_foto' => $savedPath,
+                        'urutan'    => $i + 1,
+                    ]);
                 }
-
-                if (!$savedPath) {
-                    $savedPath = $localPath;
-                }
-
-                AsetFoto::create([
-                    'aset_id'   => $aset->id,
-                    'path_foto' => $savedPath,
-                    'urutan'    => $i + 1,
-                ]);
             }
         }
 
@@ -247,26 +237,15 @@ class DataAsetApiController extends BaseApiController
         if ($request->hasFile('foto_baru')) {
             $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
             foreach ($request->file('foto_baru') as $i => $file) {
-                $localPath = $file->store('dokumentasi_aset', 'public');
-                $savedPath = null;
+                $savedPath = $this->compressAndStore($file, 'dokumentasi_aset');
 
-                try {
-                    $driveService = app(\App\Services\GoogleDriveService::class);
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $savedPath = $driveService->uploadFile($file, $filename);
-                } catch (\Exception $e) {
-                    Log::warning("Google Drive upload failed in update: " . $e->getMessage());
+                if ($savedPath) {
+                    AsetFoto::create([
+                        'aset_id'   => $aset->id,
+                        'path_foto' => $savedPath,
+                        'urutan'    => $urutanTerakhir + $i + 1,
+                    ]);
                 }
-
-                if (!$savedPath) {
-                    $savedPath = $localPath;
-                }
-
-                AsetFoto::create([
-                    'aset_id'   => $aset->id,
-                    'path_foto' => $savedPath,
-                    'urutan'    => $urutanTerakhir + $i + 1,
-                ]);
             }
         }
 
