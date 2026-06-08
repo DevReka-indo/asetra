@@ -333,6 +333,19 @@ class StockOpnameController extends Controller
             $asetId = $aset->id;
         }
 
+        $user = auth()->user();
+        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+
+        if (!$isAdmin) {
+            $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
+            if (!$isAuthorized) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses untuk melakukan stock opname pada aset dari divisi/departemen lain.'
+                ], 403);
+            }
+        }
+
         // Cek apakah aset ini sudah di-scan di sesi ini
         $existing = StockOpnameDetail::where('stock_opname_id', $request->stock_opname_id)
             ->where('aset_id', $asetId)

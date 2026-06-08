@@ -185,6 +185,16 @@ class StockOpnameApiController extends BaseApiController
             }
         }
 
+        $user = auth()->user();
+        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+
+        if (!$isAdmin) {
+            $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
+            if (!$isAuthorized) {
+                return $this->error('Anda tidak memiliki akses untuk melakukan stock opname pada aset dari divisi/departemen lain.', 403);
+            }
+        }
+
         // Check if already scanned in this session
         $existing = StockOpnameDetail::where('stock_opname_id', $request->stock_opname_id)
             ->where('aset_id', $aset->id)

@@ -684,7 +684,7 @@
         $('#so_kondisi').on('change', handleKondisiChange);
 
         // Handle Cek Manual Button click
-        $('.btn-cek-manual').on('click', function() {
+        $(document).on('click', '.btn-cek-manual', function() {
             const asetId = $(this).data('aset-id');
             const asetNomor = $(this).data('aset-nomor');
             const asetNama = $(this).data('aset-nama');

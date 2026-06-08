@@ -125,6 +125,8 @@ class User extends Authenticatable
             $kodes = array_filter(array_map('trim', explode(';', $this->kode_bagian)));
             if (!empty($kodes)) {
                 $bagianUmumKodes = \App\Models\BagianKerja::where('nama_bagian', 'like', '%Umum%')
+                    ->orWhere('nama_bagian', 'like', '%General Affairs%')
+                    ->orWhere('nama_bagian', 'like', '%GA%')
                     ->pluck('kode_bagian')
                     ->toArray();
                 if (!empty(array_intersect($kodes, $bagianUmumKodes))) {
@@ -144,13 +146,13 @@ class User extends Authenticatable
         }
 
         // --- Cek posisi dalam struktur organisasi ---
-        if ($this->department && str_contains(strtolower($this->department->name_department ?? ''), 'umum')) {
+        if ($this->department && (str_contains(strtolower($this->department->name_department ?? ''), 'umum') || str_contains(strtolower($this->department->name_department ?? ''), 'general affairs') || str_contains(strtolower($this->department->name_department ?? ''), 'ga'))) {
             return true;
         }
-        if ($this->section && str_contains(strtolower($this->section->name_section ?? ''), 'umum')) {
+        if ($this->section && (str_contains(strtolower($this->section->name_section ?? ''), 'umum') || str_contains(strtolower($this->section->name_section ?? ''), 'general affairs') || str_contains(strtolower($this->section->name_section ?? ''), 'ga'))) {
             return true;
         }
-        if ($this->unit && str_contains(strtolower($this->unit->name_unit ?? ''), 'umum')) {
+        if ($this->unit && (str_contains(strtolower($this->unit->name_unit ?? ''), 'umum') || str_contains(strtolower($this->unit->name_unit ?? ''), 'general affairs') || str_contains(strtolower($this->unit->name_unit ?? ''), 'ga'))) {
             return true;
         }
 
