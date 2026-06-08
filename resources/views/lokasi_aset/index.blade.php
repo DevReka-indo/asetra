@@ -279,7 +279,7 @@
                     Batal
                 </button>
                 <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
-                    <i class="fas fa-upload me-1"></i> Imprt Data
+                    <i class="fas fa-upload me-1"></i> Import Data
                 </button>
             </div>
         </form>
