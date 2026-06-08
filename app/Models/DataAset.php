@@ -19,7 +19,7 @@ class DataAset extends Model
         'kategori_id',
         'deskripsi',
         'merek',
-        'tanggal_kapitalisasi',
+        'tahun_kapitalisasi',
         'id_director',
         'id_divisi',
         'id_department',
@@ -36,7 +36,6 @@ class DataAset extends Model
     ];
 
     protected $casts = [
-        'tanggal_kapitalisasi' => 'date',
     ];
 
     public static function getNextNomorUrut(): string
@@ -57,7 +56,7 @@ class DataAset extends Model
         }
 
         // Tahun kapitalisasi
-        $tahun = $this->tanggal_kapitalisasi ? date('Y', strtotime($this->tanggal_kapitalisasi)) : date('Y');
+        $tahun = $this->tahun_kapitalisasi ?? date('Y');
 
         // Kode kategori aset (101, 102, 201, ...)
         $kategori = \App\Models\KategoriAset::find($this->kategori_id);
@@ -93,7 +92,7 @@ class DataAset extends Model
             if ($aset->isDirty('nomor_urut') && !empty($aset->nomor_urut)) {
                 $aset->nomor_urut = str_pad($aset->nomor_urut, 5, '0', STR_PAD_LEFT);
             }
-            if ($aset->isDirty('lokasi_id') || $aset->isDirty('kategori_id') || $aset->isDirty('tanggal_kapitalisasi') || $aset->isDirty('nomor_urut')) {
+            if ($aset->isDirty('lokasi_id') || $aset->isDirty('kategori_id') || $aset->isDirty('tahun_kapitalisasi') || $aset->isDirty('nomor_urut')) {
                 $aset->nomor_aset = $aset->generateNomorAset();
             }
         });

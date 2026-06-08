@@ -133,12 +133,12 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold text-navy mb-1 small">Tanggal Kapitalisasi <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold text-navy mb-1 small">Tahun Kapitalisasi <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-calendar-alt"></i></span>
-                                    <input type="date" name="tanggal_kapitalisasi" id="id_tahun" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('tanggal_kapitalisasi', date('Y-m-d')) }}" required>
+                                    <input type="number" min="1900" max="2100" name="tahun_kapitalisasi" id="id_tahun" class="form-control border-start-0 ps-0 shadow-none" value="{{ old('tahun_kapitalisasi', date('Y')) }}" placeholder="Contoh: 2025" required>
                                 </div>
-                                @error('tanggal_kapitalisasi')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
+                                @error('tahun_kapitalisasi')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-3">
@@ -511,8 +511,7 @@
             const kLok   = (selectLok.value && optLok.getAttribute('data-kode')) ? optLok.getAttribute('data-kode') : 'LOK';
             
             // Tahun Kapitalisasi
-            const tgl = (selectThn && selectThn.value) ? new Date(selectThn.value).getFullYear() : new Date().getFullYear();
-            const thn = isNaN(tgl) ? new Date().getFullYear() : tgl;
+            const thn = (selectThn && selectThn.value) ? parseInt(selectThn.value) : new Date().getFullYear();
 
             // Nomor Urut
             const rawUrut = inputNoUrut ? inputNoUrut.value : '';
@@ -533,9 +532,13 @@
             });
         }
 
-        [selectKategori, selectLok, selectThn].forEach(el => {
+        [selectKategori, selectLok].forEach(el => {
             if(el) el.addEventListener('change', updateNomor);
         });
+        if (selectThn) {
+            selectThn.addEventListener('input', updateNomor);
+            selectThn.addEventListener('change', updateNomor);
+        }
 
         // Detail Lokasi & Auto-fill Nama Aset
         if(selectLok) {

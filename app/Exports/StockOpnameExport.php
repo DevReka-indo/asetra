@@ -141,7 +141,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
             $aset->nomor_aset ?? '',
             $aset->deskripsi ?? '',
             $aset->merek ?? '',
-            $aset && $aset->tanggal_kapitalisasi ? $aset->tanggal_kapitalisasi->format('Y-m-d') : '',
+            $aset && $aset->tahun_kapitalisasi ? $aset->tahun_kapitalisasi : '',
             ($aset->status_kondisi ?? '') === 'Baik' ? 'v' : '',
             ($aset->status_kondisi ?? '') === 'Rusak' ? 'v' : '',
             ($aset->status_kondisi ?? '') === 'Bongkar' ? 'v' : '',

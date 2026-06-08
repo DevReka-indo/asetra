@@ -43,19 +43,23 @@ class DataAsetImport implements ToCollection
                 continue;
             }
 
-            // 2. Format Tanggal Kapitalisasi (Indeks 6)
-            $tanggalRaw = isset($cells[6]) ? trim((string) $cells[6]) : '';
-            $tanggalKapitalisasi = null;
-            if (!empty($tanggalRaw)) {
+            // 2. Format Tahun Kapitalisasi (Indeks 6)
+            $tahunRaw = isset($cells[6]) ? trim((string) $cells[6]) : '';
+            $tahunKapitalisasi = null;
+            if (!empty($tahunRaw)) {
+                // Jika input hanya berisi 4 digit angka (Tahun saja, misal 2025)
+                if (preg_match('/^\d{4}$/', $tahunRaw)) {
+                    $tahunKapitalisasi = (int) $tahunRaw;
+                }
                 // Cek jika numeric excel date
-                if (is_numeric($tanggalRaw)) {
-                    $tanggalKapitalisasi = date('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($tanggalRaw));
+                elseif (is_numeric($tahunRaw) && $tahunRaw > 10000) {
+                    $tahunKapitalisasi = (int) date('Y', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($tahunRaw));
                 } else {
-                    $timestamp = strtotime($tanggalRaw);
-                    $tanggalKapitalisasi = $timestamp ? date('Y-m-d', $timestamp) : date('Y-m-d');
+                    $timestamp = strtotime($tahunRaw);
+                    $tahunKapitalisasi = $timestamp ? (int) date('Y', $timestamp) : (int) date('Y');
                 }
             } else {
-                $tanggalKapitalisasi = date('Y-m-d');
+                $tahunKapitalisasi = (int) date('Y');
             }
 
             // 3. Tentukan Status Kondisi (Indeks 7 s.d 12)
@@ -216,7 +220,7 @@ class DataAsetImport implements ToCollection
                 'nomor_urut'           => $nomorUrut,
                 'deskripsi'            => isset($cells[4]) ? trim((string) $cells[4]) : '',
                 'merek'                => isset($cells[5]) ? trim((string) $cells[5]) : '',
-                'tanggal_kapitalisasi' => $tanggalKapitalisasi,
+                'tahun_kapitalisasi'   => $tahunKapitalisasi,
                 'id_director'          => $idDirector,
                 'id_divisi'            => $idDivisi,
                 'id_department'        => $idDepartment,

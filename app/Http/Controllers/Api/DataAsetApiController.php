@@ -79,7 +79,7 @@ class DataAsetApiController extends BaseApiController
             'lokasi_id'            => 'required|integer|exists:lokasi_aset,lokasi_id',
             'merek'                => 'required|string|max:100',
             'deskripsi'            => 'required|string',
-            'tanggal_kapitalisasi' => 'required|date',
+            'tahun_kapitalisasi'   => 'required|integer|min:1900|max:2100',
             'pic_id'               => 'required|integer|exists:users,id',
             'penanggung_jawab_id'  => 'required|integer|exists:users,id',
             'bast'                 => 'nullable|string|max:255',
@@ -92,7 +92,7 @@ class DataAsetApiController extends BaseApiController
 
         $data = $request->only(
             'nama_aset', 'kategori_id', 'lokasi_id', 'merek', 'deskripsi',
-            'tanggal_kapitalisasi', 'pic_id', 'penanggung_jawab_id', 'bast',
+            'tahun_kapitalisasi', 'pic_id', 'penanggung_jawab_id', 'bast',
             'status_kondisi', 'status_aset', 'keterangan'
         );
 
@@ -164,7 +164,7 @@ class DataAsetApiController extends BaseApiController
             'lokasi_id'            => 'required|integer|exists:lokasi_aset,lokasi_id',
             'merek'                => 'required|string|max:100',
             'deskripsi'            => 'required|string',
-            'tanggal_kapitalisasi' => 'required|date',
+            'tahun_kapitalisasi'   => 'required|integer|min:1900|max:2100',
             'pic_id'               => 'required|integer|exists:users,id',
             'penanggung_jawab_id'  => 'required|integer|exists:users,id',
             'bast'                 => 'nullable|string|max:255',
@@ -179,7 +179,7 @@ class DataAsetApiController extends BaseApiController
 
         $data = $request->only(
             'nama_aset', 'kategori_id', 'lokasi_id', 'merek', 'deskripsi',
-            'tanggal_kapitalisasi', 'pic_id', 'penanggung_jawab_id', 'bast',
+            'tahun_kapitalisasi', 'pic_id', 'penanggung_jawab_id', 'bast',
             'status_kondisi', 'status_aset', 'keterangan'
         );
 

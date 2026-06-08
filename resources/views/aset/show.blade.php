@@ -163,8 +163,8 @@
                                             <i class="fas fa-calendar-alt"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Tanggal Kapitalisasi</span>
-                                            <span class="info-value fw-semibold">{{ $aset->tanggal_kapitalisasi ? \Carbon\Carbon::parse($aset->tanggal_kapitalisasi)->isoFormat('D MMMM Y') : '-' }}</span>
+                                             <span class="info-label d-block fw-bold">Tahun Kapitalisasi</span>
+                                             <span class="info-value fw-semibold">{{ $aset->tahun_kapitalisasi ?? '-' }}</span>
                                         </div>
                                     </div>
 

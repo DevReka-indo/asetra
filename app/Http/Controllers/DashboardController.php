@@ -52,7 +52,7 @@ class DashboardController extends Controller
                 \Illuminate\Support\Facades\DB::raw('MONTH(created_at) as month'),
                 \Illuminate\Support\Facades\DB::raw('count(*) as total')
             )
-            ->whereYear('tanggal_kapitalisasi', $selectedYear)
+            ->where('tahun_kapitalisasi', $selectedYear)
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')->toArray();
@@ -62,9 +62,9 @@ class DashboardController extends Controller
                 $monthlyAsetData[] = $monthlyAssets[$i] ?? 0;
             }
 
-            // Ambil daftar tahun unik dari tanggal_kapitalisasi untuk dropdown
-            $availableYears = \App\Models\DataAset::select(\Illuminate\Support\Facades\DB::raw('YEAR(tanggal_kapitalisasi) as year'))
-                ->whereNotNull('tanggal_kapitalisasi')
+            // Ambil daftar tahun unik dari tahun_kapitalisasi untuk dropdown
+            $availableYears = \App\Models\DataAset::select('tahun_kapitalisasi as year')
+                ->whereNotNull('tahun_kapitalisasi')
                 ->distinct()
                 ->orderByDesc('year')
                 ->pluck('year')
@@ -263,7 +263,7 @@ class DashboardController extends Controller
             \Illuminate\Support\Facades\DB::raw('MONTH(created_at) as month'),
             \Illuminate\Support\Facades\DB::raw('count(*) as total')
         )
-        ->whereYear('tanggal_kapitalisasi', $selectedYear)
+        ->where('tahun_kapitalisasi', $selectedYear)
         ->groupBy('month')
         ->orderBy('month')
         ->pluck('total', 'month')->toArray();
@@ -273,9 +273,9 @@ class DashboardController extends Controller
             $monthlyAsetData[] = $monthlyAssets[$i] ?? 0;
         }
 
-        // Ambil daftar tahun unik dari tanggal_kapitalisasi untuk dropdown
-        $availableYears = \App\Models\DataAset::select(\Illuminate\Support\Facades\DB::raw('YEAR(tanggal_kapitalisasi) as year'))
-            ->whereNotNull('tanggal_kapitalisasi')
+        // Ambil daftar tahun unik dari tahun_kapitalisasi untuk dropdown
+        $availableYears = \App\Models\DataAset::select('tahun_kapitalisasi as year')
+            ->whereNotNull('tahun_kapitalisasi')
             ->distinct()
             ->orderByDesc('year')
             ->pluck('year')

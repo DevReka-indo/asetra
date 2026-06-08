@@ -180,7 +180,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
             $row->nomor_aset,
             $row->deskripsi,
             $row->merek,
-            $row->tanggal_kapitalisasi ? $row->tanggal_kapitalisasi->format('Y-m-d') : '',
+            $row->tahun_kapitalisasi ?? '',
             $row->status_kondisi === 'Baik' ? 'v' : '',
             $row->status_kondisi === 'Rusak' ? 'v' : '',
             $row->status_kondisi === 'Bongkar' ? 'v' : '',
