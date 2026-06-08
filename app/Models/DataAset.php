@@ -15,6 +15,7 @@ class DataAset extends Model
     protected $fillable = [
         'nama_aset',
         'nomor_aset',
+        'nomor_urut',
         'kategori_id',
         'deskripsi',
         'merek',
@@ -38,12 +39,24 @@ class DataAset extends Model
         'tanggal_kapitalisasi' => 'date',
     ];
 
+    public static function getNextNomorUrut(): string
+    {
+        $max = self::max(\DB::raw('CAST(nomor_urut AS UNSIGNED)')) ?? 0;
+        return str_pad($max + 1, 5, '0', STR_PAD_LEFT);
+    }
+
     public function generateNomorAset(?string $noUrut = null): string
     {
-        // No urut: dari parameter override, atau fallback ke ID aset (5 digit)
-        $noUrut = $noUrut ?? str_pad($this->id, 5, '0', STR_PAD_LEFT);
+        $noUrut = $noUrut ?? $this->nomor_urut;
 
-        // Tahun kapitalisasi (ambil tahunnya saja untuk nomor aset)
+        // Fallback jika kosong
+        if (empty($noUrut)) {
+            $noUrut = self::getNextNomorUrut();
+        } else {
+            $noUrut = str_pad($noUrut, 5, '0', STR_PAD_LEFT);
+        }
+
+        // Tahun kapitalisasi
         $tahun = $this->tanggal_kapitalisasi ? date('Y', strtotime($this->tanggal_kapitalisasi)) : date('Y');
 
         // Kode kategori aset (101, 102, 201, ...)
@@ -59,18 +72,28 @@ class DataAset extends Model
     }
 
     /**
-     * Generate nomor_aset format baru: [KODE_KLASIFIKASI]/[ID_5DIGIT]/[KODE_LOKASI]/[TAHUN]
-     * Contoh: 101/00001/SDU/2019
+     * Generate nomor_aset format baru: [KODE_KLASIFIKASI]/[NOMOR_URUT]/[KODE_LOKASI]/[TAHUN]
      */
     protected static function booted()
     {
+        static::creating(function ($aset) {
+            if (empty($aset->nomor_urut)) {
+                $aset->nomor_urut = self::getNextNomorUrut();
+            } else {
+                $aset->nomor_urut = str_pad($aset->nomor_urut, 5, '0', STR_PAD_LEFT);
+            }
+        });
+
         static::created(function ($aset) {
             $aset->nomor_aset = $aset->generateNomorAset();
             $aset->saveQuietly();
         });
 
         static::updating(function ($aset) {
-            if ($aset->isDirty('lokasi_id') || $aset->isDirty('kategori_id') || $aset->isDirty('tanggal_kapitalisasi')) {
+            if ($aset->isDirty('nomor_urut') && !empty($aset->nomor_urut)) {
+                $aset->nomor_urut = str_pad($aset->nomor_urut, 5, '0', STR_PAD_LEFT);
+            }
+            if ($aset->isDirty('lokasi_id') || $aset->isDirty('kategori_id') || $aset->isDirty('tanggal_kapitalisasi') || $aset->isDirty('nomor_urut')) {
                 $aset->nomor_aset = $aset->generateNomorAset();
             }
         });
@@ -86,11 +109,11 @@ class DataAset extends Model
 
     public function getOrganisasiTerikatAttribute(): string
     {
-        if ($this->id_unit && $this->unit) return "Unit: " . $this->unit->name_unit;
-        if ($this->id_section && $this->section) return "Bagian: " . $this->section->name_section;
-        if ($this->id_department && $this->department) return "Departemen: " . $this->department->name_department;
-        if ($this->id_divisi && $this->divisi) return "Divisi: " . $this->divisi->nm_divisi;
-        if ($this->id_director && $this->director) return "Direktur: " . $this->director->name_director;
+        if ($this->id_unit && $this->unit) return $this->unit->name_unit;
+        if ($this->id_section && $this->section) return $this->section->name_section;
+        if ($this->id_department && $this->department) return $this->department->name_department;
+        if ($this->id_divisi && $this->divisi) return $this->divisi->nm_divisi;
+        if ($this->id_director && $this->director) return $this->director->name_director;
         return 'Tanpa Organisasi';
     }
 
@@ -168,7 +191,7 @@ class DataAset extends Model
     }
 
     /**
-     * Helper: apakah aset ini bertipe aset tetap?
+     * Helper: cek jenis kategori
      */
     public function getIsAsetTetapAttribute(): bool
     {
@@ -176,7 +199,7 @@ class DataAset extends Model
     }
 
     /**
-     * Helper: apakah aset ini bertipe inventaris/EC?
+     * Helper: cek jenis kategori
      */
     public function getIsInventarisAttribute(): bool
     {

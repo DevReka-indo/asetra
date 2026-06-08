@@ -244,7 +244,7 @@
                                             <i class="fas fa-sitemap"></i>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <span class="info-label d-block fw-bold">Unit Kerja / Organisasi</span>
+                                            <span class="info-label d-block fw-bold">Struktur Organisasi</span>
                                             <span class="info-value fw-semibold">{{ $aset->organisasi_terikat }}</span>
                                         </div>
                                     </div>

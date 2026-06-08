@@ -2,6 +2,10 @@
 
 @section('title', isset($pageTitle) ? $pageTitle : 'Data Aset Perusahaan')
 
+@php
+    $showAdminActions = $showAdminActions ?? false;
+@endphp
+
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
 
@@ -30,7 +34,7 @@
                 
                 {{-- Tombol-Tombol Action Utama --}}
                 <div class="d-flex gap-2 flex-wrap justify-content-end align-items-center mb-3 pb-3 border-bottom">
-                    @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                    @if($showAdminActions)
                         {{-- Tombol Cetak Label Terpilih --}}
                         <button type="button" id="btnCetakLabelSelected" class="btn btn-dark px-2 px-md-3 rounded-3 d-flex align-items-center text-white" title="Cetak Label Terpilih">
                             <i class="fas fa-tags"></i><span class="d-none d-md-inline ms-1"> Cetak Label</span>
@@ -57,7 +61,7 @@
                         <i class="fas fa-qrcode"></i><span class="d-none d-md-inline ms-1"> Scan Barcode</span>
                     </a>
 
-                    @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                    @if($showAdminActions)
                         {{-- Button Tambah --}}
                         <a href="{{ route('aset.create') }}" class="btn btn-primary px-2 px-md-3 rounded-3 d-flex align-items-center">
                             <i class="fas fa-plus"></i><span class="d-none d-sm-inline ms-1"> Tambah Data Aset</span>
@@ -115,7 +119,7 @@
                     </div>
 
                     {{-- Filter Lokasi --}}
-                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()))
+                    @if(!request()->routeIs('aset.pic') && $showAdminActions)
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -128,7 +132,7 @@
                     @endif
 
                     {{-- Filter Divisi --}}
-                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()))
+                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()) && !request()->boolean('filter_own_dept'))
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Divisi</label>
                         <select name="divisi_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -141,7 +145,7 @@
                     @endif
 
                     {{-- Filter Departemen --}}
-                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()))
+                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()) && !request()->boolean('filter_own_dept'))
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
                         <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -165,7 +169,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                            @if($showAdminActions)
                             <th width="40" class="text-center border-end">
                                 <input class="form-check-input" type="checkbox" id="checkAllAset">
                             </th>
@@ -184,7 +188,7 @@
                     <tbody>
                         @forelse ($asets as $aset)
                             <tr>
-                                @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                                @if($showAdminActions)
                                 {{-- Checkbox --}}
                                 <td class="text-center border-end">
                                     <input class="form-check-input aset-checkbox" type="checkbox" name="ids[]" value="{{ $aset->id }}" form="formCetakLabelSelected">
@@ -258,7 +262,7 @@
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
 
-                                        @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
+                                        @if($showAdminActions)
                                             {{-- TOMBOL EDIT --}}
                                             <a href="{{ route('aset.edit', $aset->id) }}" 
                                             class="btn btn-warning btn-sm rounded-circle text-white border-0"
@@ -314,7 +318,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()) ? 9 : 8 }}" class="text-center py-5 text-muted">
+                                <td colspan="{{ $showAdminActions ? 9 : 8 }}" class="text-center py-5 text-muted">
                                     <i class="fas fa-box fa-3x mb-3 d-block opacity-25"></i>
                                     Tidak ada data aset.
                                 </td>
@@ -462,7 +466,7 @@
                     Batal
                 </button>
                 <button type="submit" form="formImportAset" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070;">
-                    <i class="fas fa-upload me-1"></i> Import Sekarang
+                    <i class="fas fa-upload me-1"></i> Import Data Aset
                 </button>
             </div>
 

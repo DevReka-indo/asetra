@@ -44,7 +44,9 @@ class DataAsetController extends Controller
         $user = auth()->user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
-        if (!$isAdmin) {
+        $filterOwnDept = $request->boolean('filter_own_dept') || !$isAdmin;
+
+        if ($filterOwnDept) {
             if ($user->unit_id_unit) {
                 $query->where('id_unit', $user->unit_id_unit);
             } elseif ($user->section_id_section) {
@@ -93,7 +95,7 @@ class DataAsetController extends Controller
         $divisiId = $request->input('divisi_id');
         $departmentId = $request->input('department_id');
 
-        if (!$isAdmin) {
+        if ($filterOwnDept) {
             $lokasiId = null;
             $divisiId = null;
             $departmentId = null;
@@ -157,9 +159,10 @@ class DataAsetController extends Controller
         }
         $kategoris = $kategoriQuery->orderBy('nama')->get();
 
-        $pageTitle = $isAdmin ? "Data Aset Perusahaan" : "Data Aset Departemen";
+        $pageTitle = ($isAdmin && !$filterOwnDept) ? "Data Aset Perusahaan" : "Data Aset Departemen";
+        $showAdminActions = $isAdmin && !$filterOwnDept;
 
-        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris'));
+        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris', 'showAdminActions'));
     }
 
     public function picIndex(Request $request)
@@ -235,8 +238,7 @@ class DataAsetController extends Controller
      */
     public function create()
     {
-        $lastAset = DataAset::orderBy('id', 'desc')->first();
-        $nextId   = $lastAset ? str_pad($lastAset->id + 1, 5, '0', STR_PAD_LEFT) : '00001';
+        $nextId   = DataAset::getNextNomorUrut();
 
         $mainDirector = Director::with([
             'subDirectors',
@@ -279,17 +281,16 @@ class DataAsetController extends Controller
             'bast'                 => 'nullable|string|max:255',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
-            'nomor_urut'           => 'nullable|digits_between:1,5',
+            'nomor_urut'           => 'required|digits_between:1,5',
             'keterangan'           => 'nullable|string',
             // Multi-foto
             'foto'                 => 'required|array|min:1|max:10',
             'foto.*'               => 'image|mimes:jpeg,png,jpg|max:4096',
         ]);
 
-        // Ambil nomor_urut sebelum create (tidak masuk fillable)
-        $nomorUrutOverride = $request->filled('nomor_urut')
-            ? str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT)
-            : null;
+        if ($request->filled('nomor_urut')) {
+            $validatedData['nomor_urut'] = str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT);
+        }
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
@@ -301,15 +302,7 @@ class DataAsetController extends Controller
             unset($validatedData['kode_organisasi']);
         }
 
-        unset($validatedData['nomor_urut']); // bukan kolom DB langsung
-
         $aset = DataAset::create($validatedData);
-
-        // Jika ada override nomor urut, regenerate nomor_aset dengan no urut custom
-        if ($nomorUrutOverride) {
-            $aset->nomor_aset = $aset->generateNomorAset($nomorUrutOverride);
-            $aset->saveQuietly();
-        }
 
         // Simpan foto
         if ($request->hasFile('foto')) {
@@ -475,7 +468,7 @@ class DataAsetController extends Controller
             'bast'                 => 'nullable|string|max:255',
             'status_kondisi'       => 'required|in:Baik,Rusak,Bongkar,Tidak Terpakai,Hilang,Tidak Teridentifikasi',
             'status_aset'          => 'required|in:Aktif,Tidak Aktif,Dalam Perbaikan,Dipinjam,Hilang',
-            'nomor_urut'           => 'nullable|digits_between:1,5',
+            'nomor_urut'           => 'required|digits_between:1,5',
             'keterangan'           => 'nullable|string',
             // Tambah foto baru
             'foto_baru'            => 'nullable|array|max:10',
@@ -485,12 +478,9 @@ class DataAsetController extends Controller
             'hapus_foto.*'         => 'integer|exists:aset_foto,id',
         ]);
 
-        // Ambil nomor_urut override sebelum proses (tidak masuk fillable)
-        $nomorUrutOverride = $request->filled('nomor_urut')
-            ? str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT)
-            : null;
-
-        unset($validatedData['nomor_urut']);
+        if ($request->filled('nomor_urut')) {
+            $validatedData['nomor_urut'] = str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT);
+        }
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
@@ -512,12 +502,6 @@ class DataAsetController extends Controller
         }
 
         $aset->update($validatedData);
-
-        // Jika ada override nomor urut, regenerate nomor_aset dengan no urut custom
-        if ($nomorUrutOverride) {
-            $aset->nomor_aset = $aset->generateNomorAset($nomorUrutOverride);
-            $aset->saveQuietly();
-        }
 
 
 

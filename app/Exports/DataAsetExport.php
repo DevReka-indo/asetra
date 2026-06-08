@@ -134,6 +134,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 'Lokasi Aset',
                 '',
                 '',
+                'Divisi/Dept',
                 'Tanggal Cek Terakhir',
                 'BAST',
                 'PIC Aset',
@@ -157,6 +158,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 'Nama Lokasi',
                 'Kode Lokasi',
                 'Detail Lokasi',
+                '',
                 '',
                 '',
                 '',
@@ -192,6 +194,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
             $row->lokasi->nama_lokasi ?? '',
             $row->lokasi->kode_lokasi ?? '',
             $row->lokasi->detail_lokasi ?? '',
+            $row->organisasi_terikat,           // Divisi/Dept (Q)
             $row->tanggal_cek_terakhir ? date('Y-m-d', strtotime($row->tanggal_cek_terakhir)) : '',
             $row->bast,
             $row->pic->fullname ?? '',
@@ -212,11 +215,12 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 $sheet->mergeCells('E1:E2'); // Deskripsi Aset
                 $sheet->mergeCells('F1:F2'); // Merk Aset
                 $sheet->mergeCells('G1:G2'); // Tanggal Kapitalisasi
-                $sheet->mergeCells('Q1:Q2'); // Tanggal Cek Terakhir
-                $sheet->mergeCells('R1:R2'); // BAST
-                $sheet->mergeCells('S1:S2'); // PIC Aset
-                $sheet->mergeCells('T1:T2'); // Penanggung Jawab Aset
-                $sheet->mergeCells('U1:U2'); // Dokumentasi Aset
+                $sheet->mergeCells('Q1:Q2'); // Divisi/Dept
+                $sheet->mergeCells('R1:R2'); // Tanggal Cek Terakhir
+                $sheet->mergeCells('S1:S2'); // BAST
+                $sheet->mergeCells('T1:T2'); // PIC Aset
+                $sheet->mergeCells('U1:U2'); // Penanggung Jawab Aset
+                $sheet->mergeCells('V1:V2'); // Dokumentasi Aset
 
                 // 2. Merging cells horizontally (Row 1)
                 $sheet->mergeCells('C1:D1'); // Kode Aset
@@ -232,23 +236,23 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                     ],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                        'wrapText' => true,
+                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'wrapText'   => true,
                     ],
                     'fill' => [
-                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => [
-                            'argb' => 'FFEFEFEF', // Light gray background
+                            'argb' => 'FFEFEFEF',
                         ],
                     ],
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color' => ['argb' => 'FF000000'],
+                            'color'       => ['argb' => 'FF000000'],
                         ],
                     ],
                 ];
-                $sheet->getStyle('A1:U2')->applyFromArray($headerStyle);
+                $sheet->getStyle('A1:V2')->applyFromArray($headerStyle);
 
                 // 4. Set Row Heights
                 $sheet->getRowDimension(1)->setRowHeight(25);
@@ -257,11 +261,11 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 // 5. Apply styling to data rows (Starts on Row 3)
                 $highestRow = $sheet->getHighestRow();
                 if ($highestRow >= 3) {
-                    $sheet->getStyle('A3:U' . $highestRow)->applyFromArray([
+                    $sheet->getStyle('A3:V' . $highestRow)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                                'color' => ['argb' => 'FF000000'],
+                                'color'       => ['argb' => 'FF000000'],
                             ],
                         ],
                         'alignment' => [
@@ -274,8 +278,8 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                     $sheet->getStyle('C3:D' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('G3:G' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('H3:M' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('Q3:Q' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    
+                    $sheet->getStyle('R3:R' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
                     // Set Data Row Heights
                     for ($row = 3; $row <= $highestRow; $row++) {
                         $sheet->getRowDimension($row)->setRowHeight(20);

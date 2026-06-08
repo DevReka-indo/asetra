@@ -9,6 +9,9 @@ use App\Models\User;
 use App\Models\AsetFoto;
 use App\Models\Department;
 use App\Models\Divisi;
+use App\Models\Section;
+use App\Models\Unit;
+use App\Models\Director;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
@@ -65,8 +68,8 @@ class DataAsetImport implements ToCollection
             elseif (!empty(trim((string) ($cells[12] ?? '')))) $statusKondisi = 'Tidak Teridentifikasi';
 
             // 4. Cari PIC & Penanggung Jawab berdasarkan Nama (atau Email)
-            // PIC Aset: Indeks 18
-            $picNameOrEmail = isset($cells[18]) ? trim((string) $cells[18]) : '';
+            // PIC Aset: Indeks 19
+            $picNameOrEmail = isset($cells[19]) ? trim((string) $cells[19]) : '';
             $pic = null;
             if (!empty($picNameOrEmail)) {
                 if (filter_var($picNameOrEmail, FILTER_VALIDATE_EMAIL) !== false || str_contains($picNameOrEmail, '@')) {
@@ -81,8 +84,8 @@ class DataAsetImport implements ToCollection
             }
             $picId = $pic ? $pic->id : auth()->id();
 
-            // Penanggung Jawab Aset: Indeks 19
-            $pjNameOrEmail = isset($cells[19]) ? trim((string) $cells[19]) : '';
+            // Penanggung Jawab Aset: Indeks 20
+            $pjNameOrEmail = isset($cells[20]) ? trim((string) $cells[20]) : '';
             $pj = null;
             if (!empty($pjNameOrEmail)) {
                 if (filter_var($pjNameOrEmail, FILTER_VALIDATE_EMAIL) !== false || str_contains($pjNameOrEmail, '@')) {
@@ -116,25 +119,87 @@ class DataAsetImport implements ToCollection
                 $lokasiId = LokasiAset::first()->lokasi_id ?? null;
             }
 
-            // 6. Simpan atau Update Data Aset
-            // Nomor Aset: Indeks 3 (Kode Aset -> Nomor)
+            // 6. Cari aset existing berdasarkan Nomor Aset di Excel (Indeks 3)
             $nomorAset = isset($cells[3]) ? trim((string) $cells[3]) : '';
             $aset = null;
+            $nomorUrut = null;
             if (!empty($nomorAset)) {
                 $aset = DataAset::where('nomor_aset', $nomorAset)->first();
+                $parts = explode('/', $nomorAset);
+                if (count($parts) >= 2) {
+                    $nomorUrut = str_pad($parts[1], 5, '0', STR_PAD_LEFT);
+                }
+            }
+
+            // 6b. Resolve Divisi/Dept dari kolom Indeks 16
+            // Cukup isi nama organisasi di Excel, misal: "Departemen Teknologi", "Divisi Keuangan"
+            // Sistem akan mencari secara berurutan: Department → Divisi → Section → Unit → Director
+            // Jika kolom kosong → pertahankan org dari aset existing (update) atau null (create baru)
+            $orgRaw       = isset($cells[16]) ? trim((string) $cells[16]) : '';
+            $idDirector   = $aset ? $aset->id_director   : null;
+            $idDivisi     = $aset ? $aset->id_divisi     : null;
+            $idDepartment = $aset ? $aset->id_department : null;
+            $idSection    = $aset ? $aset->id_section    : null;
+            $idUnit       = $aset ? $aset->id_unit       : null;
+
+            if (!empty($orgRaw)) {
+                // Reset semua ID organisasi, akan di-set ulang sesuai hasil pencarian
+                $idDirector = $idDivisi = $idDepartment = $idSection = $idUnit = null;
+
+                $searchName = $orgRaw;
+                $prefixType = '';
+
+                if (str_contains($orgRaw, ':')) {
+                    $parts = explode(':', $orgRaw, 2);
+                    $prefixType = strtolower(trim($parts[0]));
+                    $searchName = trim($parts[1]);
+                }
+
+                // Jika ada prefix type, kita bisa langsung targetkan model yang sesuai
+                if ($prefixType === 'departemen' || $prefixType === 'department') {
+                    $dept = Department::where('name_department', 'LIKE', "%{$searchName}%")->first();
+                    if ($dept) $idDepartment = $dept->id_department;
+                } elseif ($prefixType === 'divisi') {
+                    $divisiFound = Divisi::where('nm_divisi', 'LIKE', "%{$searchName}%")->first();
+                    if ($divisiFound) $idDivisi = $divisiFound->id_divisi;
+                } elseif ($prefixType === 'bagian' || $prefixType === 'section') {
+                    $sectionFound = Section::where('name_section', 'LIKE', "%{$searchName}%")->first();
+                    if ($sectionFound) $idSection = $sectionFound->id_section;
+                } elseif ($prefixType === 'unit') {
+                    $unitFound = Unit::where('name_unit', 'LIKE', "%{$searchName}%")->first();
+                    if ($unitFound) $idUnit = $unitFound->id_unit;
+                } elseif ($prefixType === 'direktur' || $prefixType === 'director') {
+                    $directorFound = Director::where('name_director', 'LIKE', "%{$searchName}%")->first();
+                    if ($directorFound) $idDirector = $directorFound->id_director;
+                } else {
+                    // Fallback jika tidak ada colon atau prefix tidak cocok, cari ke semua secara berurutan
+                    $dept = Department::where('name_department', 'LIKE', "%{$searchName}%")->first();
+                    if ($dept) {
+                        $idDepartment = $dept->id_department;
+                    } elseif ($divisiFound = Divisi::where('nm_divisi', 'LIKE', "%{$searchName}%")->first()) {
+                        $idDivisi = $divisiFound->id_divisi;
+                    } elseif ($sectionFound = Section::where('name_section', 'LIKE', "%{$searchName}%")->first()) {
+                        $idSection = $sectionFound->id_section;
+                    } elseif ($unitFound = Unit::where('name_unit', 'LIKE', "%{$searchName}%")->first()) {
+                        $idUnit = $unitFound->id_unit;
+                    } elseif ($directorFound = Director::where('name_director', 'LIKE', "%{$searchName}%")->first()) {
+                        $idDirector = $directorFound->id_director;
+                    }
+                }
             }
 
             $asetData = [
                 'nama_aset'            => $namaAset,
                 'kategori_id'          => $kategori->id,
+                'nomor_urut'           => $nomorUrut,
                 'deskripsi'            => isset($cells[4]) ? trim((string) $cells[4]) : '',
                 'merek'                => isset($cells[5]) ? trim((string) $cells[5]) : '',
                 'tanggal_kapitalisasi' => $tanggalKapitalisasi,
-                'id_director'          => $aset ? $aset->id_director : null,
-                'id_divisi'            => $aset ? $aset->id_divisi : null,
-                'id_department'        => $aset ? $aset->id_department : null,
-                'id_section'           => $aset ? $aset->id_section : null,
-                'id_unit'              => $aset ? $aset->id_unit : null,
+                'id_director'          => $idDirector,
+                'id_divisi'            => $idDivisi,
+                'id_department'        => $idDepartment,
+                'id_section'           => $idSection,
+                'id_unit'              => $idUnit,
                 'lokasi_id'            => $lokasiId,
                 'pic_id'               => $picId,
                 'penanggung_jawab_id'  => $pjId,
@@ -145,15 +210,25 @@ class DataAsetImport implements ToCollection
             ];
 
             if ($aset) {
-                // Update
+                // Update aset yang sudah ada
                 $aset->update($asetData);
             } else {
-                // Create
+                // Buat aset baru (nomor_aset di-generate otomatis oleh model booted)
                 $aset = DataAset::create($asetData);
             }
 
-            // 7. Simpan/Update Link Foto Google Drive: Indeks 20 (Dokumentasi Aset)
-            $photosRaw = isset($cells[20]) ? trim((string) $cells[20]) : '';
+            // Jika kolom nomor aset di Excel terisi → gunakan langsung sebagai nomor_aset, dan simpan nomor_urut
+            if (!empty($nomorAset)) {
+                $aset->nomor_aset = $nomorAset;
+                if (!empty($nomorUrut)) {
+                    $aset->nomor_urut = $nomorUrut;
+                }
+                $aset->saveQuietly();
+            }
+
+
+            // 7. Simpan/Update Link Foto Google Drive: Indeks 21 (Dokumentasi Aset)
+            $photosRaw = isset($cells[21]) ? trim((string) $cells[21]) : '';
             if (!empty($photosRaw)) {
                 // Pisahkan string koma menjadi array URL
                 $photoUrls = array_map('trim', explode(',', $photosRaw));

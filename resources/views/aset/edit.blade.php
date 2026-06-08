@@ -47,6 +47,10 @@
                 </div>
             @endif
             
+            @php
+                $nomorAsetParts = explode('/', $aset->nomor_aset);
+                $currentNomorUrut = $aset->nomor_urut ?? (count($nomorAsetParts) >= 2 ? $nomorAsetParts[1] : '00001');
+            @endphp
             <form action="{{ route('aset.update', $aset->id) }}" method="POST" enctype="multipart/form-data" id="formAset" autocomplete="off" novalidate>
                 @csrf
                 @method('PUT')
@@ -60,32 +64,24 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            {{-- NOMOR URUT ASET (auto dari ID, bisa override) --}}
+                            {{-- NOMOR URUT ASET --}}
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">
                                     Nomor Urut Aset <span class="text-danger">*</span>
-                                    <span id="badge_auto" class="badge ms-1" style="background:#253070; font-size:0.65rem;">AUTO</span>
-                                    <span id="badge_manual" class="badge bg-warning text-dark ms-1" style="font-size:0.65rem; display:none;">MANUAL</span>
                                 </label>
                                 <div class="input-group input-group-focus rounded-3">
                                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-hashtag"></i></span>
                                     <input type="text" name="nomor_urut" id="nomor_urut"
-                                           class="form-control border-start-0 border-end-0 ps-0 shadow-none bg-light"
-                                           value="{{ old('nomor_urut', str_pad($aset->id, 5, '0', STR_PAD_LEFT)) }}"
-                                           placeholder="00001"
+                                           class="form-control border-start-0 ps-0 shadow-none bg-white"
+                                           value="{{ old('nomor_urut', $currentNomorUrut) }}"
+                                           placeholder="Contoh: 00001"
                                            maxlength="5"
                                            inputmode="numeric"
-                                           disabled
-                                           style="cursor: not-allowed;"
+                                           style="cursor: text;"
                                            required>
-                                    <button type="button" id="btn_override_urut" class="btn btn-light border text-muted px-2"
-                                            title="Klik untuk override nomor urut secara manual"
-                                            style="border-radius: 0 0.375rem 0.375rem 0;">
-                                        <i class="fas fa-lock" id="icon_lock"></i>
-                                    </button>
                                 </div>
                                 <small class="text-muted" id="hint_urut" style="font-size: 0.7rem;">
-                                    Terisi otomatis dari ID aset &mdash; klik <i class="fas fa-lock fa-xs"></i> untuk ubah manual
+                                    Masukkan 5 digit nomor urut (contoh: 00001)
                                 </small>
                                 @error('nomor_urut')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
@@ -93,9 +89,12 @@
                             {{-- PRATINJAU NOMOR ASET --}}
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-navy mb-1 small">Pratinjau Nomor Aset</label>
-                                <input type="text" id="nomor_aset_display"
-                                       class="form-control bg-light text-navy fw-bold border-0 shadow-none px-3 py-2"
-                                       value="{{ $aset->nomor_aset }}" disabled style="cursor: not-allowed; opacity: 1;">
+                                <div class="input-group input-group-focus rounded-3">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" id="nomor_aset_display"
+                                           class="form-control border-start-0 ps-0 shadow-none bg-light text-navy fw-bold"
+                                           value="{{ $aset->nomor_aset }}" disabled style="cursor: not-allowed; opacity: 1;">
+                                </div>
                                 <small class="text-muted" style="font-size: 0.7rem;">KODE/NO_URUT/LOKASI/TAHUN</small>
                             </div>
 
@@ -504,9 +503,8 @@
         const statusKondisi  = document.getElementById('status_kondisi');
         const inputNamaAset  = document.getElementById('nama_aset');
 
-        // Nomor urut default = ID aset diformat 5 digit
-        const assetIdFormatted = "{{ str_pad($aset->id, 5, '0', STR_PAD_LEFT) }}";
-        let isOverride = false;
+        // Nomor urut default
+        const assetIdFormatted = "{{ $currentNomorUrut }}";
 
         function padNoUrut(val) {
             const num = val.replace(/\D/g, '').slice(0, 5);
@@ -526,51 +524,20 @@
             const tgl = (selectThn && selectThn.value) ? new Date(selectThn.value).getFullYear() : new Date().getFullYear();
             const thn = isNaN(tgl) ? new Date().getFullYear() : tgl;
 
-            // Nomor Urut: auto dari ID atau override manual
-            const rawUrut = inputNoUrut ? inputNoUrut.value : assetIdFormatted;
-            const noUrut  = padNoUrut(rawUrut || assetIdFormatted);
+            // Nomor Urut
+            const rawUrut = inputNoUrut ? inputNoUrut.value : '';
+            const noUrut  = rawUrut ? padNoUrut(rawUrut) : 'XXXXX';
 
             inputDisplay.value = `${kKat}/${noUrut}/${kLok}/${thn}`;
         }
 
-        // Toggle override manual
-        if (btnOverride && inputNoUrut) {
-            btnOverride.addEventListener('click', function() {
-                isOverride = !isOverride;
-
-                if (isOverride) {
-                    inputNoUrut.disabled = false;
-                    inputNoUrut.style.cursor = 'text';
-                    inputNoUrut.classList.remove('bg-light');
-                    inputNoUrut.classList.add('bg-white');
-                    iconLock.className = 'fas fa-lock-open text-warning';
-                    badgeAuto.style.display = 'none';
-                    badgeManual.style.display = 'inline-block';
-                    hintUrut.innerHTML = '</i>Mode manual aktif &mdash;';
-                    inputNoUrut.focus();
-                    inputNoUrut.select();
-                } else {
-                    inputNoUrut.disabled = true;
-                    inputNoUrut.style.cursor = 'not-allowed';
-                    inputNoUrut.classList.add('bg-light');
-                    inputNoUrut.classList.remove('bg-white');
-                    inputNoUrut.value = assetIdFormatted;
-                    iconLock.className = 'fas fa-lock';
-                    badgeAuto.style.display = 'inline-block';
-                    badgeManual.style.display = 'none';
-                    hintUrut.innerHTML = 'Terisi otomatis dari ID aset &mdash; klik <i class="fas fa-lock fa-xs"></i> untuk ubah manual';
-                }
-
-                updateNomor();
-            });
-
+        // Saat mengetik di nomor urut
+        if (inputNoUrut) {
             inputNoUrut.addEventListener('input', function() {
-                if (!isOverride) return;
                 this.value = this.value.replace(/\D/g, '').slice(0, 5);
                 updateNomor();
             });
             inputNoUrut.addEventListener('blur', function() {
-                if (!isOverride) return;
                 if (this.value) this.value = padNoUrut(this.value);
                 updateNomor();
             });
