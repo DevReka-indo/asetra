@@ -85,6 +85,7 @@ class DataAsetController extends Controller
 
         if ($filterOwnDept) {
             $divisiId = null;
+            $departmentId = null;
         }
 
         if ($lokasiId != '') {
@@ -132,16 +133,7 @@ class DataAsetController extends Controller
         $lokasis = LokasiAset::all();
 
         $departmentsQuery = \App\Models\Department::query();
-        if ($filterOwnDept) {
-            if ($user->divisi_id_divisi) {
-                $departmentsQuery->where('divisi_id_divisi', $user->divisi_id_divisi);
-            } elseif ($user->director_id_director) {
-                $departmentsQuery->where('director_id_director', $user->director_id_director);
-            } else {
-                // Jika user tidak memiliki divisi atau direktorat, tampilkan kosong
-                $departmentsQuery->whereRaw('1 = 0');
-            }
-        } elseif ($divisiId != '') {
+        if ($divisiId != '') {
             $departmentsQuery->where('divisi_id_divisi', $divisiId);
         }
         $departments = $departmentsQuery->get();

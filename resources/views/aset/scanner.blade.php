@@ -195,8 +195,8 @@
                     </div>
 
                     <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070; border-color: #253070;">
-                            <i class="fas fa-save me-2"></i> Simpan Temuan & Lanjut Scan
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070 !important; border-color: #253070 !important;">
+                            <i class="fas fa-save me-2"></i> Simpan Temuan
                         </button>
                     </div>
                 </form>
@@ -236,7 +236,7 @@
 
         function handleKondisiChange() {
             if (!soKondisi) return;
-            const isUnidentified = soKondisi.value === 'Tidak Teridentifikasi';
+            const isUnidentified = soKondisi.value === 'Tidak Teridentifikasi' || soKondisi.value === 'Hilang';
             
             if (isUnidentified) {
                 // Disable and remove required

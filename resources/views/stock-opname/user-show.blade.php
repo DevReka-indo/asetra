@@ -507,7 +507,7 @@
                 </div>
                 <div class="modal-footer bg-white border-top-0 pt-0 pb-4 px-4">
                     <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070;">
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070 !important; border-color: #253070 !important;">
                         <i class="fas fa-save me-2"></i> Simpan Temuan
                     </button>
                 </div>
@@ -656,7 +656,7 @@
         // Function to toggle inputs when kondisi is 'Tidak Teridentifikasi'
         function handleKondisiChange() {
             const kondisi = $('#so_kondisi').val();
-            const isUnidentified = kondisi === 'Tidak Teridentifikasi';
+            const isUnidentified = kondisi === 'Tidak Teridentifikasi' || kondisi === 'Hilang';
             
             const soLokasi = $('#so_lokasi');
             const soFoto = $('#so_foto');

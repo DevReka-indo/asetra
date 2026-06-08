@@ -168,7 +168,7 @@ class StockOpnameApiController extends BaseApiController
             'stock_opname_id' => 'required|exists:stock_opname,id',
             'aset_id'         => 'required|string', // Can be ID or Nomor Aset
             'kondisi_temuan'  => 'required|string',
-            'lokasi_temuan'   => 'required_unless:kondisi_temuan,Tidak Teridentifikasi|nullable|string',
+            'lokasi_temuan'   => 'required_unless:kondisi_temuan,Tidak Teridentifikasi,Hilang|nullable|string',
             'foto_temuan'     => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
             'keterangan'      => 'nullable|string'
         ]);

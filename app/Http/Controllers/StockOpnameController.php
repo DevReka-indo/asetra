@@ -296,7 +296,7 @@ class StockOpnameController extends Controller
             'stock_opname_id' => 'required|exists:stock_opname,id',
             'aset_id' => 'required',
             'kondisi_temuan' => 'required|string',
-            'lokasi_temuan' => 'required_unless:kondisi_temuan,Tidak Teridentifikasi|nullable|string',
+            'lokasi_temuan' => 'required_unless:kondisi_temuan,Tidak Teridentifikasi,Hilang|nullable|string',
             'foto_temuan' => 'nullable|image|mimes:jpeg,png,jpg|max:4096'
         ]);
 
