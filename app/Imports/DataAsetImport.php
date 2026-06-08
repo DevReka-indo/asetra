@@ -172,18 +172,40 @@ class DataAsetImport implements ToCollection
                     $directorFound = Director::where('name_director', 'LIKE', "%{$searchName}%")->first();
                     if ($directorFound) $idDirector = $directorFound->id_director;
                 } else {
-                    // Fallback jika tidak ada colon atau prefix tidak cocok, cari ke semua secara berurutan
-                    $dept = Department::where('name_department', 'LIKE', "%{$searchName}%")->first();
-                    if ($dept) {
-                        $idDepartment = $dept->id_department;
-                    } elseif ($divisiFound = Divisi::where('nm_divisi', 'LIKE', "%{$searchName}%")->first()) {
+                    // Fallback jika tidak ada colon atau prefix tidak cocok:
+                    // 1. Cari exact match terlebih dahulu di semua level untuk presisi
+                    $foundExact = false;
+                    if ($divisiFound = Divisi::where('nm_divisi', $searchName)->first()) {
                         $idDivisi = $divisiFound->id_divisi;
-                    } elseif ($sectionFound = Section::where('name_section', 'LIKE', "%{$searchName}%")->first()) {
+                        $foundExact = true;
+                    } elseif ($dept = Department::where('name_department', $searchName)->first()) {
+                        $idDepartment = $dept->id_department;
+                        $foundExact = true;
+                    } elseif ($sectionFound = Section::where('name_section', $searchName)->first()) {
                         $idSection = $sectionFound->id_section;
-                    } elseif ($unitFound = Unit::where('name_unit', 'LIKE', "%{$searchName}%")->first()) {
+                        $foundExact = true;
+                    } elseif ($unitFound = Unit::where('name_unit', $searchName)->first()) {
                         $idUnit = $unitFound->id_unit;
-                    } elseif ($directorFound = Director::where('name_director', 'LIKE', "%{$searchName}%")->first()) {
+                        $foundExact = true;
+                    } elseif ($directorFound = Director::where('name_director', $searchName)->first()) {
                         $idDirector = $directorFound->id_director;
+                        $foundExact = true;
+                    }
+
+                    // 2. Jika tidak ditemukan exact match, lakukan LIKE query secara berurutan
+                    if (!$foundExact) {
+                        $dept = Department::where('name_department', 'LIKE', "%{$searchName}%")->first();
+                        if ($dept) {
+                            $idDepartment = $dept->id_department;
+                        } elseif ($divisiFound = Divisi::where('nm_divisi', 'LIKE', "%{$searchName}%")->first()) {
+                            $idDivisi = $divisiFound->id_divisi;
+                        } elseif ($sectionFound = Section::where('name_section', 'LIKE', "%{$searchName}%")->first()) {
+                            $idSection = $sectionFound->id_section;
+                        } elseif ($unitFound = Unit::where('name_unit', 'LIKE', "%{$searchName}%")->first()) {
+                            $idUnit = $unitFound->id_unit;
+                        } elseif ($directorFound = Director::where('name_director', 'LIKE', "%{$searchName}%")->first()) {
+                            $idDirector = $directorFound->id_director;
+                        }
                     }
                 }
             }
@@ -203,7 +225,7 @@ class DataAsetImport implements ToCollection
                 'lokasi_id'            => $lokasiId,
                 'pic_id'               => $picId,
                 'penanggung_jawab_id'  => $pjId,
-                'bast'                 => isset($cells[17]) ? trim((string) $cells[17]) : '',
+                'bast'                 => isset($cells[18]) ? trim((string) $cells[18]) : '',
                 'status_kondisi'       => $statusKondisi,
                 'status_aset'          => $aset ? $aset->status_aset : 'Aktif',
                 'keterangan'           => $aset ? $aset->keterangan : '',
