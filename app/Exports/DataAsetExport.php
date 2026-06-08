@@ -19,9 +19,10 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
     protected $isTemplate;
     protected $departmentId;
     protected $divisiId;
+    protected $jenisKategoriId;
     private $rowNum = 0;
 
-    public function __construct($search = null, $kondisi = null, $status = null, $lokasiId = null, $isTemplate = false, $departmentId = null, $divisiId = null)
+    public function __construct($search = null, $kondisi = null, $status = null, $lokasiId = null, $isTemplate = false, $departmentId = null, $divisiId = null, $jenisKategoriId = null)
     {
         $this->search = $search;
         $this->kondisi = $kondisi;
@@ -30,6 +31,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
         $this->isTemplate = $isTemplate;
         $this->departmentId = $departmentId;
         $this->divisiId = $divisiId;
+        $this->jenisKategoriId = $jenisKategoriId;
     }
 
     public function collection()
@@ -82,6 +84,12 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
 
         if ($this->status) {
             $query->where('status_aset', $this->status);
+        }
+
+        if ($this->jenisKategoriId) {
+            $query->whereHas('kategoriAset', function($q) {
+                $q->where('jenis_kategori_id', $this->jenisKategoriId);
+            });
         }
 
         if ($this->lokasiId) {

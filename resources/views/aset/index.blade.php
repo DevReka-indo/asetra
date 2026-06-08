@@ -105,16 +105,14 @@
                         </select>
                     </div>
 
-                    {{-- Filter Status --}}
+                    {{-- Filter Jenis Kategori --}}
                     <div class="col-12 col-sm-6 col-md-2">
-                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status Aset</label>
-                        <select name="status_aset" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
-                            <option value="">Semua Status</option>
-                            <option value="Aktif" {{ request('status_aset') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="Tidak Aktif" {{ request('status_aset') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                            <option value="Dalam Perbaikan" {{ request('status_aset') == 'Dalam Perbaikan' ? 'selected' : '' }}>Dalam Perbaikan</option>
-                            <option value="Dipinjam" {{ request('status_aset') == 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                            <option value="Hilang" {{ request('status_aset') == 'Hilang' ? 'selected' : '' }}>Hilang</option>
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Jenis Kategori</label>
+                        <select name="jenis_kategori_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Jenis Kategori</option>
+                            @foreach($jenisList as $jenis)
+                                <option value="{{ $jenis->id }}" {{ request('jenis_kategori_id') == $jenis->id ? 'selected' : '' }}>{{ $jenis->nama_jenis }}</option>
+                            @endforeach
                         </select>
                     </div>
 

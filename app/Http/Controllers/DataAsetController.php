@@ -660,6 +660,7 @@ class DataAsetController extends Controller
         $lokasiId = $request->input('lokasi');
         $departmentId = $request->input('department_id');
         $divisiId = $request->input('divisi_id');
+        $jenisKategoriId = $request->input('jenis_kategori_id');
 
         if ($divisiId) {
             if ($departmentId) {
@@ -672,7 +673,7 @@ class DataAsetController extends Controller
             }
         }
 
-        return Excel::download(new DataAsetExport($search, $kondisi, $status, $lokasiId, false, $departmentId, $divisiId), 'Data_Aset.xlsx');
+        return Excel::download(new DataAsetExport($search, $kondisi, $status, $lokasiId, false, $departmentId, $divisiId, $jenisKategoriId), 'Data_Aset.xlsx');
     }
 
     /**
