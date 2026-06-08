@@ -278,6 +278,13 @@
                     <span class="text-section">Lainnya</span>
                 </li>
 
+                <li class="nav-item {{ request()->routeIs('organization.manageOrganization') ? 'active_' : '' }}">
+                    <a href="{{ route('organization.manageOrganization') }}" class="nav-link">
+                        <i class="fas fa-sitemap"></i>
+                        <p>Struktur Organisasi</p>
+                    </a>
+                </li>
+
                 <li class="nav-item {{ request()->is('pemulihan*') ? 'active_' : '' }}">
                     <a href="#pemulihanDrop"
                         class="nav-link {{ request()->is('pemulihan*') ? '' : 'collapsed' }}"

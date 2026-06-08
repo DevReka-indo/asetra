@@ -71,13 +71,6 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::get('/permission-manage', [\App\Http\Controllers\PermissionController::class, 'index'])->name('permissions.manage');
     Route::post('/permission-manage/update', [\App\Http\Controllers\PermissionController::class, 'update'])->name('permissions.update');
 
-    // Organization Controller
-    Route::put('/organization/{type}/{id}', [OrganizationController::class, 'update'])->name('organization.update');
-    Route::delete('/organization/{type}/{id}', [OrganizationController::class, 'delete'])->name('organization.delete');
-    Route::get('/organization-manage', [OrganizationController::class, 'index'])->name('organization.manageOrganization');
-    Route::post('organization-manage/add', [OrganizationController::class, 'store'])->name('organization-manage/add');
-    Route::post('/organization-manage/sync-sipo', [OrganizationController::class, 'syncSipo'])->name('organization.sync-sipo');
-
 // Kode Bagian Controller
     Route::get('/kode-bagian', [KodeBagianController::class, 'index'])->name('kode-bagian.index');
     Route::get('/kode-bagian/create', [KodeBagianController::class, 'create'])->name('kode-bagian.create');
@@ -162,6 +155,13 @@ Route::middleware(['auth'])->group(function () {
 
 // Sumber Kepemilikan & Lokasi Aset - superadmin (role:1) and GA staff (section:12)
 Route::middleware(['auth', 'ga-admin'])->group(function () {
+
+    // Organization Controller
+    Route::put('/organization/{type}/{id}', [OrganizationController::class, 'update'])->name('organization.update');
+    Route::delete('/organization/{type}/{id}', [OrganizationController::class, 'delete'])->name('organization.delete');
+    Route::get('/organization-manage', [OrganizationController::class, 'index'])->name('organization.manageOrganization');
+    Route::post('organization-manage/add', [OrganizationController::class, 'store'])->name('organization-manage/add');
+    Route::post('/organization-manage/sync-sipo', [OrganizationController::class, 'syncSipo'])->name('organization.sync-sipo');
 
 Route::post('/lokasi-aset/import', [LokasiAsetController::class, 'import'])->name('lokasi-aset.import');
 Route::get('/lokasi-aset/template', [LokasiAsetController::class, 'downloadTemplate'])->name('lokasi-aset.template');
