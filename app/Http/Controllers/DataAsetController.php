@@ -147,7 +147,7 @@ class DataAsetController extends Controller
         }
         $kategoris = $kategoriQuery->orderBy('nama')->get();
 
-        $pageTitle = ($isAdmin && !$filterOwnDept) ? "Data Aset Perusahaan" : "Data Aset Departemen";
+        $pageTitle = ($isAdmin && !$filterOwnDept) ? "Data Aset Perusahaan" : "Data Aset Divisi";
         $showAdminActions = $isAdmin && !$filterOwnDept;
 
         return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris', 'showAdminActions'));

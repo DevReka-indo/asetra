@@ -78,7 +78,7 @@
                 <li class="nav-item {{ (request()->routeIs('aset.index') && request()->boolean('filter_own_dept')) ? 'active_' : '' }}">
                     <a href="{{ route('aset.index', ['filter_own_dept' => 1]) }}" class="nav-link">
                         <i class="fas fa-cubes"></i>
-                        <p>Data Aset Departemen</p>
+                        <p>Data Aset Divisi</p>
                     </a>
                 </li>
 
@@ -234,7 +234,7 @@
                 <li class="nav-item {{ (request()->routeIs('aset.index') && request()->boolean('filter_own_dept')) ? 'active_' : '' }}">
                     <a href="{{ route('aset.index', ['filter_own_dept' => 1]) }}" class="nav-link">
                         <i class="fas fa-cubes"></i>
-                        <p>Data Aset Departemen</p>
+                        <p>Data Aset Divisi</p>
                     </a>
                 </li>
 
@@ -338,7 +338,7 @@
                 <li class="nav-item {{ request()->routeIs('aset.index') ? 'active_' : '' }}">
                     <a href="{{ route('aset.index') }}" class="nav-link">
                         <i class="fas fa-box"></i>
-                        <p>Data Aset Departemen</p>
+                        <p>Data Aset Divisi</p>
                     </a>
                 </li>
 

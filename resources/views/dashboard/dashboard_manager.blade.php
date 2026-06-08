@@ -38,7 +38,7 @@
                         <i class="fas fa-boxes"></i>
                     </div>
                     <div>
-                        <p class="text-muted mb-0 small fw-bold text-uppercase">Aset Departemen</p>
+                        <p class="text-muted mb-0 small fw-bold text-uppercase">Aset Divisi</p>
                         <h3 class="fw-bold mb-0 text-dark">{{ number_format($totalAsetDept) }}</h3>
                     </div>
                 </div>
