@@ -117,7 +117,7 @@
                     </div>
 
                     {{-- Filter Lokasi --}}
-                    @if(!request()->routeIs('aset.pic') && $showAdminActions)
+                    @if(!request()->routeIs('aset.pic'))
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
@@ -143,7 +143,7 @@
                     @endif
 
                     {{-- Filter Departemen --}}
-                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()) && !request()->boolean('filter_own_dept'))
+                    @if(!request()->routeIs('aset.pic') && $filterOwnDept)
                     <div class="col-12 col-sm-6 col-md-2">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
                         <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">

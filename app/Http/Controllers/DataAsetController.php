@@ -84,9 +84,7 @@ class DataAsetController extends Controller
         $departmentId = $request->input('department_id');
 
         if ($filterOwnDept) {
-            $lokasiId = null;
             $divisiId = null;
-            $departmentId = null;
         }
 
         if ($lokasiId != '') {
@@ -134,7 +132,16 @@ class DataAsetController extends Controller
         $lokasis = LokasiAset::all();
 
         $departmentsQuery = \App\Models\Department::query();
-        if ($divisiId != '') {
+        if ($filterOwnDept) {
+            if ($user->divisi_id_divisi) {
+                $departmentsQuery->where('divisi_id_divisi', $user->divisi_id_divisi);
+            } elseif ($user->director_id_director) {
+                $departmentsQuery->where('director_id_director', $user->director_id_director);
+            } else {
+                // Jika user tidak memiliki divisi atau direktorat, tampilkan kosong
+                $departmentsQuery->whereRaw('1 = 0');
+            }
+        } elseif ($divisiId != '') {
             $departmentsQuery->where('divisi_id_divisi', $divisiId);
         }
         $departments = $departmentsQuery->get();
@@ -150,7 +157,7 @@ class DataAsetController extends Controller
         $pageTitle = ($isAdmin && !$filterOwnDept) ? "Data Aset Perusahaan" : "Data Aset Divisi";
         $showAdminActions = $isAdmin && !$filterOwnDept;
 
-        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris', 'showAdminActions'));
+        return view('aset.index', compact('asets', 'lokasis', 'departments', 'divisis', 'pageTitle', 'jenisList', 'kategoris', 'showAdminActions', 'filterOwnDept'));
     }
 
     public function picIndex(Request $request)
