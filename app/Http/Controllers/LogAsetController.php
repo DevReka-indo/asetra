@@ -38,17 +38,7 @@ class LogAsetController extends Controller
         if (!$isAdmin) {
             $query->whereHas('aset', function($q) use ($user) {
                 $q->where(function($subQ) use ($user) {
-                    if ($user->unit_id_unit) {
-                        $subQ->where('id_unit', $user->unit_id_unit);
-                    } elseif ($user->section_id_section) {
-                        $subQ->where('id_section', $user->section_id_section);
-                    } elseif ($user->department_id_department) {
-                        $subQ->where('id_department', $user->department_id_department);
-                    } elseif ($user->divisi_id_divisi) {
-                        $subQ->where('id_divisi', $user->divisi_id_divisi);
-                    } elseif ($user->director_id_director) {
-                        $subQ->where('id_director', $user->director_id_director);
-                    }
+                    $subQ->forUser($user);
                     
                     $subQ->orWhere('pic_id', $user->id);
                 });

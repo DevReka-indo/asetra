@@ -52,19 +52,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
         if (!$isAdmin) {
-            if ($user->unit_id_unit) {
-                $query->where('id_unit', $user->unit_id_unit);
-            } elseif ($user->section_id_section) {
-                $query->where('id_section', $user->section_id_section);
-            } elseif ($user->department_id_department) {
-                $query->where('id_department', $user->department_id_department);
-            } elseif ($user->divisi_id_divisi) {
-                $query->where('id_divisi', $user->divisi_id_divisi);
-            } elseif ($user->director_id_director) {
-                $query->where('id_director', $user->director_id_director);
-            } else {
-                $query->where('id', 0);
-            }
+            $query->forUser($user);
         }
 
         if ($this->search) {

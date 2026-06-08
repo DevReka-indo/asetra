@@ -223,19 +223,7 @@ class StockOpnameController extends Controller
         $queryAset = DataAset::with(['lokasi', 'kategoriAset']);
 
         if (!$isAdmin) {
-            if ($user->unit_id_unit) {
-                $queryAset->where('id_unit', $user->unit_id_unit);
-            } elseif ($user->section_id_section) {
-                $queryAset->where('id_section', $user->section_id_section);
-            } elseif ($user->department_id_department) {
-                $queryAset->where('id_department', $user->department_id_department);
-            } elseif ($user->divisi_id_divisi) {
-                $queryAset->where('id_divisi', $user->divisi_id_divisi);
-            } elseif ($user->director_id_director) {
-                $queryAset->where('id_director', $user->director_id_director);
-            } else {
-                $queryAset->where('id', 0);
-            }
+            $queryAset->forUser($user);
         }
 
         // Semua aset yang masuk scope user

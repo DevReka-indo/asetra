@@ -47,19 +47,7 @@ class DataAsetController extends Controller
         $filterOwnDept = $request->boolean('filter_own_dept') || !$isAdmin;
 
         if ($filterOwnDept) {
-            if ($user->unit_id_unit) {
-                $query->where('id_unit', $user->unit_id_unit);
-            } elseif ($user->section_id_section) {
-                $query->where('id_section', $user->section_id_section);
-            } elseif ($user->department_id_department) {
-                $query->where('id_department', $user->department_id_department);
-            } elseif ($user->divisi_id_divisi) {
-                $query->where('id_divisi', $user->divisi_id_divisi);
-            } elseif ($user->director_id_director) {
-                $query->where('id_director', $user->director_id_director);
-            } else {
-                $query->where('id', 0);
-            }
+            $query->forUser($user);
         }
 
         if ($search) {
@@ -341,13 +329,7 @@ class DataAsetController extends Controller
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
         if (!$isAdmin) {
-            $isAuthorized = false;
-            if ($user->unit_id_unit && $aset->id_unit == $user->unit_id_unit) $isAuthorized = true;
-            elseif ($user->section_id_section && $aset->id_section == $user->section_id_section) $isAuthorized = true;
-            elseif ($user->department_id_department && $aset->id_department == $user->department_id_department) $isAuthorized = true;
-            elseif ($user->divisi_id_divisi && $aset->id_divisi == $user->divisi_id_divisi) $isAuthorized = true;
-            elseif ($user->director_id_director && $aset->id_director == $user->director_id_director) $isAuthorized = true;
-            elseif ($aset->pic_id == $user->id) $isAuthorized = true;
+            $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
 
             if (!$isAuthorized) {
                 abort(403, 'Anda tidak memiliki akses untuk melihat detail aset dari departemen lain.');

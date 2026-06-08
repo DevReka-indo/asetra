@@ -264,4 +264,90 @@ class DataAset extends Model
         return $this->hasMany(PengajuanPerbaikan::class, 'aset_id')
                     ->whereIn('status', ['menunggu', 'disetujui']);
     }
+
+    /**
+     * Scope query to limit assets according to user's organizational structure hierarchy.
+     */
+    public function scopeForUser($query, $user)
+    {
+        if (!$user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $allowedDirectorIds = [];
+        $allowedDivisiIds = [];
+        $allowedDepartmentIds = [];
+        $allowedSectionIds = [];
+        $allowedUnitIds = [];
+
+        // 1. Ancestors (Upward):
+        if ($user->director_id_director) $allowedDirectorIds[] = $user->director_id_director;
+        if ($user->divisi_id_divisi) $allowedDivisiIds[] = $user->divisi_id_divisi;
+        if ($user->department_id_department) $allowedDepartmentIds[] = $user->department_id_department;
+        if ($user->section_id_section) $allowedSectionIds[] = $user->section_id_section;
+        if ($user->unit_id_unit) $allowedUnitIds[] = $user->unit_id_unit;
+
+        // 2. Descendants (Downward):
+        if ($user->director_id_director) {
+            $divIds = \App\Models\Divisi::where('director_id_director', $user->director_id_director)->pluck('id_divisi')->toArray();
+            $allowedDivisiIds = array_merge($allowedDivisiIds, $divIds);
+            
+            $deptIds = \App\Models\Department::where('director_id_director', $user->director_id_director)
+                ->orWhereIn('divisi_id_divisi', $divIds)
+                ->pluck('id_department')->toArray();
+            $allowedDepartmentIds = array_merge($allowedDepartmentIds, $deptIds);
+        }
+
+        if ($user->divisi_id_divisi) {
+            $deptIds = \App\Models\Department::where('divisi_id_divisi', $user->divisi_id_divisi)->pluck('id_department')->toArray();
+            $allowedDepartmentIds = array_merge($allowedDepartmentIds, $deptIds);
+        }
+
+        if (!empty($allowedDepartmentIds)) {
+            $sectIds = \App\Models\Section::whereIn('department_id_department', $allowedDepartmentIds)->pluck('id_section')->toArray();
+            $allowedSectionIds = array_merge($allowedSectionIds, $sectIds);
+        }
+
+        if (!empty($allowedSectionIds) || !empty($allowedDepartmentIds)) {
+            $unitIds = \App\Models\Unit::whereIn('section_id_section', $allowedSectionIds)
+                ->orWhereIn('department_id_department', $allowedDepartmentIds)
+                ->pluck('id_unit')->toArray();
+            $allowedUnitIds = array_merge($allowedUnitIds, $unitIds);
+        }
+
+        $allowedDirectorIds = array_unique($allowedDirectorIds);
+        $allowedDivisiIds = array_unique($allowedDivisiIds);
+        $allowedDepartmentIds = array_unique($allowedDepartmentIds);
+        $allowedSectionIds = array_unique($allowedSectionIds);
+        $allowedUnitIds = array_unique($allowedUnitIds);
+
+        return $query->where(function($q) use ($allowedDirectorIds, $allowedDivisiIds, $allowedDepartmentIds, $allowedSectionIds, $allowedUnitIds) {
+            $hasCondition = false;
+
+            if (!empty($allowedUnitIds)) {
+                $q->orWhereIn('id_unit', $allowedUnitIds);
+                $hasCondition = true;
+            }
+            if (!empty($allowedSectionIds)) {
+                $q->orWhereIn('id_section', $allowedSectionIds);
+                $hasCondition = true;
+            }
+            if (!empty($allowedDepartmentIds)) {
+                $q->orWhereIn('id_department', $allowedDepartmentIds);
+                $hasCondition = true;
+            }
+            if (!empty($allowedDivisiIds)) {
+                $q->orWhereIn('id_divisi', $allowedDivisiIds);
+                $hasCondition = true;
+            }
+            if (!empty($allowedDirectorIds)) {
+                $q->orWhereIn('id_director', $allowedDirectorIds);
+                $hasCondition = true;
+            }
+
+            if (!$hasCondition) {
+                $q->whereRaw('1 = 0');
+            }
+        });
+    }
 }

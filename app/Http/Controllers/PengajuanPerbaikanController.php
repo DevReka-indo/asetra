@@ -60,17 +60,7 @@ class PengajuanPerbaikanController extends Controller
                 $q->where('diajukan_oleh', $user->id)
                   ->orWhereHas('aset', function($qAset) use ($user) {
                       $qAset->where(function($subQ) use ($user) {
-                          if ($user->unit_id_unit) {
-                              $subQ->where('id_unit', $user->unit_id_unit);
-                          } elseif ($user->section_id_section) {
-                              $subQ->where('id_section', $user->section_id_section);
-                          } elseif ($user->department_id_department) {
-                              $subQ->where('id_department', $user->department_id_department);
-                          } elseif ($user->divisi_id_divisi) {
-                              $subQ->where('id_divisi', $user->divisi_id_divisi);
-                          } elseif ($user->director_id_director) {
-                              $subQ->where('id_director', $user->director_id_director);
-                          }
+                          $subQ->forUser($user);
                           
                           $subQ->orWhere('pic_id', $user->id);
                       });
@@ -193,12 +183,7 @@ class PengajuanPerbaikanController extends Controller
             $isAuthorized = false;
             
             if ($aset) {
-                if ($user->unit_id_unit && $aset->id_unit == $user->unit_id_unit) $isAuthorized = true;
-                elseif ($user->section_id_section && $aset->id_section == $user->section_id_section) $isAuthorized = true;
-                elseif ($user->department_id_department && $aset->id_department == $user->department_id_department) $isAuthorized = true;
-                elseif ($user->divisi_id_divisi && $aset->id_divisi == $user->divisi_id_divisi) $isAuthorized = true;
-                elseif ($user->director_id_director && $aset->id_director == $user->director_id_director) $isAuthorized = true;
-                elseif ($aset->pic_id == $user->id) $isAuthorized = true;
+                $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
             }
 
             if (!$isAuthorized) {
