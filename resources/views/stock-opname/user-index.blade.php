@@ -38,7 +38,7 @@
     <div class="so-user-hero d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div class="so-user-hero-content">
             <h4 class="fw-bold mt-2 mb-1">Halo, {{ auth()->user()->firstname }}!</h4>
-            <p class="mb-0 opacity-90">Pilih jadwal opname yang sedang berjalan untuk mulai memeriksa fisik aset di unit kerja Anda.</p>
+            <p class="mb-0 opacity-90">Pilih jadwal opname yang sedang berjalan untuk mulai memeriksa fisik aset.</p>
         </div>
         <div class="so-user-hero-content text-md-end">
             <div class="d-flex align-items-center gap-3 justify-content-md-end">

@@ -52,7 +52,7 @@
     <div class="so-hero d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div class="so-hero-content">
             <h4 class="fw-bold mb-1">Kelola Periode &amp; Pantau Progres Pengecekan Aset</h4>
-            <p class="mb-0 opacity-75">Buat jadwal opname, pantau progres tim per departemen, dan sinkronkan temuan ke master data dengan rapi.</p>
+            
         </div>
         <div class="so-hero-content">
             @if($sesiAktif > 0)
@@ -114,15 +114,6 @@
                 <div>
                     <h5 class="card-title fw-bold text-dark mb-1">Daftar Jadwal Stock Opname</h5>
                 </div>
-                @if($sesiAktif > 0)
-                    <button class="btn so-btn-primary btn-sm text-white px-3 rounded-pill d-md-none" onclick="Swal.fire('Perhatian', 'Harap selesaikan jadwal opname aktif terlebih dahulu.', 'warning')">
-                        <i class="fas fa-exclamation-circle me-1"></i> Buat Jadwal
-                    </button>
-                @else
-                    <button class="btn so-btn-primary btn-sm text-white px-3 rounded-pill d-md-none" data-bs-toggle="modal" data-bs-target="#createModal">
-                        <i class="fas fa-plus me-1"></i> Buat Jadwal
-                    </button>
-                @endif
             </div>
         </div>
         <div class="card-body px-4 pt-3 pb-4">
