@@ -287,31 +287,58 @@ class DataAset extends Model
         if ($user->unit_id_unit) $allowedUnitIds[] = $user->unit_id_unit;
 
         // 2. Descendants (Downward):
-        if ($user->director_id_director) {
-            $divIds = \App\Models\Divisi::where('director_id_director', $user->director_id_director)->pluck('id_divisi')->toArray();
+        // Downward scoping should start from the user's most specific assigned organization node,
+        // rather than starting from the Director and exposing other sibling branches.
+        if ($user->unit_id_unit) {
+            // Unit has no descendants.
+        } elseif ($user->section_id_section) {
+            $unitIds = \App\Models\Unit::where('section_id_section', $user->section_id_section)
+                ->pluck('id_unit')->toArray();
+            $allowedUnitIds = array_merge($allowedUnitIds, $unitIds);
+        } elseif ($user->department_id_department) {
+            $sectIds = \App\Models\Section::where('department_id_department', $user->department_id_department)
+                ->pluck('id_section')->toArray();
+            $allowedSectionIds = array_merge($allowedSectionIds, $sectIds);
+
+            $unitIds = \App\Models\Unit::whereIn('section_id_section', $sectIds)
+                ->orWhere('department_id_department', $user->department_id_department)
+                ->pluck('id_unit')->toArray();
+            $allowedUnitIds = array_merge($allowedUnitIds, $unitIds);
+        } elseif ($user->divisi_id_divisi) {
+            $deptIds = \App\Models\Department::where('divisi_id_divisi', $user->divisi_id_divisi)
+                ->pluck('id_department')->toArray();
+            $allowedDepartmentIds = array_merge($allowedDepartmentIds, $deptIds);
+
+            if (!empty($deptIds)) {
+                $sectIds = \App\Models\Section::whereIn('department_id_department', $deptIds)
+                    ->pluck('id_section')->toArray();
+                $allowedSectionIds = array_merge($allowedSectionIds, $sectIds);
+
+                $unitIds = \App\Models\Unit::whereIn('section_id_section', $sectIds)
+                    ->orWhereIn('department_id_department', $deptIds)
+                    ->pluck('id_unit')->toArray();
+                $allowedUnitIds = array_merge($allowedUnitIds, $unitIds);
+            }
+        } elseif ($user->director_id_director) {
+            $divIds = \App\Models\Divisi::where('director_id_director', $user->director_id_director)
+                ->pluck('id_divisi')->toArray();
             $allowedDivisiIds = array_merge($allowedDivisiIds, $divIds);
-            
+
             $deptIds = \App\Models\Department::where('director_id_director', $user->director_id_director)
                 ->orWhereIn('divisi_id_divisi', $divIds)
                 ->pluck('id_department')->toArray();
             $allowedDepartmentIds = array_merge($allowedDepartmentIds, $deptIds);
-        }
 
-        if ($user->divisi_id_divisi) {
-            $deptIds = \App\Models\Department::where('divisi_id_divisi', $user->divisi_id_divisi)->pluck('id_department')->toArray();
-            $allowedDepartmentIds = array_merge($allowedDepartmentIds, $deptIds);
-        }
+            if (!empty($deptIds)) {
+                $sectIds = \App\Models\Section::whereIn('department_id_department', $deptIds)
+                    ->pluck('id_section')->toArray();
+                $allowedSectionIds = array_merge($allowedSectionIds, $sectIds);
 
-        if (!empty($allowedDepartmentIds)) {
-            $sectIds = \App\Models\Section::whereIn('department_id_department', $allowedDepartmentIds)->pluck('id_section')->toArray();
-            $allowedSectionIds = array_merge($allowedSectionIds, $sectIds);
-        }
-
-        if (!empty($allowedSectionIds) || !empty($allowedDepartmentIds)) {
-            $unitIds = \App\Models\Unit::whereIn('section_id_section', $allowedSectionIds)
-                ->orWhereIn('department_id_department', $allowedDepartmentIds)
-                ->pluck('id_unit')->toArray();
-            $allowedUnitIds = array_merge($allowedUnitIds, $unitIds);
+                $unitIds = \App\Models\Unit::whereIn('section_id_section', $sectIds)
+                    ->orWhereIn('department_id_department', $deptIds)
+                    ->pluck('id_unit')->toArray();
+                $allowedUnitIds = array_merge($allowedUnitIds, $unitIds);
+            }
         }
 
         $allowedDirectorIds = array_unique($allowedDirectorIds);
