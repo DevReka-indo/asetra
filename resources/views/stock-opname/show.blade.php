@@ -91,8 +91,8 @@
     {{-- STAT CARDS --}}
     @php
         $progressPct = $totalAset > 0 ? round(($totalChecked/$totalAset)*100) : 0;
-        $deptDone = collect($deptStats)->where('progress', 100)->count();
-        $deptTotal = count($deptStats);
+        $divisiDone = collect($divisiStats)->where('progress', 100)->count();
+        $divisiTotal = count($divisiStats);
         $totalAnomali = count($anomaliLokasi) + count($anomaliKondisi);
     @endphp
 
@@ -123,14 +123,14 @@
                 <div class="d-flex align-items-start gap-3 mb-3">
                     <span class="stat-icon success"><i class="fas fa-building-shield"></i></span>
                     <div class="flex-grow-1">
-                        <div class="stat-label">Departemen Selesai</div>
+                        <div class="stat-label">Divisi Selesai</div>
                         <div class="d-flex align-items-baseline gap-1">
-                            <div class="stat-number">{{ $deptDone }}</div>
-                            <div class="stat-sub">/ {{ $deptTotal }}</div>
+                            <div class="stat-number">{{ $divisiDone }}</div>
+                            <div class="stat-sub">/ {{ $divisiTotal }}</div>
                         </div>
                     </div>
                 </div>
-                <div class="stat-sub">{{ $deptTotal > 0 ? round(($deptDone/$deptTotal)*100) : 0 }}% departemen rampung</div>
+                <div class="stat-sub">{{ $divisiTotal > 0 ? round(($divisiDone/$divisiTotal)*100) : 0 }}% divisi rampung</div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
@@ -160,29 +160,29 @@
     </div>
 
     <div class="row g-3">
-        {{-- KIRI: Progress per Departemen --}}
+        {{-- KIRI: Progress per Divisi --}}
         <div class="col-lg-8">
             <div class="panel-card mb-3">
                 <div class="panel-head">
                     <div class="section-title mb-0">
-                        <span class="dot"></span> Progres Per Departemen
+                        <span class="dot"></span> Progres Per Divisi
                     </div>
                     <div>
-                        <span class="summary-pill success"><i class="fas fa-check"></i> {{ $deptDone }} Selesai</span>
-                        <span class="summary-pill warn ms-1"><i class="fas fa-spinner"></i> {{ max(0, $deptTotal - $deptDone) }} Berjalan</span>
+                        <span class="summary-pill success"><i class="fas fa-check"></i> {{ $divisiDone }} Selesai</span>
+                        <span class="summary-pill warn ms-1"><i class="fas fa-spinner"></i> {{ max(0, $divisiTotal - $divisiDone) }} Berjalan</span>
                     </div>
                 </div>
                 <div class="panel-body">
-                    @if(empty($deptStats))
+                    @if(empty($divisiStats))
                         <div class="empty-state py-5">
                             <i class="fas fa-building d-block mb-2"></i>
-                            <p class="mb-0">Belum ada data departemen.</p>
+                            <p class="mb-0">Belum ada data divisi.</p>
                         </div>
                     @else
                         <div class="row g-3">
-                            @foreach($deptStats as $dept)
+                            @foreach($divisiStats as $divisi)
                                 @php
-                                    $isComplete = $dept['progress'] == 100;
+                                    $isComplete = $divisi['progress'] == 100;
                                     $progressColor = $isComplete ? 'background:linear-gradient(90deg,#28a745,#48d971);' : 'background:linear-gradient(90deg,#253070,#48abf7);';
                                 @endphp
                                 <div class="col-md-6">
@@ -191,13 +191,13 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 <span class="dept-icon"><i class="fas fa-building"></i></span>
                                                 <div>
-                                                    <div class="dept-name">{{ \Illuminate\Support\Str::limit($dept['name'], 28) }}</div>
-                                                    <small class="text-muted">{{ $dept['total'] }} Aset Total</small>
+                                                    <div class="dept-name">{{ \Illuminate\Support\Str::limit($divisi['name'], 28) }}</div>
+                                                    <small class="text-muted">{{ $divisi['total'] }} Aset Total</small>
                                                 </div>
                                             </div>
                                             @if($isComplete)
                                                 <span class="badge-progress selesai"><i class="fas fa-check-circle"></i> Selesai</span>
-                                            @elseif($dept['progress'] == 0)
+                                            @elseif($divisi['progress'] == 0)
                                                 <span class="badge-progress kosong">Belum Mulai</span>
                                             @else
                                                 <span class="badge-progress aktif"><i class="fas fa-bolt"></i> Berjalan</span>
@@ -205,11 +205,11 @@
                                         </div>
                                         
                                         <div class="d-flex align-items-end justify-content-between mb-2 mt-3">
-                                            <div class="progress-pct {{ $isComplete ? 'complete' : '' }}">{{ $dept['progress'] }}%</div>
-                                            <small class="text-muted">{{ $dept['checked'] }} dari {{ $dept['total'] }} dicek</small>
+                                            <div class="progress-pct {{ $isComplete ? 'complete' : '' }}">{{ $divisi['progress'] }}%</div>
+                                            <small class="text-muted">{{ $divisi['checked'] }} dari {{ $divisi['total'] }} dicek</small>
                                         </div>
                                         <div class="progress progress-thin">
-                                            <div class="progress-bar" style="width: {{ $dept['progress'] }}%; {{ $progressColor }}"></div>
+                                            <div class="progress-bar" style="width: {{ $divisi['progress'] }}%; {{ $progressColor }}"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -318,7 +318,7 @@
 
 {{-- Modal Belum Dicek --}}
 @php
-    $uniqueDepts = $belumDicek->map(fn($a) => $a->resolved_department_name)->filter()->unique();
+    $uniqueDivisis = $belumDicek->map(fn($a) => $a->resolved_divisi_name)->filter()->unique();
 @endphp
 <div class="modal fade" id="belumDicekModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -341,9 +341,9 @@
                             <div class="input-group input-group-sm rounded-3 overflow-hidden border bg-white">
                                 <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-building"></i></span>
                                 <select id="modalDeptSelect" class="form-select border-0 shadow-none bg-transparent">
-                                    <option value="">Semua Departemen</option>
-                                    @foreach($uniqueDepts as $deptName)
-                                        <option value="{{ $deptName }}">{{ $deptName }}</option>
+                                    <option value="">Semua Divisi</option>
+                                    @foreach($uniqueDivisis as $divisiName)
+                                        <option value="{{ $divisiName }}">{{ $divisiName }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -359,17 +359,17 @@
                                 <th>Nomor Aset</th>
                                 <th>Nama Aset</th>
                                 <th>Lokasi Sistem</th>
-                                <th>Departemen</th>
+                                <th>Divisi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($belumDicek as $aset)
-                                <tr data-number="{{ $aset->nomor_aset }}" data-name="{{ $aset->nama_aset }}" data-dept="{{ $aset->resolved_department_name }}">
+                                <tr data-number="{{ $aset->nomor_aset }}" data-name="{{ $aset->nama_aset }}" data-dept="{{ $aset->resolved_divisi_name }}">
                                     <td class="row-number">{{ $loop->iteration }}</td>
                                     <td class="fw-bold text-dark">{{ $aset->nomor_aset }}</td>
                                     <td>{{ $aset->nama_aset }}</td>
                                     <td><i class="fas fa-map-marker-alt text-muted me-1"></i> {{ $aset->lokasi->nama_lokasi ?? '-' }}</td>
-                                    <td>{{ $aset->resolved_department_name }}</td>
+                                    <td>{{ $aset->resolved_divisi_name }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

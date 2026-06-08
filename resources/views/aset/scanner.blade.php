@@ -462,20 +462,26 @@
                 btnSubmit.innerHTML = originalText;
                 
                 if (result.status === 200 && result.body.success) {
+                    // Close modal immediately
+                    const modalEl = document.getElementById('stockOpnameModal');
+                    const modalInst = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if (modalInst) {
+                        modalInst.hide();
+                    }
+
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil',
                         text: result.body.message,
-                        timer: 1500,
-                        showConfirmButton: false
+                        showConfirmButton: true,
+                        confirmButtonColor: '#253070'
                     });
-                    // Close modal 
-                    bootstrap.Modal.getInstance(document.getElementById('stockOpnameModal')).hide();
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal',
-                        text: result.body.message || 'Terjadi kesalahan'
+                        text: result.body.message || 'Terjadi kesalahan',
+                        confirmButtonColor: '#253070'
                     });
                 }
             })
@@ -483,7 +489,12 @@
                 console.error(error);
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = originalText;
-                Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan sistem.',
+                    confirmButtonColor: '#253070'
+                });
             });
         });
     });

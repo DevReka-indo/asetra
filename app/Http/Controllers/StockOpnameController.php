@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
 use App\Models\DataAset;
+use App\Models\AsetFoto;
 use App\Models\LokasiAset;
 use App\Models\User;
 use App\Notifications\SystemNotification;
@@ -117,21 +118,21 @@ class StockOpnameController extends Controller
             }
         }
 
-        // 4. Hitung Progres per Departemen
-        $deptStats = [];
-        $asetsByDept = $allAsets->groupBy(fn($a) => $a->resolved_department_name);
+        // 4. Hitung Progres per Divisi
+        $divisiStats = [];
+        $asetsByDivisi = $allAsets->groupBy(fn($a) => $a->resolved_divisi_name);
 
-        foreach ($asetsByDept as $deptName => $deptAsets) {
-            $deptAsetIds = $deptAsets->pluck('id')->toArray();
-            $deptCheckedCount = $allFindings->whereIn('aset_id', $deptAsetIds)->count();
-            $totalInDept = $deptAsets->count();
+        foreach ($asetsByDivisi as $divisiName => $divisiAsets) {
+            $divisiAsetIds = $divisiAsets->pluck('id')->toArray();
+            $divisiCheckedCount = $allFindings->whereIn('aset_id', $divisiAsetIds)->count();
+            $totalInDivisi = $divisiAsets->count();
             
-            $deptStats[] = [
-                'name' => $deptName,
-                'total' => $totalInDept,
-                'checked' => $deptCheckedCount,
-                'progress' => $totalInDept > 0 ? round(($deptCheckedCount / $totalInDept) * 100) : 0,
-                'findings' => $allFindings->whereIn('aset_id', $deptAsetIds)
+            $divisiStats[] = [
+                'name' => $divisiName,
+                'total' => $totalInDivisi,
+                'checked' => $divisiCheckedCount,
+                'progress' => $totalInDivisi > 0 ? round(($divisiCheckedCount / $totalInDivisi) * 100) : 0,
+                'findings' => $allFindings->whereIn('aset_id', $divisiAsetIds)
             ];
         }
 
@@ -142,7 +143,7 @@ class StockOpnameController extends Controller
             'session', 
             'totalAset', 
             'totalChecked', 
-            'deptStats', 
+            'divisiStats', 
             'anomaliLokasi', 
             'anomaliKondisi', 
             'belumDicek'
@@ -186,6 +187,23 @@ class StockOpnameController extends Controller
                         $aset->lokasi_id = $detail->lokasi_temuan;
                     }
                     $aset->save();
+
+                    // Sinkronisasi foto temuan jika ada
+                    if ($detail->foto_temuan) {
+                        $exists = AsetFoto::where('aset_id', $aset->id)
+                            ->where('path_foto', $detail->foto_temuan)
+                            ->exists();
+                        
+                        if (!$exists) {
+                            $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
+                            AsetFoto::create([
+                                'aset_id'   => $aset->id,
+                                'path_foto' => $detail->foto_temuan,
+                                'urutan'    => $urutanTerakhir + 1,
+                                'keterangan' => 'Sinkronisasi dari Stock Opname: ' . ($session->periode ?? 'Temuan'),
+                            ]);
+                        }
+                    }
                 }
             }
             DB::commit();
@@ -265,10 +283,10 @@ class StockOpnameController extends Controller
 
         $lokasis = LokasiAset::oldest()->get();
 
-        // Daftar Departemen/Unit unik untuk filter GA/Admin
-        $availableDepts = [];
+        // Daftar Divisi unik untuk filter GA/Admin
+        $availableDivisis = [];
         if ($isAdmin) {
-            $availableDepts = DataAset::with([
+            $availableDivisis = DataAset::with([
                 'department',
                 'section.department',
                 'unit.section.department',
@@ -277,14 +295,14 @@ class StockOpnameController extends Controller
                 'director'
             ])
             ->get()
-            ->map(fn($a) => $a->resolved_department_name)
+            ->map(fn($a) => $a->resolved_divisi_name)
             ->unique()
             ->filter()
             ->values()
             ->toArray();
         }
 
-        return view('stock-opname.user-show', compact('session', 'telahDicek', 'belumDicek', 'lokasis', 'availableDepts', 'isAdmin'));
+        return view('stock-opname.user-show', compact('session', 'telahDicek', 'belumDicek', 'lokasis', 'availableDivisis', 'isAdmin'));
     }
 
     /**

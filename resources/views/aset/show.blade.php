@@ -70,14 +70,14 @@
                         </div>
                         <div class="card-body p-0 text-center">
                             @php
-                                $latestLogPhoto = $aset->logAset->where('foto_bukti', '!=', null)->sortByDesc('tanggal_cek')->first();
+                                $latestLogPhoto = $aset->logAset->where('foto_bukti', '!=', null)->sortByDesc('created_at')->first();
                             @endphp
 
                             @if($latestLogPhoto)
                                 <div class="mb-3 p-2 text-start">
                                     <div class="small text-muted mb-1">Foto Dokumentasi Terbaru (Monitoring)</div>
                                     <img src="{{ Storage::url($latestLogPhoto->foto_bukti) }}" class="img-fluid mb-2 rounded" alt="Foto Dokumentasi" style="cursor: zoom-in;" data-bs-toggle="modal" data-bs-target="#imagePreviewModal" onclick="document.getElementById('previewImage').src=this.src;">
-                                    <div class="small text-muted">Diunggah: {{ \Carbon\Carbon::parse($latestLogPhoto->tanggal_cek)->format('d M Y, H:i') }} @if($latestLogPhoto->dicatatOleh) oleh {{ $latestLogPhoto->dicatatOleh->firstname }} @endif</div>
+                                    <div class="small text-muted">Diunggah: {{ $latestLogPhoto->created_at->format('d M Y, H:i') }} @if($latestLogPhoto->dicatatOleh) oleh {{ $latestLogPhoto->dicatatOleh->firstname }} @endif</div>
                                 </div>
                             @endif
 

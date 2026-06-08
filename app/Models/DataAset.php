@@ -141,6 +141,36 @@ class DataAset extends Model
         return 'Tanpa Departemen';
     }
 
+    public function getResolvedDivisiNameAttribute(): string
+    {
+        $dept = null;
+        if ($this->id_unit && $this->unit) {
+            if ($this->unit->section && $this->unit->section->department) {
+                $dept = $this->unit->section->department;
+            } else if ($this->unit->department) {
+                $dept = $this->unit->department;
+            }
+        } else if ($this->id_section && $this->section && $this->section->department) {
+            $dept = $this->section->department;
+        } else if ($this->id_department && $this->department) {
+            $dept = $this->department;
+        }
+
+        if ($dept && $dept->divisi) {
+            return $dept->divisi->nm_divisi;
+        }
+
+        if ($this->id_divisi && $this->divisi) {
+            return $this->divisi->nm_divisi;
+        }
+
+        if ($this->id_director && $this->director) {
+            return $this->director->name_director;
+        }
+
+        return 'Tanpa Divisi';
+    }
+
     public function getKodeOrganisasiAttribute(): ?string
     {
         if ($this->id_unit) return "unit_" . $this->id_unit;

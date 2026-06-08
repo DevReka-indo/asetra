@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
 use App\Models\DataAset;
+use App\Models\AsetFoto;
 use App\Models\LokasiAset;
 use App\Models\User;
 use App\Notifications\SystemNotification;
@@ -233,6 +234,23 @@ class StockOpnameApiController extends BaseApiController
                         $aset->lokasi_id = $detail->lokasi_temuan;
                     }
                     $aset->save();
+
+                    // Sinkronisasi foto temuan jika ada
+                    if ($detail->foto_temuan) {
+                        $exists = AsetFoto::where('aset_id', $aset->id)
+                            ->where('path_foto', $detail->foto_temuan)
+                            ->exists();
+                        
+                        if (!$exists) {
+                            $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
+                            AsetFoto::create([
+                                'aset_id'   => $aset->id,
+                                'path_foto' => $detail->foto_temuan,
+                                'urutan'    => $urutanTerakhir + 1,
+                                'keterangan' => 'Sinkronisasi dari Stock Opname: ' . ($session->periode ?? 'Temuan'),
+                            ]);
+                        }
+                    }
                 }
             }
             DB::commit();

@@ -187,14 +187,14 @@
                             {{-- Filter Departemen (Only for Admin/GA) --}}
                             @if($isAdmin)
                             @php
-                                $userResolvedDept = auth()->user()->department->name_department ?? (auth()->user()->section->department->name_department ?? (auth()->user()->unit->section->department->name_department ?? ''));
+                                $userResolvedDivisi = auth()->user()->divisi->nm_divisi ?? (auth()->user()->department->divisi->nm_divisi ?? (auth()->user()->section->department->divisi->nm_divisi ?? (auth()->user()->unit->section->department->divisi->nm_divisi ?? '')));
                             @endphp
                             <div class="col-md-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Departemen</label>
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Divisi</label>
                                 <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtBelum">
-                                    <option value="">-- Semua Departemen --</option>
-                                    @foreach($availableDepts as $deptName)
-                                        <option value="{{ $deptName }}" {{ $userResolvedDept == $deptName ? 'selected' : '' }}>{{ $deptName }}</option>
+                                    <option value="">-- Semua Divisi --</option>
+                                    @foreach($availableDivisis as $divisiName)
+                                        <option value="{{ $divisiName }}" {{ $userResolvedDivisi == $divisiName ? 'selected' : '' }}>{{ $divisiName }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -218,7 +218,7 @@
                                         <th>Kategori</th>
                                         <th>Lokasi Terakhir</th>
                                         @if($isAdmin)
-                                            <th class="col-dept">Departemen/Unit</th>
+                                            <th class="col-dept">Divisi</th>
                                         @endif
                                         <th>Kondisi</th>
                                         <th class="text-center">Aksi</th>
@@ -226,7 +226,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($belumDicek as $aset)
-                                        <tr data-dept="{{ $aset->resolved_department_name }}">
+                                        <tr data-dept="{{ $aset->resolved_divisi_name }}">
                                             <td class="text-center text-muted">{{ $loop->iteration }}</td>
                                             <td>
                                                 <div class="aset-cell">
@@ -245,7 +245,7 @@
                                                 <span class="text-dark small">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
                                             </td>
                                             @if($isAdmin)
-                                                <td class="col-dept"><span class="text-dark small">{{ $aset->resolved_department_name }}</span></td>
+                                                <td class="col-dept"><span class="text-dark small">{{ $aset->resolved_divisi_name }}</span></td>
                                             @endif
                                             <td>
                                                 @php
@@ -306,17 +306,17 @@
                                     <option value="100">100</option>
                                 </select>
                             </div>
-                            {{-- Filter Departemen (Only for Admin/GA) --}}
+                            {{-- Filter Divisi (Only for Admin/GA) --}}
                             @if($isAdmin)
                             @php
-                                $userResolvedDept = auth()->user()->department->name_department ?? (auth()->user()->section->department->name_department ?? (auth()->user()->unit->section->department->name_department ?? ''));
+                                $userResolvedDivisi = auth()->user()->divisi->nm_divisi ?? (auth()->user()->department->divisi->nm_divisi ?? (auth()->user()->section->department->divisi->nm_divisi ?? (auth()->user()->unit->section->department->divisi->nm_divisi ?? '')));
                             @endphp
                             <div class="col-md-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Departemen</label>
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Divisi</label>
                                 <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtDitemukan">
-                                    <option value="">-- Semua Departemen --</option>
-                                    @foreach($availableDepts as $deptName)
-                                        <option value="{{ $deptName }}" {{ $userResolvedDept == $deptName ? 'selected' : '' }}>{{ $deptName }}</option>
+                                    <option value="">-- Semua Divisi --</option>
+                                    @foreach($availableDivisis as $divisiName)
+                                        <option value="{{ $divisiName }}" {{ $userResolvedDivisi == $divisiName ? 'selected' : '' }}>{{ $divisiName }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -339,7 +339,7 @@
                                         <th>Kondisi Temuan</th>
                                         <th>Lokasi Temuan</th>
                                         @if($isAdmin)
-                                            <th class="col-dept">Departemen/Unit</th>
+                                            <th class="col-dept">Divisi</th>
                                         @endif
                                         <th>Foto</th>
                                         <th>Dicek Oleh</th>
@@ -358,7 +358,7 @@
                                             }
                                             $lokasiBerubah = is_numeric($detail->lokasi_temuan) && $detail->aset && $detail->lokasi_temuan != $detail->aset->lokasi_id;
                                         @endphp
-                                        <tr data-dept="{{ $detail->aset->resolved_department_name ?? '-' }}">
+                                        <tr data-dept="{{ $detail->aset->resolved_divisi_name ?? '-' }}">
                                             <td>
                                                 <div class="aset-cell">
                                                     <div class="aset-thumb" style="background:rgba(40,167,69,.10); color:#28a745;"><i class="fas fa-check"></i></div>
@@ -414,7 +414,7 @@
                                                 @endif
                                             </td>
                                             @if($isAdmin)
-                                                <td class="col-dept"><span class="text-dark small">{{ $detail->aset->resolved_department_name ?? '-' }}</span></td>
+                                                <td class="col-dept"><span class="text-dark small">{{ $detail->aset->resolved_divisi_name ?? '-' }}</span></td>
                                             @endif
                                             <td>
                                                 @if($detail->foto_temuan)
@@ -724,12 +724,15 @@
                 btnSubmit.innerHTML = originalText;
                 
                 if (result.status === 200 && result.body.success) {
+                    // Close bootstrap modal immediately
+                    $('#stockOpnameModal').modal('hide');
+                    
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil',
                         text: result.body.message,
-                        timer: 1500,
-                        showConfirmButton: false
+                        showConfirmButton: true,
+                        confirmButtonColor: '#253070'
                     }).then(() => {
                         // Reload page to reflect changes
                         window.location.reload();
@@ -738,7 +741,8 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal',
-                        text: result.body.message || 'Terjadi kesalahan'
+                        text: result.body.message || 'Terjadi kesalahan',
+                        confirmButtonColor: '#253070'
                     });
                 }
             })
@@ -746,7 +750,12 @@
                 console.error(error);
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = originalText;
-                Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan sistem.',
+                    confirmButtonColor: '#253070'
+                });
             });
         });
     });
