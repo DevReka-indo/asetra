@@ -31,7 +31,6 @@
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/info.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/aset.css') }}">
