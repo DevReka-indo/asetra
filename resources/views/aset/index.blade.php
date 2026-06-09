@@ -142,6 +142,19 @@
                     </div>
                     @endif
 
+                    {{-- Filter Departemen --}}
+                    @if(!request()->routeIs('aset.pic') && (auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum()) && !request()->boolean('filter_own_dept'))
+                    <div class="col-12 col-sm-6 col-md-2">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Departemen</label>
+                        <select name="department_id" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                            <option value="">Semua Departemen</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept->id_department }}" {{ request('department_id') == $dept->id_department ? 'selected' : '' }}>{{ $dept->name_department }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
 
 
                 </div>
