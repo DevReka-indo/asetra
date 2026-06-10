@@ -35,9 +35,16 @@ class StockOpnameController extends Controller
         // Cek apakah ada jadwal opname yang masih aktif
         $activeOpname = StockOpname::where('status', 'aktif')->first();
         if ($activeOpname) {
+            $msg = 'Gagal membuat jadwal baru. Masih ada jadwal Stock Opname (' . $activeOpname->periode . ') yang sedang berjalan.';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg
+                ], 422);
+            }
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal membuat jadwal baru. Masih ada jadwal Stock Opname (' . $activeOpname->periode . ') yang sedang berjalan.');
+                ->with('error', $msg);
         }
 
         $request->validate([
@@ -67,6 +74,13 @@ class StockOpnameController extends Controller
 
         foreach ($users as $u) {
             $u->notify(new SystemNotification($title, $message, $url, $type));
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Jadwal Stock Opname berhasil dibuat.'
+            ]);
         }
 
         return redirect()->route('stock-opname.index')->with('success', 'Jadwal Stock Opname berhasil dibuat.');
@@ -164,6 +178,87 @@ class StockOpnameController extends Controller
         $session->update(['status' => $request->status]);
 
         return redirect()->back()->with('success', 'Status Stock Opname berhasil diperbarui.');
+    }
+
+    /**
+     * Memperbarui jadwal Stock Opname
+     */
+    public function update(Request $request, $id)
+    {
+        $session = StockOpname::findOrFail($id);
+
+        $request->validate([
+            'periode' => 'required|string|max:20',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_berakhir' => 'required|date|after_or_equal:tanggal_mulai',
+            'keterangan' => 'nullable|string',
+            'status' => 'required|in:aktif,selesai',
+        ]);
+
+        // Jika status diubah menjadi aktif, pastikan tidak ada jadwal aktif lain (kecuali dirinya sendiri)
+        if ($request->status === 'aktif' && $session->status !== 'aktif') {
+            $activeOpname = StockOpname::where('status', 'aktif')->where('id', '!=', $id)->first();
+            if ($activeOpname) {
+                $msg = 'Gagal mengaktifkan jadwal. Masih ada jadwal Stock Opname (' . $activeOpname->periode . ') yang sedang aktif.';
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $msg
+                    ], 422);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', $msg);
+            }
+        }
+
+        $session->update([
+            'periode' => $request->periode,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_berakhir' => $request->tanggal_berakhir,
+            'keterangan' => $request->keterangan,
+            'status' => $request->status,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Jadwal Stock Opname berhasil diperbarui.'
+            ]);
+        }
+
+        return redirect()->route('stock-opname.index')->with('success', 'Jadwal Stock Opname berhasil diperbarui.');
+    }
+
+    /**
+     * Menghapus jadwal Stock Opname beserta temuan-temuannya (jika ada)
+     */
+    public function destroy($id)
+    {
+        $session = StockOpname::findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            // Hapus file gambar temuan dari storage public jika ada
+            $details = StockOpnameDetail::where('stock_opname_id', $id)->get();
+            foreach ($details as $detail) {
+                if ($detail->foto_temuan) {
+                    Storage::disk('public')->delete($detail->foto_temuan);
+                }
+            }
+
+            // Hapus detail stock opname terkait
+            StockOpnameDetail::where('stock_opname_id', $id)->delete();
+
+            // Hapus data stock opname utama
+            $session->delete();
+
+            DB::commit();
+            return redirect()->route('stock-opname.index')->with('success', 'Jadwal Stock Opname berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus jadwal: ' . $e->getMessage());
+        }
     }
 
     /**

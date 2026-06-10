@@ -56,7 +56,7 @@
         </div>
         <div class="so-hero-content">
             @if($sesiAktif > 0)
-                <button class="btn btn-light fw-bold px-4 rounded-pill shadow-sm" onclick="Swal.fire('Perhatian', 'Gagal membuat jadwal baru. Harap selesaikan jadwal opname aktif terlebih dahulu.', 'warning')">
+                <button class="btn btn-light fw-bold px-4 rounded-pill shadow-sm" onclick="Swal.fire({ title: 'Perhatian', text: 'Gagal membuat jadwal baru. Harap selesaikan jadwal opname aktif terlebih dahulu.', icon: 'warning', confirmButtonColor: '#253070', confirmButtonText: 'OK', customClass: { popup: 'rounded-4 shadow' } })">
                     <i class="fas fa-plus-circle me-2 text-warning"></i> Buat Jadwal Baru
                 </button>
             @else
@@ -150,7 +150,7 @@
                             <th class="d-none d-lg-table-cell">Keterangan</th>
                             <th class="d-none d-md-table-cell">Dibuat Oleh</th>
                             <th class="text-center">Status</th>
-                            <th width="13%" class="text-center">Aksi</th>
+                            <th width="150" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -200,9 +200,28 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('stock-opname.show', $session->id) }}" class="btn so-action-btn so-btn-primary text-white">
-                                        <i class="fas fa-chart-line me-1"></i> Detail
-                                    </a>
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        {{-- Tombol Detail / View --}}
+                                        <a href="{{ route('stock-opname.show', $session->id) }}" class="btn btn-info btn-sm rounded-circle text-white border-0" 
+                                            style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;"
+                                            title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        {{-- Tombol Edit (Warning) --}}
+                                        <button type="button" class="btn btn-warning btn-sm rounded-circle text-white border-0" 
+                                            style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;"
+                                            title="Edit" data-bs-toggle="modal" data-bs-target="#editModal{{ $session->id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        {{-- Tombol Hapus (Danger) --}}
+                                        <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0" 
+                                            style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;"
+                                            title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $session->id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -238,7 +257,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('stock-opname.store') }}" method="POST">
+            <form action="{{ route('stock-opname.store') }}" method="POST" id="formCreateStockOpname">
                 @csrf
                 <div class="modal-body p-4 bg-light">
                     <div class="mb-3">
@@ -288,6 +307,133 @@
         </div>
     </div>
 </div>
+
+{{-- MODALS EDIT & HAPUS --}}
+@foreach($sessions as $session)
+    <!-- Modal Edit -->
+    <div class="modal fade so-modal" id="editModal{{ $session->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $session->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 pt-4 px-4 pb-3" style="background-color: #253070;">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2 text-white" id="editModalLabel{{ $session->id }}" style="font-size: 1.05rem;">
+                        <i class="fas fa-edit text-white"></i> Edit Jadwal Stock Opname
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('stock-opname.update', $session->id) }}" method="POST" id="formEditStockOpname{{ $session->id }}" autocomplete="off" novalidate>
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="form_type" value="edit_{{ $session->id }}">
+                    <div class="modal-body p-4 bg-light">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                Periode
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                                <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-tag"></i></span>
+                                <input type="text" name="periode" class="form-control border-0 shadow-none fs-6" required placeholder="Contoh: Periode 2 2026" value="{{ old('form_type') == 'edit_'.$session->id ? old('periode') : $session->periode }}">
+                            </div>
+                            @if(old('form_type') == 'edit_'.$session->id)
+                                @error('periode') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                            @endif
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                    Tanggal Mulai
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                                    <input type="date" name="tanggal_mulai" class="form-control border-0 shadow-none fs-6" required value="{{ old('form_type') == 'edit_'.$session->id ? old('tanggal_mulai') : ($session->tanggal_mulai ? $session->tanggal_mulai->format('Y-m-d') : '') }}">
+                                </div>
+                                @if(old('form_type') == 'edit_'.$session->id)
+                                    @error('tanggal_mulai') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                                @endif
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                    Tanggal Berakhir
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                                    <input type="date" name="tanggal_berakhir" class="form-control border-0 shadow-none fs-6" required value="{{ old('form_type') == 'edit_'.$session->id ? old('tanggal_berakhir') : ($session->tanggal_berakhir ? $session->tanggal_berakhir->format('Y-m-d') : '') }}">
+                                </div>
+                                @if(old('form_type') == 'edit_'.$session->id)
+                                    @error('tanggal_berakhir') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                Status
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-lg shadow-sm rounded-3 input-group-focus align-items-center bg-white border">
+                                <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-toggle-on"></i></span>
+                                <select name="status" class="form-select border-0 shadow-none fs-6" required>
+                                    @php
+                                        $currentStatus = old('form_type') == 'edit_'.$session->id ? old('status') : $session->status;
+                                    @endphp
+                                    <option value="aktif" {{ $currentStatus == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                    <option value="selesai" {{ $currentStatus == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                </select>
+                            </div>
+                            @if(old('form_type') == 'edit_'.$session->id)
+                                @error('status') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                            @endif
+                        </div>
+                        <div class="mb-1">
+                            <label class="form-label fw-bold small text-uppercase mb-1" style="color: #253070; font-size: 0.72rem;">
+                                Keterangan
+                            </label>
+                            <textarea name="keterangan" class="form-control shadow-sm rounded-3 border-0" rows="3" placeholder="Catatan/instruksi tambahan untuk tim...">{{ old('form_type') == 'edit_'.$session->id ? old('keterangan') : $session->keterangan }}</textarea>
+                            @if(old('form_type') == 'edit_'.$session->id)
+                                @error('keterangan') <div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div> @enderror
+                            @endif
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top-0 pt-2 pb-4 px-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #253070; border-color: #253070;">
+                            <i class="fas fa-save me-1"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Delete -->
+    <div class="modal fade so-modal" id="deleteModal{{ $session->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-body p-5 text-center bg-light">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f8d7da;">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
+                    <p class="text-muted mb-4" style="font-size: 1rem;">
+                        Anda yakin ingin menghapus jadwal Stock Opname periode <br>
+                        <strong class="text-danger fs-5">{{ $session->periode }}</strong>?
+                    </p>
+                    <div class="alert alert-warning border-0 rounded-3 text-start small mb-4">
+                        <i class="fas fa-exclamation-circle me-2 text-warning"></i>
+                        <strong>Peringatan:</strong> Menghapus jadwal ini juga akan menghapus secara permanen semua data scan temuan aset, catatan kondisi, dan file foto yang terkait dengan periode ini.
+                    </div>
+                    <div class="d-flex justify-content-center gap-3">
+                        <form action="{{ route('stock-opname.destroy', $session->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                            @csrf
+                            @method('DELETE')
+                            <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                            <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endforeach
 @endsection
 
 @push('scripts')
@@ -325,6 +471,202 @@
         // Wire custom Search input
         $('.custom-search-input').on('keyup', function() {
             dt.search($(this).val()).draw();
+        });
+
+        // Setup SweetAlert config
+        const swalConfig = {
+            showConfirmButton: true,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#253070',
+            customClass: { popup: 'rounded-4 shadow' }
+        };
+
+        // Form Validation & AJAX Submit
+        const formsToValidate = document.querySelectorAll('#formCreateStockOpname, form[id^="formEditStockOpname"]');
+        formsToValidate.forEach(form => {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Clear previous errors
+                form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                form.querySelectorAll('.input-group').forEach(el => {
+                    el.classList.remove('border', 'border-danger');
+                });
+
+                let isValid = true;
+                let firstInvalidEl = null;
+
+                const fields = form.querySelectorAll('input, select');
+                fields.forEach(field => {
+                    if (field.type === 'hidden') return;
+                    
+                    let labelText = '';
+                    const formGroup = field.closest('.mb-3, .row, .mb-1');
+                    if (formGroup) {
+                        const labelEl = formGroup.querySelector('label');
+                        if (labelEl) {
+                            labelText = labelEl.textContent.replace('*', '').trim();
+                        }
+                    }
+                    if (!labelText) {
+                        labelText = field.getAttribute('placeholder') || field.getAttribute('name') || 'Kolom';
+                    }
+
+                    if (field.hasAttribute('required') && (!field.value || (field.tagName === 'SELECT' && field.value === ''))) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                        const inputGroup = field.closest('.input-group');
+                        if (inputGroup) {
+                            inputGroup.classList.add('border', 'border-danger');
+                        }
+
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${labelText} wajib diisi.`;
+                        
+                        const targetAnchor = inputGroup || field;
+                        targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                        if (!firstInvalidEl) {
+                            firstInvalidEl = targetAnchor;
+                        }
+                    }
+                });
+
+                // Custom validation: End Date must be after or equal to Start Date
+                const tglMulai = form.querySelector('[name="tanggal_mulai"]');
+                const tglAkhir = form.querySelector('[name="tanggal_berakhir"]');
+                if (tglMulai && tglAkhir && tglMulai.value && tglAkhir.value) {
+                    if (new Date(tglAkhir.value) < new Date(tglMulai.value)) {
+                        isValid = false;
+                        tglAkhir.classList.add('is-invalid');
+                        const inputGroup = tglAkhir.closest('.input-group');
+                        if (inputGroup) {
+                            inputGroup.classList.add('border', 'border-danger');
+                        }
+
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Tanggal berakhir harus setelah atau sama dengan tanggal mulai.`;
+                        
+                        const targetAnchor = inputGroup || tglAkhir;
+                        targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+
+                        if (!firstInvalidEl) {
+                            firstInvalidEl = targetAnchor;
+                        }
+                    }
+                }
+
+                if (!isValid) {
+                    if (firstInvalidEl) {
+                        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
+
+                // AJAX submission
+                Swal.fire({
+                    title: 'Menyimpan...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+
+                    const responseData = await response.json();
+                    Swal.close();
+
+                    if (response.ok) {
+                        // Close the Bootstrap modal immediately
+                        const modalEl = form.closest('.modal');
+                        if (modalEl) {
+                            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            } else if (window.jQuery || window.$) {
+                                $(modalEl).modal('hide');
+                            }
+                        }
+
+                        await Swal.fire({
+                            ...swalConfig,
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: responseData.message || 'Data berhasil disimpan.'
+                        });
+                        location.reload();
+                    } else if (response.status === 422) {
+                        const errors = responseData.errors;
+                        if (errors) {
+                            Object.keys(errors).forEach(fieldName => {
+                                const field = form.querySelector(`[name="${fieldName}"]`);
+                                if (field) {
+                                    field.classList.add('is-invalid');
+                                    const inputGroup = field.closest('.input-group');
+                                    if (inputGroup) {
+                                        inputGroup.classList.add('border', 'border-danger');
+                                    }
+
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'text-danger small mt-1 fw-bold invalid-feedback-custom';
+                                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${errors[fieldName].join(', ')}`;
+
+                                    const targetAnchor = inputGroup || field;
+                                    targetAnchor.parentNode.insertBefore(errorDiv, targetAnchor.nextSibling);
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                ...swalConfig,
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: responseData.message || 'Terjadi kesalahan validasi.'
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            ...swalConfig,
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: responseData.message || 'Terjadi kesalahan pada server.'
+                        });
+                    }
+                } catch (err) {
+                    Swal.close();
+                    Swal.fire({
+                        ...swalConfig,
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Tidak dapat menghubungi server. Silakan coba lagi.'
+                    });
+                }
+            });
+        });
+
+        // Add clear error class on modal hide
+        document.querySelectorAll('.modal').forEach(modalEl => {
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                const form = this.querySelector('form');
+                if (form) {
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.invalid-feedback-custom').forEach(el => el.remove());
+                    form.querySelectorAll('.input-group').forEach(el => {
+                        el.classList.remove('border', 'border-danger');
+                    });
+                    form.reset();
+                }
+            });
         });
     });
 </script>

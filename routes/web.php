@@ -210,6 +210,8 @@ Route::delete('/pemulihan/lokasi-aset/{id}/force-delete', [PemulihanController::
 Route::get('/stock-opname', [\App\Http\Controllers\StockOpnameController::class, 'index'])->name('stock-opname.index');
 Route::post('/stock-opname', [\App\Http\Controllers\StockOpnameController::class, 'store'])->name('stock-opname.store');
 Route::get('/stock-opname/{id}', [\App\Http\Controllers\StockOpnameController::class, 'show'])->name('stock-opname.show');
+Route::put('/stock-opname/{id}', [\App\Http\Controllers\StockOpnameController::class, 'update'])->name('stock-opname.update');
+Route::delete('/stock-opname/{id}', [\App\Http\Controllers\StockOpnameController::class, 'destroy'])->name('stock-opname.destroy');
 Route::put('/stock-opname/{id}/status', [\App\Http\Controllers\StockOpnameController::class, 'updateStatus'])->name('stock-opname.update-status');
 Route::post('/stock-opname/{id}/sync', [\App\Http\Controllers\StockOpnameController::class, 'syncData'])->name('stock-opname.sync');
 Route::get('/stock-opname/{id}/export', [\App\Http\Controllers\StockOpnameController::class, 'export'])->name('stock-opname.export');
