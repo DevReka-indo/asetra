@@ -132,21 +132,31 @@ class StockOpnameController extends Controller
             }
         }
 
-        // 4. Hitung Progres per Divisi
-        $divisiStats = [];
-        $asetsByDivisi = $allAsets->groupBy(fn($a) => $a->resolved_divisi_name);
+        // 4. Hitung Progres per Divisi/Departemen
+        $deptStats = [];
+        $asetsByGroup = $allAsets->groupBy(function($a) {
+            $divisiName = $a->resolved_divisi_name;
+            if ($divisiName && $divisiName !== 'Tanpa Divisi') {
+                return $divisiName;
+            }
+            $deptName = $a->resolved_department_name;
+            if ($deptName && $deptName !== 'Tanpa Departemen') {
+                return $deptName;
+            }
+            return 'Tanpa Divisi';
+        });
 
-        foreach ($asetsByDivisi as $divisiName => $divisiAsets) {
-            $divisiAsetIds = $divisiAsets->pluck('id')->toArray();
-            $divisiCheckedCount = $allFindings->whereIn('aset_id', $divisiAsetIds)->count();
-            $totalInDivisi = $divisiAsets->count();
+        foreach ($asetsByGroup as $groupName => $groupAsets) {
+            $groupAsetIds = $groupAsets->pluck('id')->toArray();
+            $groupCheckedCount = $allFindings->whereIn('aset_id', $groupAsetIds)->count();
+            $totalInGroup = $groupAsets->count();
             
-            $divisiStats[] = [
-                'name' => $divisiName,
-                'total' => $totalInDivisi,
-                'checked' => $divisiCheckedCount,
-                'progress' => $totalInDivisi > 0 ? round(($divisiCheckedCount / $totalInDivisi) * 100) : 0,
-                'findings' => $allFindings->whereIn('aset_id', $divisiAsetIds)
+            $deptStats[] = [
+                'name' => $groupName,
+                'total' => $totalInGroup,
+                'checked' => $groupCheckedCount,
+                'progress' => $totalInGroup > 0 ? round(($groupCheckedCount / $totalInGroup) * 100) : 0,
+                'findings' => $allFindings->whereIn('aset_id', $groupAsetIds)
             ];
         }
 
@@ -157,7 +167,7 @@ class StockOpnameController extends Controller
             'session', 
             'totalAset', 
             'totalChecked', 
-            'divisiStats', 
+            'deptStats', 
             'anomaliLokasi', 
             'anomaliKondisi', 
             'belumDicek'
@@ -380,7 +390,7 @@ class StockOpnameController extends Controller
 
         // Daftar Divisi & Departemen unik untuk filter GA/Admin
         $availableDivisis = [];
-        $availableDepartments = [];
+        $availableDepts = [];
         if ($isAdmin) {
             $availableDivisis = \App\Models\Divisi::orderBy('nm_divisi')
                 ->pluck('nm_divisi')
@@ -389,7 +399,7 @@ class StockOpnameController extends Controller
                 ->values()
                 ->toArray();
 
-            $availableDepartments = \App\Models\Department::orderBy('name_department')
+            $availableDepts = \App\Models\Department::orderBy('name_department')
                 ->pluck('name_department')
                 ->unique()
                 ->filter()
@@ -397,7 +407,7 @@ class StockOpnameController extends Controller
                 ->toArray();
         }
 
-        return view('stock-opname.user-show', compact('session', 'telahDicek', 'belumDicek', 'lokasis', 'availableDivisis', 'availableDepartments', 'isAdmin'));
+        return view('stock-opname.user-show', compact('session', 'telahDicek', 'belumDicek', 'lokasis', 'availableDivisis', 'availableDepts', 'isAdmin'));
     }
 
     /**

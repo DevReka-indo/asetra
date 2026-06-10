@@ -11,11 +11,11 @@
 
     {{-- BREADCRUMB --}}
     {{-- HEADER --}}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="fw-bold mb-0">Pelaksanaan Stock Opname</h3>
-        <ul class="breadcrumbs d-flex flex-wrap align-items-center p-0 m-0" style="list-style: none;">
+        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
-                <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
+                <a href="{{ url('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
                     <span style="font-size: 14px; font-weight: 500; position: relative; top: 2px;">Dashboard</span>
                 </a>
@@ -72,7 +72,7 @@
             <div class="col-md-5">
                 <div class="d-flex align-items-center justify-content-md-end gap-3">
                     <div class="progress-ring">
-                        <svg viewBox="0 0 120 120">
+                        <svg width="120" height="120">
                             <circle cx="60" cy="60" r="50" class="ring-track"></circle>
                             <circle cx="60" cy="60" r="50" class="ring-bar hero-progress-circle"
                                 stroke-dasharray="{{ $circumference }}"
@@ -137,7 +137,7 @@
             <h6 class="fw-bold mb-1 text-dark">Mulai Pindai Aset</h6>
             <p class="mb-0 small text-muted">Buka scanner untuk memindai QR code aset, atau gunakan "Cek Manual" jika label sulit dipindai.</p>
         </div>
-        <a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="scanner-btn d-inline-flex align-items-center justify-content-center gap-2">
+        <a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="scanner-btn d-none d-md-inline-flex align-items-center gap-2">
             <i class="fas fa-camera"></i> Buka Scanner
         </a>
     </div>
@@ -173,43 +173,44 @@
                         </div>
                     @else
                         {{-- Custom Filter Toolbar to match Kelola Pages --}}
-                        <div class="row g-2 align-items-center mb-3">
+                        <div class="row g-2 align-items-end mb-3">
                             {{-- Entries --}}
-                            <div class="col-6 col-sm-auto mb-2 mb-sm-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-0" style="font-size: 0.7rem; white-space: nowrap;">Entries</label>
-                                    <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtBelum" style="width: 75px;">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                </div>
+                            <div style="width: 100px;">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Entries</label>
+                                <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtBelum">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
                             </div>
-                            {{-- Filter Departemen (Only for Admin/GA) --}}
+                            {{-- Filter Divisi (Only for Admin/GA) --}}
                             @if($isAdmin)
-                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
-                                <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtBelum">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Divisi</label>
+                                <select class="form-select form-select-sm rounded-3 custom-divisi-filter" data-table="dtBelum">
                                     <option value="">-- Semua Divisi --</option>
                                     @foreach($availableDivisis as $divisiName)
                                         <option value="{{ $divisiName }}">{{ $divisiName }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
-                                <select class="form-select form-select-sm rounded-3 custom-sub-dept-filter" data-table="dtBelum">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Departemen</label>
+                                <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtBelum">
                                     <option value="">-- Semua Departemen --</option>
-                                    @foreach($availableDepartments as $deptName)
+                                    @foreach($availableDepts as $deptName)
                                         <option value="{{ $deptName }}">{{ $deptName }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             @endif
                             {{-- Pencarian --}}
-                            <div class="col-12 col-sm-4 col-md-3 ms-sm-auto mb-2 mb-sm-0">
+                            <div class="col-md-3 ms-auto">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Pencarian</label>
                                 <div class="input-group input-group-sm input-group-focus rounded-3" style="border: 1px solid #ced4da; background: #fff;">
                                     <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtBelum" placeholder="Cari...">
+                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtBelum" placeholder="Cari nomor atau nama...">
                                 </div>
                             </div>
                         </div>
@@ -218,13 +219,13 @@
                             <table class="table data-table mb-0" id="tableBelum">
                                 <thead class="table-light">
                                     <tr>
-                                        <th width="5%" class="text-center d-none d-md-table-cell">No</th>
+                                        <th width="5%" class="text-center">No</th>
                                         <th>Aset</th>
-                                        <th class="d-none d-md-table-cell">Kategori</th>
+                                        <th>Kategori</th>
                                         <th>Lokasi Terakhir</th>
                                         @if($isAdmin)
-                                            <th class="col-dept d-none d-lg-table-cell">Divisi</th>
-                                            <th class="col-sub-dept d-none d-lg-table-cell">Departemen</th>
+                                            <th class="col-divisi">Divisi</th>
+                                            <th class="col-dept">Departemen/Unit</th>
                                         @endif
                                         <th>Kondisi</th>
                                         <th class="text-center">Aksi</th>
@@ -232,8 +233,8 @@
                                 </thead>
                                 <tbody>
                                     @foreach($belumDicek as $aset)
-                                        <tr data-dept="{{ $aset->resolved_divisi_name }}">
-                                            <td class="text-center text-muted d-none d-md-table-cell">{{ $loop->iteration }}</td>
+                                        <tr data-divisi="{{ $aset->resolved_divisi_name }}" data-dept="{{ $aset->resolved_department_name }}">
+                                            <td class="text-center text-muted">{{ $loop->iteration }}</td>
                                             <td>
                                                 <div class="aset-cell">
                                                     <div class="aset-thumb"><i class="fas fa-box"></i></div>
@@ -243,7 +244,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="d-none d-md-table-cell">
+                                            <td>
                                                 <span class="text-dark small">{{ $aset->kategoriAset->nama ?? '-' }}</span>
                                             </td>
                                             <td>
@@ -251,8 +252,8 @@
                                                 <span class="text-dark small">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
                                             </td>
                                             @if($isAdmin)
-                                                <td class="col-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $aset->resolved_divisi_name }}</span></td>
-                                                <td class="col-sub-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $aset->resolved_department_name }}</span></td>
+                                                <td class="col-divisi"><span class="text-dark small">{{ $aset->resolved_divisi_name }}</span></td>
+                                                <td class="col-dept"><span class="text-dark small">{{ $aset->resolved_department_name }}</span></td>
                                             @endif
                                             <td>
                                                 @php
@@ -281,7 +282,7 @@
                                                     data-aset-nomor="{{ $aset->nomor_aset }}"
                                                     data-aset-nama="{{ $aset->nama_aset }}"
                                                     title="Input temuan manual untuk aset ini">
-                                                    <i class="fas fa-pen-to-square me-1"></i> <span class="d-none d-sm-inline">Cek Manual</span>
+                                                    <i class="fas fa-pen-to-square me-1"></i> Cek Manual
                                                 </button>
                                             </td>
                                         </tr>
@@ -302,43 +303,44 @@
                         </div>
                     @else
                         {{-- Custom Filter Toolbar to match Kelola Pages --}}
-                        <div class="row g-2 align-items-center mb-3">
+                        <div class="row g-2 align-items-end mb-3">
                             {{-- Entries --}}
-                            <div class="col-6 col-sm-auto mb-2 mb-sm-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <label class="form-label fw-bold small text-muted text-uppercase mb-0" style="font-size: 0.7rem; white-space: nowrap;">Entries</label>
-                                    <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtDitemukan" style="width: 75px;">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                </div>
+                            <div style="width: 100px;">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Entries</label>
+                                <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtDitemukan">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
                             </div>
                             {{-- Filter Divisi (Only for Admin/GA) --}}
                             @if($isAdmin)
-                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
-                                <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtDitemukan">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Divisi</label>
+                                <select class="form-select form-select-sm rounded-3 custom-divisi-filter" data-table="dtDitemukan">
                                     <option value="">-- Semua Divisi --</option>
                                     @foreach($availableDivisis as $divisiName)
                                         <option value="{{ $divisiName }}">{{ $divisiName }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
-                                <select class="form-select form-select-sm rounded-3 custom-sub-dept-filter" data-table="dtDitemukan">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Departemen</label>
+                                <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtDitemukan">
                                     <option value="">-- Semua Departemen --</option>
-                                    @foreach($availableDepartments as $deptName)
+                                    @foreach($availableDepts as $deptName)
                                         <option value="{{ $deptName }}">{{ $deptName }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             @endif
                             {{-- Pencarian --}}
-                            <div class="col-12 col-sm-4 col-md-3 ms-sm-auto mb-2 mb-sm-0">
+                            <div class="col-md-3 ms-auto">
+                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Pencarian</label>
                                 <div class="input-group input-group-sm input-group-focus rounded-3" style="border: 1px solid #ced4da; background: #fff;">
                                     <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtDitemukan" placeholder="Cari...">
+                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtDitemukan" placeholder="Cari nomor atau nama...">
                                 </div>
                             </div>
                         </div>
@@ -351,12 +353,12 @@
                                         <th>Kondisi Temuan</th>
                                         <th>Lokasi Temuan</th>
                                         @if($isAdmin)
-                                            <th class="col-dept d-none d-lg-table-cell">Divisi</th>
-                                            <th class="col-sub-dept d-none d-lg-table-cell">Departemen</th>
+                                            <th class="col-divisi">Divisi</th>
+                                            <th class="col-dept">Departemen/Unit</th>
                                         @endif
                                         <th>Foto</th>
-                                        <th class="d-none d-md-table-cell">Dicek Oleh</th>
-                                        <th class="d-none d-md-table-cell">Waktu</th>
+                                        <th>Dicek Oleh</th>
+                                        <th>Waktu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -371,7 +373,7 @@
                                             }
                                             $lokasiBerubah = is_numeric($detail->lokasi_temuan) && $detail->aset && $detail->lokasi_temuan != $detail->aset->lokasi_id;
                                         @endphp
-                                        <tr data-dept="{{ $detail->aset->resolved_divisi_name ?? '-' }}">
+                                        <tr data-divisi="{{ $detail->aset->resolved_divisi_name ?? '-' }}" data-dept="{{ $detail->aset->resolved_department_name ?? '-' }}">
                                             <td>
                                                 <div class="aset-cell">
                                                     <div class="aset-thumb" style="background:rgba(40,167,69,.10); color:#28a745;"><i class="fas fa-check"></i></div>
@@ -427,8 +429,8 @@
                                                 @endif
                                             </td>
                                             @if($isAdmin)
-                                                <td class="col-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $detail->aset->resolved_divisi_name ?? '-' }}</span></td>
-                                                <td class="col-sub-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $detail->aset->resolved_department_name ?? '-' }}</span></td>
+                                                <td class="col-divisi"><span class="text-dark small">{{ $detail->aset->resolved_divisi_name ?? '-' }}</span></td>
+                                                <td class="col-dept"><span class="text-dark small">{{ $detail->aset->resolved_department_name ?? '-' }}</span></td>
                                             @endif
                                             <td>
                                                 @if($detail->foto_temuan)
@@ -437,10 +439,10 @@
                                                     <span class="text-muted small"><i class="fas fa-image"></i> -</span>
                                                 @endif
                                             </td>
-                                            <td class="d-none d-md-table-cell">
+                                            <td>
                                                 <small class="fw-semibold text-dark">{{ $detail->dicekOleh->firstname ?? '-' }} {{ $detail->dicekOleh->lastname ?? '' }}</small>
                                             </td>
-                                            <td class="d-none d-md-table-cell">
+                                            <td>
                                                 <small class="text-muted">
                                                     <i class="far fa-clock me-1"></i>
                                                     {{ \Carbon\Carbon::parse($detail->created_at)->format('d M, H:i') }}
@@ -458,6 +460,11 @@
         </div>
     </div>
 </div>
+
+{{-- Floating Button untuk Mobile --}}
+<a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="floating-scanner-btn d-md-none" title="Buka Scanner">
+    <i class="fas fa-qrcode"></i>
+</a>
 
 <!-- Modal Stock Opname Input -->
 <div class="modal fade" id="stockOpnameModal" tabindex="-1" aria-labelledby="stockOpnameModalLabel" aria-hidden="true" data-bs-backdrop="static">
@@ -516,7 +523,7 @@
                 </div>
                 <div class="modal-footer bg-white border-top-0 pt-0 pb-4 px-4">
                     <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm border" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070 !important; border-color: #253070 !important;">
+                    <button type="submit" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070;">
                         <i class="fas fa-save me-2"></i> Simpan Temuan
                     </button>
                 </div>
@@ -536,37 +543,31 @@
             "order": [],
             "dom": "rtip", // Hides the default length menu 'l' and search box 'f'
             "language": {
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
                 "infoEmpty": "",
                 "zeroRecords": "Tidak ada data ditemukan",
                 "paginate": {
-                    "first": "«",
-                    "last": "»",
-                    "next": "›",
-                    "previous": "‹"
+                    "first": "Awal",
+                    "last": "Akhir",
+                    "next": "Lanjut",
+                    "previous": "Kembali"
                 }
             }
         });
-
-        dtBelum.on('order.dt search.dt', function () {
-            dtBelum.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
-                cell.innerHTML = i + 1;
-            });
-        }).draw();
 
         var dtDitemukan = $('#tableDitemukan').DataTable({
             "pageLength": 10,
             "order": [],
             "dom": "rtip", // Hides the default length menu 'l' and search box 'f'
             "language": {
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
                 "infoEmpty": "",
                 "zeroRecords": "Tidak ada data ditemukan",
                 "paginate": {
-                    "first": "«",
-                    "last": "»",
-                    "next": "›",
-                    "previous": "‹"
+                    "first": "Awal",
+                    "last": "Akhir",
+                    "next": "Lanjut",
+                    "previous": "Kembali"
                 }
             }
         });
@@ -582,22 +583,41 @@
             const dtInstance = tables[tableName];
             if (dtInstance) {
                 dtInstance.page.len(parseInt($(this).val())).draw();
-                updateStats();
             }
         });
 
+        // Wire custom Search input
         $('.custom-search-input').on('keyup', function() {
             const tableName = $(this).data('table');
             const dtInstance = tables[tableName];
             if (dtInstance) {
                 dtInstance.search($(this).val()).draw();
-                updateStats();
             }
         });
 
-        function updateStats() {
-            const countBelum = tables.dtBelum ? tables.dtBelum.rows({ search: 'applied' }).count() : 0;
-            const countTelah = tables.dtDitemukan ? tables.dtDitemukan.rows({ search: 'applied' }).count() : 0;
+        // Function to dynamically update stats cards and circular progress based on selected division and department
+        function updateFilteredStats() {
+            let countBelum = 0;
+            let countTelah = 0;
+
+            const selectedDivisi = $('.custom-divisi-filter').first().val() || '';
+            const selectedDept = $('.custom-dept-filter').first().val() || '';
+
+            const trBelum = tables.dtBelum ? $(tables.dtBelum.rows().nodes()) : $();
+            const trTelah = tables.dtDitemukan ? $(tables.dtDitemukan.rows().nodes()) : $();
+
+            const filterFn = function() {
+                const divVal = $(this).attr('data-divisi') || '';
+                const deptVal = $(this).attr('data-dept') || '';
+                
+                const matchesDivisi = selectedDivisi === '' || divVal === selectedDivisi;
+                const matchesDept = selectedDept === '' || deptVal === selectedDept;
+                
+                return matchesDivisi && matchesDept;
+            };
+
+            countBelum = trBelum.filter(filterFn).length;
+            countTelah = trTelah.filter(filterFn).length;
 
             const total = countBelum + countTelah;
             const progressPercent = total > 0 ? Math.round((countTelah / total) * 100) : 0;
@@ -622,6 +642,34 @@
             $('.ring-bar.hero-progress-circle').css('stroke-dashoffset', offset);
         }
 
+        // Wire custom Divisi filter (Only for Admin/GA)
+        $('.custom-divisi-filter').on('change', function() {
+            const val = $(this).val();
+            
+            // Sync all divisi select filters
+            $('.custom-divisi-filter').val(val);
+
+            // Filter both tables
+            if (tables.dtBelum) {
+                if (val === '') {
+                    tables.dtBelum.column('.col-divisi').search('').draw();
+                } else {
+                    tables.dtBelum.column('.col-divisi').search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
+                }
+            }
+            if (tables.dtDitemukan) {
+                if (val === '') {
+                    tables.dtDitemukan.column('.col-divisi').search('').draw();
+                } else {
+                    tables.dtDitemukan.column('.col-divisi').search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
+                }
+            }
+
+            // Dynamically update stats based on selected filters
+            updateFilteredStats();
+        });
+
+        // Wire custom Department filter (Only for Admin/GA)
         $('.custom-dept-filter').on('change', function() {
             const val = $(this).val();
             
@@ -644,43 +692,12 @@
                 }
             }
 
-            // Dynamically update stats
-            updateStats();
+            // Dynamically update stats based on selected filters
+            updateFilteredStats();
         });
 
-        $('.custom-sub-dept-filter').on('change', function() {
-            const val = $(this).val();
-            
-            // Sync all department select filters
-            $('.custom-sub-dept-filter').val(val);
-
-            // Filter both tables
-            if (tables.dtBelum) {
-                if (val === '') {
-                    tables.dtBelum.column('.col-sub-dept').search('').draw();
-                } else {
-                    tables.dtBelum.column('.col-sub-dept').search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
-                }
-            }
-            if (tables.dtDitemukan) {
-                if (val === '') {
-                    tables.dtDitemukan.column('.col-sub-dept').search('').draw();
-                } else {
-                    tables.dtDitemukan.column('.col-sub-dept').search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
-                }
-            }
-
-            // Dynamically update stats
-            updateStats();
-        });
-
-        // Trigger initial department filter for Admin/GA
-        const initialDept = $('.custom-dept-filter').val();
-        if (initialDept !== undefined) {
-            $('.custom-dept-filter').first().trigger('change');
-        } else {
-            updateStats();
-        }
+        // Trigger initial stats calculation
+        updateFilteredStats();
 
         // Recalculate column widths when switching tabs
         $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function () {
@@ -690,7 +707,7 @@
         // Function to toggle inputs when kondisi is 'Tidak Teridentifikasi'
         function handleKondisiChange() {
             const kondisi = $('#so_kondisi').val();
-            const isUnidentified = kondisi === 'Tidak Teridentifikasi' || kondisi === 'Hilang';
+            const isUnidentified = kondisi === 'Tidak Teridentifikasi';
             
             const soLokasi = $('#so_lokasi');
             const soFoto = $('#so_foto');
@@ -718,7 +735,7 @@
         $('#so_kondisi').on('change', handleKondisiChange);
 
         // Handle Cek Manual Button click
-        $(document).on('click', '.btn-cek-manual', function() {
+        $('.btn-cek-manual').on('click', function() {
             const asetId = $(this).data('aset-id');
             const asetNomor = $(this).data('aset-nomor');
             const asetNama = $(this).data('aset-nama');
@@ -758,15 +775,12 @@
                 btnSubmit.innerHTML = originalText;
                 
                 if (result.status === 200 && result.body.success) {
-                    // Close bootstrap modal immediately
-                    $('#stockOpnameModal').modal('hide');
-                    
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil',
                         text: result.body.message,
-                        showConfirmButton: true,
-                        confirmButtonColor: '#253070'
+                        timer: 1500,
+                        showConfirmButton: false
                     }).then(() => {
                         // Reload page to reflect changes
                         window.location.reload();
@@ -775,8 +789,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal',
-                        text: result.body.message || 'Terjadi kesalahan',
-                        confirmButtonColor: '#253070'
+                        text: result.body.message || 'Terjadi kesalahan'
                     });
                 }
             })
@@ -784,12 +797,7 @@
                 console.error(error);
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = originalText;
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan sistem.',
-                    confirmButtonColor: '#253070'
-                });
+                Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
             });
         });
     });
