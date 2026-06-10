@@ -422,6 +422,11 @@
     transition: all .2s ease;
     white-space: nowrap;
 }
+@media (max-width: 768px) {
+    .page-stock-opname-user-show .scanner-btn {
+        width: 100%;
+    }
+}
 .page-stock-opname-user-show .scanner-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37,48,112,.25); color: #fff; }
 
 .page-stock-opname-user-show .nav-tabs-pills { border-bottom: 1px solid #eef0f5; gap: .25rem; margin-bottom: 1rem; }

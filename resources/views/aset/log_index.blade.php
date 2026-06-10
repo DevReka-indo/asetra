@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-4">
         <h3 class="fw-bold mb-0">Riwayat Monitoring Aset</h3>
         <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;"> 
             <li class="nav-home d-flex align-items-center">
@@ -39,9 +39,9 @@
                 
                 <div class="row g-2 align-items-end">
                     {{-- Entries --}}
-                    <div class="col-6 col-sm-4 col-md-1">
+                    <div class="col-6 col-sm-auto mb-2 mb-sm-0">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Entries</label>
-                        <select name="per_page" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
+                        <select name="per_page" class="form-select form-select-sm rounded-3 w-100" style="min-width: 75px;" onchange="this.form.submit()">
                             <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                             <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                             <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
@@ -49,17 +49,8 @@
                         </select>
                     </div>
 
-                    {{-- Pencarian --}}
-                    <div class="col-12 col-sm-8 col-md-3">
-                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
-                        <div class="input-group input-group-sm input-group-focus rounded-3">
-                            <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                            <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari nomor atau nama aset..." value="{{ request('search') }}">
-                        </div>
-                    </div>
-
                     {{-- Filter Kondisi --}}
-                    <div class="col-12 col-sm-6 col-md-2">
+                    <div class="col-6 col-sm-auto mb-2 mb-sm-0">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Kondisi Aset</label>
                         <select name="kondisi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Kondisi</option>
@@ -73,7 +64,7 @@
                     </div>
 
                     {{-- Filter Status --}}
-                    <div class="col-12 col-sm-6 col-md-2">
+                    <div class="col-6 col-sm-auto mb-2 mb-sm-0">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Status Aset</label>
                         <select name="status_aset" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Status</option>
@@ -87,7 +78,7 @@
 
                     {{-- Filter Lokasi --}}
                     @if(auth()->user()->role_id_role == 1 || auth()->user()->isBagianUmum())
-                    <div class="col-12 col-sm-6 col-md-2">
+                    <div class="col-6 col-sm-auto mb-2 mb-sm-0">
                         <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Lokasi Aset</label>
                         <select name="lokasi" class="form-select form-select-sm rounded-3 w-100" onchange="this.form.submit()">
                             <option value="">Semua Lokasi</option>
@@ -97,6 +88,15 @@
                         </select>
                     </div>
                     @endif
+
+                    {{-- Pencarian --}}
+                    <div class="col-12 col-sm-4 col-md-3 mb-2 mb-sm-0 ms-sm-auto">
+                        <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem;">Pencarian</label>
+                        <div class="input-group input-group-sm input-group-focus rounded-3">
+                            <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
+                            <input type="text" name="search" class="form-control border-0 shadow-none bg-transparent" placeholder="Cari nomor atau nama aset..." value="{{ request('search') }}">
+                        </div>
+                    </div>
                 </div>
 
             </form>
@@ -109,10 +109,11 @@
                 $sortBy = request('sort_by', 'created_at');
                 $orderBy = request('order_by', 'desc');
             @endphp
+            <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">No</th>
+                            <th class="ps-4 d-none d-md-table-cell">No</th>
                             <th>
                                 <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'tanggal_cek', 'order_by' => ($sortBy == 'tanggal_cek' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
                                     Tanggal Pengecekan
@@ -140,7 +141,7 @@
                                     </span>
                                 </a>
                             </th>
-                            <th>
+                            <th class="d-none d-md-table-cell">
                                 <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'nama_lokasi', 'order_by' => ($sortBy == 'nama_lokasi' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
                                     Lokasi & Penempatan
                                     <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
@@ -149,7 +150,7 @@
                                     </span>
                                 </a>
                             </th>
-                            <th>
+                            <th class="d-none d-lg-table-cell">
                                 <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'dicatat_oleh_name', 'order_by' => ($sortBy == 'dicatat_oleh_name' && $orderBy == 'asc') ? 'desc' : 'asc']) }}" class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
                                     Pelapor
                                     <span class="d-inline-block position-relative ms-2" style="width: 20px; height: 18px; vertical-align: middle;">
@@ -158,14 +159,14 @@
                                     </span>
                                 </a>
                             </th>
-                            <th>Catatan & Perubahan</th>
+                            <th class="d-none d-md-table-cell">Catatan & Perubahan</th>
                             <th class="text-center pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($logs as $index => $log)
                         <tr>
-                            <td class="ps-4 text-muted">{{ $logs->firstItem() + $index }}</td>
+                            <td class="ps-4 text-muted d-none d-md-table-cell">{{ $logs->firstItem() + $index }}</td>
                             <td>
                                 <span class="fw-semibold text-dark">{{ \Carbon\Carbon::parse($log->tanggal_cek)->format('d M Y') }}</span><br>
                                 <small class="text-muted">{{ $log->created_at->format('H:i') }} WIB</small>
@@ -189,9 +190,9 @@
                                 
                                 @if($log->status_aset)
                                     <small class="d-block mt-1 text-muted"><i class="fas fa-tag me-1 text-secondary"></i>{{ $log->status_aset }}</small>
-                                @endif
+                                  @endif
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 @if($log->lokasi || $log->organisasi_terikat !== 'Tanpa Organisasi')
                                     <small class="d-block text-dark fw-bold"><i class="fas fa-map-marker-alt text-danger me-1"></i>{{ $log->lokasi->nama_lokasi ?? '-' }}</small>
                                     <small class="d-block text-muted"><i class="fas fa-sitemap text-secondary me-1"></i>{{ $log->organisasi_terikat }}</small>
@@ -199,12 +200,12 @@
                                     -
                                 @endif
                             </td>
-                            <td>
+                            <td class="d-none d-lg-table-cell">
                                 <span class="badge bg-primary rounded-pill px-3">
                                     {{ $log->dicatatOleh->firstname ?? 'System' }} {{ $log->dicatatOleh->lastname ?? '' }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 @if($log->flag_perubahan == 'Pengecekan Rutin')
                                     <span class="badge bg-light text-success border border-success rounded-pill px-2 py-1 mb-1" style="font-weight: 500; font-size: 0.7rem;"><i class="fas fa-check-circle me-1"></i>Pengecekan Rutin</span>
                                 @elseif($log->flag_perubahan)
@@ -240,11 +241,11 @@
             </div>
             
             {{-- Pagination --}}
-            <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top bg-light">
-                <div class="text-muted small">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 px-4 py-3 border-top bg-light">
+                <div class="text-muted small text-center text-md-start">
                     Menampilkan {{ $logs->firstItem() ?? 0 }} sampai {{ $logs->lastItem() ?? 0 }} dari {{ $logs->total() }} catatan
                 </div>
-                <div>
+                <div class="d-flex justify-content-center">
                     {{ $logs->appends(request()->query())->links('pagination::bootstrap-5') }}
                 </div>
             </div>
