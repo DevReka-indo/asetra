@@ -137,7 +137,7 @@
             <h6 class="fw-bold mb-1 text-dark">Mulai Pindai Aset</h6>
             <p class="mb-0 small text-muted">Buka scanner untuk memindai QR code aset, atau gunakan "Cek Manual" jika label sulit dipindai.</p>
         </div>
-        <a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="scanner-btn d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
+        <a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="scanner-btn d-inline-flex align-items-center justify-content-center gap-2">
             <i class="fas fa-camera"></i> Buka Scanner
         </a>
     </div>
@@ -188,14 +188,19 @@
                             </div>
                             {{-- Filter Departemen (Only for Admin/GA) --}}
                             @if($isAdmin)
-                            @php
-                                $userResolvedDivisi = auth()->user()->divisi->nm_divisi ?? (auth()->user()->department->divisi->nm_divisi ?? (auth()->user()->section->department->divisi->nm_divisi ?? (auth()->user()->unit->section->department->divisi->nm_divisi ?? '')));
-                            @endphp
                             <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
                                 <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtBelum">
                                     <option value="">-- Semua Divisi --</option>
                                     @foreach($availableDivisis as $divisiName)
-                                        <option value="{{ $divisiName }}" {{ $userResolvedDivisi == $divisiName ? 'selected' : '' }}>{{ $divisiName }}</option>
+                                        <option value="{{ $divisiName }}">{{ $divisiName }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
+                                <select class="form-select form-select-sm rounded-3 custom-sub-dept-filter" data-table="dtBelum">
+                                    <option value="">-- Semua Departemen --</option>
+                                    @foreach($availableDepartments as $deptName)
+                                        <option value="{{ $deptName }}">{{ $deptName }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -219,6 +224,7 @@
                                         <th>Lokasi Terakhir</th>
                                         @if($isAdmin)
                                             <th class="col-dept d-none d-lg-table-cell">Divisi</th>
+                                            <th class="col-sub-dept d-none d-lg-table-cell">Departemen</th>
                                         @endif
                                         <th>Kondisi</th>
                                         <th class="text-center">Aksi</th>
@@ -246,6 +252,7 @@
                                             </td>
                                             @if($isAdmin)
                                                 <td class="col-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $aset->resolved_divisi_name }}</span></td>
+                                                <td class="col-sub-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $aset->resolved_department_name }}</span></td>
                                             @endif
                                             <td>
                                                 @php
@@ -310,14 +317,19 @@
                             </div>
                             {{-- Filter Divisi (Only for Admin/GA) --}}
                             @if($isAdmin)
-                            @php
-                                $userResolvedDivisi = auth()->user()->divisi->nm_divisi ?? (auth()->user()->department->divisi->nm_divisi ?? (auth()->user()->section->department->divisi->nm_divisi ?? (auth()->user()->unit->section->department->divisi->nm_divisi ?? '')));
-                            @endphp
                             <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
                                 <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtDitemukan">
                                     <option value="">-- Semua Divisi --</option>
                                     @foreach($availableDivisis as $divisiName)
-                                        <option value="{{ $divisiName }}" {{ $userResolvedDivisi == $divisiName ? 'selected' : '' }}>{{ $divisiName }}</option>
+                                        <option value="{{ $divisiName }}">{{ $divisiName }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
+                                <select class="form-select form-select-sm rounded-3 custom-sub-dept-filter" data-table="dtDitemukan">
+                                    <option value="">-- Semua Departemen --</option>
+                                    @foreach($availableDepartments as $deptName)
+                                        <option value="{{ $deptName }}">{{ $deptName }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -340,6 +352,7 @@
                                         <th>Lokasi Temuan</th>
                                         @if($isAdmin)
                                             <th class="col-dept d-none d-lg-table-cell">Divisi</th>
+                                            <th class="col-sub-dept d-none d-lg-table-cell">Departemen</th>
                                         @endif
                                         <th>Foto</th>
                                         <th class="d-none d-md-table-cell">Dicek Oleh</th>
@@ -415,6 +428,7 @@
                                             </td>
                                             @if($isAdmin)
                                                 <td class="col-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $detail->aset->resolved_divisi_name ?? '-' }}</span></td>
+                                                <td class="col-sub-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $detail->aset->resolved_department_name ?? '-' }}</span></td>
                                             @endif
                                             <td>
                                                 @if($detail->foto_temuan)
@@ -534,6 +548,12 @@
             }
         });
 
+        dtBelum.on('order.dt search.dt', function () {
+            dtBelum.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
+                cell.innerHTML = i + 1;
+            });
+        }).draw();
+
         var dtDitemukan = $('#tableDitemukan').DataTable({
             "pageLength": 10,
             "order": [],
@@ -562,6 +582,7 @@
             const dtInstance = tables[tableName];
             if (dtInstance) {
                 dtInstance.page.len(parseInt($(this).val())).draw();
+                updateStats();
             }
         });
 
@@ -570,23 +591,13 @@
             const dtInstance = tables[tableName];
             if (dtInstance) {
                 dtInstance.search($(this).val()).draw();
+                updateStats();
             }
         });
 
-        function updateStatsForDept(selectedDept) {
-            let countBelum = 0;
-            let countTelah = 0;
-
-            const trBelum = tables.dtBelum ? $(tables.dtBelum.rows().nodes()) : $();
-            const trTelah = tables.dtDitemukan ? $(tables.dtDitemukan.rows().nodes()) : $();
-
-            if (selectedDept === '') {
-                countBelum = trBelum.filter('[data-dept]').length;
-                countTelah = trTelah.filter('[data-dept]').length;
-            } else {
-                countBelum = trBelum.filter(`[data-dept="${selectedDept}"]`).length;
-                countTelah = trTelah.filter(`[data-dept="${selectedDept}"]`).length;
-            }
+        function updateStats() {
+            const countBelum = tables.dtBelum ? tables.dtBelum.rows({ search: 'applied' }).count() : 0;
+            const countTelah = tables.dtDitemukan ? tables.dtDitemukan.rows({ search: 'applied' }).count() : 0;
 
             const total = countBelum + countTelah;
             const progressPercent = total > 0 ? Math.round((countTelah / total) * 100) : 0;
@@ -633,14 +644,42 @@
                 }
             }
 
-            // Dynamically update stats based on selected department
-            updateStatsForDept(val);
+            // Dynamically update stats
+            updateStats();
+        });
+
+        $('.custom-sub-dept-filter').on('change', function() {
+            const val = $(this).val();
+            
+            // Sync all department select filters
+            $('.custom-sub-dept-filter').val(val);
+
+            // Filter both tables
+            if (tables.dtBelum) {
+                if (val === '') {
+                    tables.dtBelum.column('.col-sub-dept').search('').draw();
+                } else {
+                    tables.dtBelum.column('.col-sub-dept').search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
+                }
+            }
+            if (tables.dtDitemukan) {
+                if (val === '') {
+                    tables.dtDitemukan.column('.col-sub-dept').search('').draw();
+                } else {
+                    tables.dtDitemukan.column('.col-sub-dept').search('^' + $.fn.dataTable.util.escapeRegex(val) + '$', true, false).draw();
+                }
+            }
+
+            // Dynamically update stats
+            updateStats();
         });
 
         // Trigger initial department filter for Admin/GA
         const initialDept = $('.custom-dept-filter').val();
         if (initialDept !== undefined) {
             $('.custom-dept-filter').first().trigger('change');
+        } else {
+            updateStats();
         }
 
         // Recalculate column widths when switching tabs

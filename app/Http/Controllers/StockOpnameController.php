@@ -283,26 +283,26 @@ class StockOpnameController extends Controller
 
         $lokasis = LokasiAset::oldest()->get();
 
-        // Daftar Divisi unik untuk filter GA/Admin
+        // Daftar Divisi & Departemen unik untuk filter GA/Admin
         $availableDivisis = [];
+        $availableDepartments = [];
         if ($isAdmin) {
-            $availableDivisis = DataAset::with([
-                'department',
-                'section.department',
-                'unit.section.department',
-                'unit.department',
-                'divisi',
-                'director'
-            ])
-            ->get()
-            ->map(fn($a) => $a->resolved_divisi_name)
-            ->unique()
-            ->filter()
-            ->values()
-            ->toArray();
+            $availableDivisis = \App\Models\Divisi::orderBy('nm_divisi')
+                ->pluck('nm_divisi')
+                ->unique()
+                ->filter()
+                ->values()
+                ->toArray();
+
+            $availableDepartments = \App\Models\Department::orderBy('name_department')
+                ->pluck('name_department')
+                ->unique()
+                ->filter()
+                ->values()
+                ->toArray();
         }
 
-        return view('stock-opname.user-show', compact('session', 'telahDicek', 'belumDicek', 'lokasis', 'availableDivisis', 'isAdmin'));
+        return view('stock-opname.user-show', compact('session', 'telahDicek', 'belumDicek', 'lokasis', 'availableDivisis', 'availableDepartments', 'isAdmin'));
     }
 
     /**

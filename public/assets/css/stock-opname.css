@@ -664,3 +664,29 @@
     outline: 0 !important;
     box-shadow: 0 0 0 0.2rem rgba(37,48,112,.15) !important;
 }
+
+/* GENERAL DATATABLES RESPONSIVE OVERRIDES */
+.page-stock-opname-index .dataTables_info,
+.page-stock-opname-user-show .dataTables_info {
+    white-space: normal !important;
+    font-size: 0.78rem !important;
+    color: #8a94a6 !important;
+    line-height: 1.4 !important;
+}
+
+@media (max-width: 576px) {
+    .page-stock-opname-index .dataTables_wrapper .dataTables_info,
+    .page-stock-opname-user-show .dataTables_wrapper .dataTables_info {
+        text-align: center !important;
+        margin-bottom: 0.75rem !important;
+        float: none !important;
+        display: block !important;
+    }
+    .page-stock-opname-index .dataTables_wrapper .dataTables_paginate,
+    .page-stock-opname-user-show .dataTables_wrapper .dataTables_paginate {
+        text-align: center !important;
+        float: none !important;
+        display: flex !important;
+        justify-content: center !important;
+    }
+}
