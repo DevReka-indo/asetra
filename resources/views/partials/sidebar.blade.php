@@ -298,6 +298,11 @@
                     <div class="collapse {{ request()->is('pemulihan*') ? 'show' : '' }}"
                         id="pemulihanDrop">
                         <ul class="nav nav-collapse" style="margin-top: 0; padding-bottom: 10px;">
+                            <li class="{{ request()->routeIs('pemulihan.lokasi-aset') ? 'active' : '' }}">
+                                <a href="{{ route('pemulihan.lokasi-aset') }}">
+                                    <span class="sub-item">Lokasi Aset</span>
+                                </a>
+                            </li>
                             <li class="{{ request()->routeIs('pemulihan.jenis-kategori') ? 'active' : '' }}">
                                 <a href="{{ route('pemulihan.jenis-kategori') }}">
                                     <span class="sub-item">Jenis Kategori</span>
@@ -313,11 +318,7 @@
                                     <span class="sub-item">Data Aset</span>
                                 </a>
                             </li>
-                            <li class="{{ request()->routeIs('pemulihan.lokasi-aset') ? 'active' : '' }}">
-                                <a href="{{ route('pemulihan.lokasi-aset') }}">
-                                    <span class="sub-item">Lokasi Aset</span>
-                                </a>
-                            </li>
+                            
                         </ul>
                     </div>
                 </li>

@@ -6,8 +6,7 @@
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
         <h3 class="fw-bold mb-0">Pemulihan Data Aset</h3>
-        <p class="text-muted small">Data di bawah ini adalah aset yang telah dihapus. Anda dapat memulihkannya atau menghapusnya secara permanen.</p>
-    </div>
+       
 
     {{-- FILTER --}}
     <div class="card shadow-sm border-0 mb-4">

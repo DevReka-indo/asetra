@@ -6,7 +6,7 @@
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
         <h3 class="fw-bold mb-0">Pemulihan Jenis Kategori</h3>
-        <p class="text-muted small">Data di bawah ini adalah Jenis Kategori yang telah dihapus. Anda dapat memulihkannya atau menghapusnya secara permanen.</p>
+        
     </div>
 
     {{-- FILTER --}}
@@ -53,8 +53,8 @@
                         @forelse ($data as $i => $item)
                             <tr>
                                 <td class="text-center">{{ $data->firstItem() + $i }}</td>
-                                <td class="fw-semibold">{{ $item->nama_jenis }}</td>
-                                <td class="fw-bold text-primary fs-5">{{ $item->kode_awalan }}</td>
+                                <td>{{ $item->nama_jenis }}</td>
+                                <td class="fw-bold text-primary">{{ $item->kode_awalan }}</td>
                                 <td>{{ $item->deleted_at ? $item->deleted_at->format('d/m/Y H:i') : '-' }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center align-items-center gap-2">

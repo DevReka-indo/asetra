@@ -6,7 +6,7 @@
 <div class="container-fluid px-1 py-0 mt-0">
     <div class="mb-4">
         <h3 class="fw-bold mb-0">Pemulihan Kategori Aset</h3>
-        <p class="text-muted small">Data di bawah ini adalah data klasifikasi yang telah dihapus. Anda dapat memulihkannya atau menghapusnya secara permanen.</p>
+       
     </div>
 
     {{-- FILTER --}}
@@ -45,7 +45,7 @@
                             <th width="60" class="text-center">No</th>
                             <th>Nama Kategori</th>
                             <th>Kode</th>
-                            <th class="text-center">Tipe</th>
+                            <th class="text-center">Jenis Kategori</th>
                             <th>Tgl Dihapus</th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
