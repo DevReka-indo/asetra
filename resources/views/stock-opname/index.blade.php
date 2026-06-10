@@ -10,9 +10,9 @@
 <div class="container-fluid px-1 py-0 mt-0 page-stock-opname-index">
 
     {{-- HEADER --}}
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
         <h3 class="fw-bold mb-0">Manajemen Stock Opname</h3>
-        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+        <ul class="breadcrumbs d-flex flex-wrap align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
                 <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
@@ -118,23 +118,24 @@
         </div>
         <div class="card-body px-4 pt-3 pb-4">
             {{-- Custom Filter Toolbar to match Kelola Pages --}}
-            <div class="row g-2 align-items-end mb-3">
+            <div class="row g-2 align-items-center mb-3">
                 {{-- Entries --}}
-                <div style="width: 100px;">
-                    <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Entries</label>
-                    <select class="form-select form-select-sm rounded-3 custom-entries-select">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                <div class="col-6 col-sm-auto mb-2 mb-sm-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-0" style="font-size: 0.7rem; white-space: nowrap;">Entries</label>
+                        <select class="form-select form-select-sm rounded-3 custom-entries-select" style="width: 75px;">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
                 {{-- Pencarian --}}
-                <div class="col-md-3 ms-auto">
-                    <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Pencarian</label>
+                <div class="col-12 col-sm-4 col-md-3 ms-sm-auto mb-2 mb-sm-0">
                     <div class="input-group input-group-sm input-group-focus rounded-3" style="border: 1px solid #ced4da; background: #fff;">
                         <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" placeholder="Cari periode...">
+                        <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" placeholder="Cari...">
                     </div>
                 </div>
             </div>
@@ -143,11 +144,11 @@
                 <table class="table table-hover align-middle mb-0" id="stockOpnameTable">
                     <thead class="table-light">
                         <tr>
-                            <th width="5%" class="text-center">No</th>
+                            <th width="5%" class="text-center d-none d-md-table-cell">No</th>
                             <th>Periode</th>
                             <th>Tanggal Pelaksanaan</th>
-                            <th>Keterangan</th>
-                            <th>Dibuat Oleh</th>
+                            <th class="d-none d-lg-table-cell">Keterangan</th>
+                            <th class="d-none d-md-table-cell">Dibuat Oleh</th>
                             <th class="text-center">Status</th>
                             <th width="13%" class="text-center">Aksi</th>
                         </tr>
@@ -160,7 +161,7 @@
                                 $durasi = $start->diffInDays($end) + 1;
                             @endphp
                             <tr>
-                                <td class="text-center text-muted">{{ $loop->iteration }}</td>
+                                <td class="text-center text-muted d-none d-md-table-cell">{{ $loop->iteration }}</td>
                                 <td>
                                     <div class="so-period-name">
                                         <i class="fas fa-calendar-check me-1 text-primary"></i> {{ $session->periode }}
@@ -177,10 +178,10 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="d-none d-lg-table-cell">
                                     <span class="text-muted">{{ \Illuminate\Support\Str::limit($session->keterangan ?: '—', 50) }}</span>
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="so-stat-ico" style="width:34px;height:34px;background:rgba(37,48,112,.08);color:#253070;font-size:.8rem;">
                                             {{ strtoupper(substr($session->createdBy->firstname ?? 'X', 0, 1)) }}

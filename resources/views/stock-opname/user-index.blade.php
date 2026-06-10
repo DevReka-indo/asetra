@@ -9,9 +9,9 @@
 @section('content')
 <div class="container-fluid px-1 py-0 mt-0 page-stock-opname-user-index">
     {{-- Breadcrumb --}}
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
         <h3 class="fw-bold mb-0">Pelaksanaan Stock Opname</h3>
-        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+        <ul class="breadcrumbs d-flex flex-wrap align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
                 <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
@@ -60,10 +60,9 @@
             <div class="row g-3">
                 @forelse($sessions as $session)
                     @php
-                        $start = \Carbon\Carbon::parse($session->tanggal_mulai);
-                        $end = \Carbon\Carbon::parse($session->tanggal_berakhir);
-                        $today = now();
-                        $sisaHari = $today->lessThan($end) ? $today->startOfDay()->diffInDays($end->startOfDay()) : 0;
+                        $start = \Carbon\Carbon::parse($session->tanggal_mulai)->startOfDay();
+                        $end = \Carbon\Carbon::parse($session->tanggal_berakhir)->startOfDay();
+                        $today = now()->startOfDay();
                         $durasi = $start->diffInDays($end) + 1;
                     @endphp
                     <div class="col-md-6">
@@ -84,10 +83,14 @@
                                 </div>
                                 <div class="meta-row">
                                     <i class="far fa-hourglass"></i>
-                                    @if($sisaHari > 0)
+                                    @if($today->lt($end))
+                                        @php $sisaHari = $today->diffInDays($end); @endphp
                                         <span>Sisa <strong class="text-success">{{ $sisaHari }} hari</strong> lagi</span>
-                                    @else
+                                    @elseif($today->eq($end))
                                         <span class="text-warning fw-semibold">Hari terakhir!</span>
+                                    @else
+                                        @php $overdueHari = $end->diffInDays($today); @endphp
+                                        <span class="text-danger fw-semibold">Terlewat {{ $overdueHari }} hari!</span>
                                     @endif
                                 </div>
                                 <div class="meta-row mb-3">

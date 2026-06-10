@@ -10,9 +10,9 @@
 <div class="container-fluid px-1 py-0 mt-0 page-stock-opname-show">
 
     {{-- Breadcrumb --}}
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
         <h3 class="fw-bold mb-0">Detail Stock Opname</h3>
-        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+        <ul class="breadcrumbs d-flex flex-wrap align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
                 <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
@@ -355,21 +355,21 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light sticky-top" style="z-index: 10;">
                             <tr>
-                                <th style="width:5%;">No</th>
+                                <th style="width:5%;" class="d-none d-sm-table-cell">No</th>
                                 <th>Nomor Aset</th>
                                 <th>Nama Aset</th>
                                 <th>Lokasi Sistem</th>
-                                <th>Divisi</th>
+                                <th class="d-none d-md-table-cell">Divisi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($belumDicek as $aset)
                                 <tr data-number="{{ $aset->nomor_aset }}" data-name="{{ $aset->nama_aset }}" data-dept="{{ $aset->resolved_divisi_name }}">
-                                    <td class="row-number">{{ $loop->iteration }}</td>
+                                    <td class="row-number d-none d-sm-table-cell">{{ $loop->iteration }}</td>
                                     <td class="fw-bold text-dark">{{ $aset->nomor_aset }}</td>
                                     <td>{{ $aset->nama_aset }}</td>
                                     <td><i class="fas fa-map-marker-alt text-muted me-1"></i> {{ $aset->lokasi->nama_lokasi ?? '-' }}</td>
-                                    <td>{{ $aset->resolved_divisi_name }}</td>
+                                    <td class="d-none d-md-table-cell">{{ $aset->resolved_divisi_name }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

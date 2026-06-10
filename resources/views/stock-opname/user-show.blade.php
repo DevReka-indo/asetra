@@ -11,9 +11,9 @@
 
     {{-- BREADCRUMB --}}
     {{-- HEADER --}}
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
         <h3 class="fw-bold mb-0">Pelaksanaan Stock Opname</h3>
-        <ul class="breadcrumbs d-flex align-items-center p-0 m-0" style="list-style: none;">
+        <ul class="breadcrumbs d-flex flex-wrap align-items-center p-0 m-0" style="list-style: none;">
             <li class="nav-home d-flex align-items-center">
                 <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none d-flex align-items-center">
                     <i class="fas fa-home me-2" style="font-size: 15px;"></i>
@@ -72,7 +72,7 @@
             <div class="col-md-5">
                 <div class="d-flex align-items-center justify-content-md-end gap-3">
                     <div class="progress-ring">
-                        <svg width="120" height="120">
+                        <svg viewBox="0 0 120 120">
                             <circle cx="60" cy="60" r="50" class="ring-track"></circle>
                             <circle cx="60" cy="60" r="50" class="ring-bar hero-progress-circle"
                                 stroke-dasharray="{{ $circumference }}"
@@ -137,7 +137,7 @@
             <h6 class="fw-bold mb-1 text-dark">Mulai Pindai Aset</h6>
             <p class="mb-0 small text-muted">Buka scanner untuk memindai QR code aset, atau gunakan "Cek Manual" jika label sulit dipindai.</p>
         </div>
-        <a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="scanner-btn d-none d-md-inline-flex align-items-center gap-2">
+        <a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="scanner-btn d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto">
             <i class="fas fa-camera"></i> Buka Scanner
         </a>
     </div>
@@ -173,24 +173,25 @@
                         </div>
                     @else
                         {{-- Custom Filter Toolbar to match Kelola Pages --}}
-                        <div class="row g-2 align-items-end mb-3">
+                        <div class="row g-2 align-items-center mb-3">
                             {{-- Entries --}}
-                            <div style="width: 100px;">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Entries</label>
-                                <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtBelum">
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
+                            <div class="col-6 col-sm-auto mb-2 mb-sm-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="form-label fw-bold small text-muted text-uppercase mb-0" style="font-size: 0.7rem; white-space: nowrap;">Entries</label>
+                                    <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtBelum" style="width: 75px;">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
                             </div>
                             {{-- Filter Departemen (Only for Admin/GA) --}}
                             @if($isAdmin)
                             @php
                                 $userResolvedDivisi = auth()->user()->divisi->nm_divisi ?? (auth()->user()->department->divisi->nm_divisi ?? (auth()->user()->section->department->divisi->nm_divisi ?? (auth()->user()->unit->section->department->divisi->nm_divisi ?? '')));
                             @endphp
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Divisi</label>
+                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
                                 <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtBelum">
                                     <option value="">-- Semua Divisi --</option>
                                     @foreach($availableDivisis as $divisiName)
@@ -200,11 +201,10 @@
                             </div>
                             @endif
                             {{-- Pencarian --}}
-                            <div class="col-md-3 ms-auto">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Pencarian</label>
+                            <div class="col-12 col-sm-4 col-md-3 ms-sm-auto mb-2 mb-sm-0">
                                 <div class="input-group input-group-sm input-group-focus rounded-3" style="border: 1px solid #ced4da; background: #fff;">
                                     <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtBelum" placeholder="Cari nomor atau nama...">
+                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtBelum" placeholder="Cari...">
                                 </div>
                             </div>
                         </div>
@@ -213,12 +213,12 @@
                             <table class="table data-table mb-0" id="tableBelum">
                                 <thead class="table-light">
                                     <tr>
-                                        <th width="5%" class="text-center">No</th>
+                                        <th width="5%" class="text-center d-none d-md-table-cell">No</th>
                                         <th>Aset</th>
-                                        <th>Kategori</th>
+                                        <th class="d-none d-md-table-cell">Kategori</th>
                                         <th>Lokasi Terakhir</th>
                                         @if($isAdmin)
-                                            <th class="col-dept">Divisi</th>
+                                            <th class="col-dept d-none d-lg-table-cell">Divisi</th>
                                         @endif
                                         <th>Kondisi</th>
                                         <th class="text-center">Aksi</th>
@@ -227,7 +227,7 @@
                                 <tbody>
                                     @foreach($belumDicek as $aset)
                                         <tr data-dept="{{ $aset->resolved_divisi_name }}">
-                                            <td class="text-center text-muted">{{ $loop->iteration }}</td>
+                                            <td class="text-center text-muted d-none d-md-table-cell">{{ $loop->iteration }}</td>
                                             <td>
                                                 <div class="aset-cell">
                                                     <div class="aset-thumb"><i class="fas fa-box"></i></div>
@@ -237,7 +237,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 <span class="text-dark small">{{ $aset->kategoriAset->nama ?? '-' }}</span>
                                             </td>
                                             <td>
@@ -245,7 +245,7 @@
                                                 <span class="text-dark small">{{ $aset->lokasi->nama_lokasi ?? '-' }}</span>
                                             </td>
                                             @if($isAdmin)
-                                                <td class="col-dept"><span class="text-dark small">{{ $aset->resolved_divisi_name }}</span></td>
+                                                <td class="col-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $aset->resolved_divisi_name }}</span></td>
                                             @endif
                                             <td>
                                                 @php
@@ -274,7 +274,7 @@
                                                     data-aset-nomor="{{ $aset->nomor_aset }}"
                                                     data-aset-nama="{{ $aset->nama_aset }}"
                                                     title="Input temuan manual untuk aset ini">
-                                                    <i class="fas fa-pen-to-square me-1"></i> Cek Manual
+                                                    <i class="fas fa-pen-to-square me-1"></i> <span class="d-none d-sm-inline">Cek Manual</span>
                                                 </button>
                                             </td>
                                         </tr>
@@ -295,24 +295,25 @@
                         </div>
                     @else
                         {{-- Custom Filter Toolbar to match Kelola Pages --}}
-                        <div class="row g-2 align-items-end mb-3">
+                        <div class="row g-2 align-items-center mb-3">
                             {{-- Entries --}}
-                            <div style="width: 100px;">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Entries</label>
-                                <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtDitemukan">
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
+                            <div class="col-6 col-sm-auto mb-2 mb-sm-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="form-label fw-bold small text-muted text-uppercase mb-0" style="font-size: 0.7rem; white-space: nowrap;">Entries</label>
+                                    <select class="form-select form-select-sm rounded-3 custom-entries-select" data-table="dtDitemukan" style="width: 75px;">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
                             </div>
                             {{-- Filter Divisi (Only for Admin/GA) --}}
                             @if($isAdmin)
                             @php
                                 $userResolvedDivisi = auth()->user()->divisi->nm_divisi ?? (auth()->user()->department->divisi->nm_divisi ?? (auth()->user()->section->department->divisi->nm_divisi ?? (auth()->user()->unit->section->department->divisi->nm_divisi ?? '')));
                             @endphp
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Divisi</label>
+                            <div class="col-6 col-sm-4 col-md-3 mb-2 mb-sm-0">
                                 <select class="form-select form-select-sm rounded-3 custom-dept-filter" data-table="dtDitemukan">
                                     <option value="">-- Semua Divisi --</option>
                                     @foreach($availableDivisis as $divisiName)
@@ -322,11 +323,10 @@
                             </div>
                             @endif
                             {{-- Pencarian --}}
-                            <div class="col-md-3 ms-auto">
-                                <label class="form-label fw-bold small text-muted text-uppercase" style="font-size: 0.7rem; margin-bottom: 0.25rem; display: block;">Pencarian</label>
+                            <div class="col-12 col-sm-4 col-md-3 ms-sm-auto mb-2 mb-sm-0">
                                 <div class="input-group input-group-sm input-group-focus rounded-3" style="border: 1px solid #ced4da; background: #fff;">
                                     <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtDitemukan" placeholder="Cari nomor atau nama...">
+                                    <input type="text" class="form-control border-0 shadow-none bg-transparent custom-search-input" data-table="dtDitemukan" placeholder="Cari...">
                                 </div>
                             </div>
                         </div>
@@ -339,11 +339,11 @@
                                         <th>Kondisi Temuan</th>
                                         <th>Lokasi Temuan</th>
                                         @if($isAdmin)
-                                            <th class="col-dept">Divisi</th>
+                                            <th class="col-dept d-none d-lg-table-cell">Divisi</th>
                                         @endif
                                         <th>Foto</th>
-                                        <th>Dicek Oleh</th>
-                                        <th>Waktu</th>
+                                        <th class="d-none d-md-table-cell">Dicek Oleh</th>
+                                        <th class="d-none d-md-table-cell">Waktu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -414,7 +414,7 @@
                                                 @endif
                                             </td>
                                             @if($isAdmin)
-                                                <td class="col-dept"><span class="text-dark small">{{ $detail->aset->resolved_divisi_name ?? '-' }}</span></td>
+                                                <td class="col-dept d-none d-lg-table-cell"><span class="text-dark small">{{ $detail->aset->resolved_divisi_name ?? '-' }}</span></td>
                                             @endif
                                             <td>
                                                 @if($detail->foto_temuan)
@@ -423,10 +423,10 @@
                                                     <span class="text-muted small"><i class="fas fa-image"></i> -</span>
                                                 @endif
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 <small class="fw-semibold text-dark">{{ $detail->dicekOleh->firstname ?? '-' }} {{ $detail->dicekOleh->lastname ?? '' }}</small>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 <small class="text-muted">
                                                     <i class="far fa-clock me-1"></i>
                                                     {{ \Carbon\Carbon::parse($detail->created_at)->format('d M, H:i') }}
@@ -444,11 +444,6 @@
         </div>
     </div>
 </div>
-
-{{-- Floating Button untuk Mobile --}}
-<a href="{{ route('aset.scanner') }}?mode=opname&session_id={{ $session->id }}" class="floating-scanner-btn d-md-none" title="Buka Scanner">
-    <i class="fas fa-qrcode"></i>
-</a>
 
 <!-- Modal Stock Opname Input -->
 <div class="modal fade" id="stockOpnameModal" tabindex="-1" aria-labelledby="stockOpnameModalLabel" aria-hidden="true" data-bs-backdrop="static">
