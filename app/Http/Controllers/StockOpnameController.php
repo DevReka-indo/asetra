@@ -286,6 +286,15 @@ class StockOpnameController extends Controller
                 $aset = DataAset::find($detail->aset_id);
                 if ($aset) {
                     $aset->status_kondisi = $detail->kondisi_temuan;
+                    if ($detail->kondisi_temuan === 'Hilang') {
+                        $aset->status_aset = 'Hilang';
+                        if ($aset->pic) {
+                            $title = 'Aset Hilang Terdeteksi';
+                            $message = "Aset {$aset->nama_aset} ({$aset->nomor_aset}) terdeteksi Hilang selama Stock Opname periode {$session->periode}. Harap lakukan pencarian fisik.";
+                            $url = route('aset.show', $aset->id);
+                            $aset->pic->notify(new SystemNotification($title, $message, $url, 'stock_opname'));
+                        }
+                    }
                     // Note: lokasi_temuan dari input staff bisa berbentuk string bebas atau ID lokasi
                     // Meminta ID lokasi saat scan agar mudah disinkronkan
                     if (is_numeric($detail->lokasi_temuan)) {
@@ -419,7 +428,7 @@ class StockOpnameController extends Controller
             'stock_opname_id' => 'required|exists:stock_opname,id',
             'aset_id' => 'required',
             'kondisi_temuan' => 'required|string',
-            'lokasi_temuan' => 'required_unless:kondisi_temuan,Tidak Teridentifikasi,Hilang|nullable|string',
+            'lokasi_temuan' => 'required_unless:kondisi_temuan,Hilang|nullable|string',
             'foto_temuan' => 'nullable|image|mimes:jpeg,png,jpg|max:4096'
         ]);
 

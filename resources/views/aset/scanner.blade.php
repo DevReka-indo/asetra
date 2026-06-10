@@ -236,9 +236,9 @@
 
         function handleKondisiChange() {
             if (!soKondisi) return;
-            const isUnidentified = soKondisi.value === 'Tidak Teridentifikasi' || soKondisi.value === 'Hilang';
+            const isLost = soKondisi.value === 'Hilang';
             
-            if (isUnidentified) {
+            if (isLost) {
                 // Disable and remove required
                 soLokasi.disabled = true;
                 soLokasi.required = false;

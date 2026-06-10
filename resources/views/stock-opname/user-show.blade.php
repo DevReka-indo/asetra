@@ -704,15 +704,15 @@
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
         });
 
-        // Function to toggle inputs when kondisi is 'Tidak Teridentifikasi'
+        // Function to toggle inputs when kondisi is 'Hilang'
         function handleKondisiChange() {
             const kondisi = $('#so_kondisi').val();
-            const isUnidentified = kondisi === 'Tidak Teridentifikasi';
+            const isLost = kondisi === 'Hilang';
             
             const soLokasi = $('#so_lokasi');
             const soFoto = $('#so_foto');
             
-            if (isUnidentified) {
+            if (isLost) {
                 // Disable and remove required
                 soLokasi.prop('disabled', true).prop('required', false).val('');
                 soFoto.prop('disabled', true).prop('required', false).val('');
