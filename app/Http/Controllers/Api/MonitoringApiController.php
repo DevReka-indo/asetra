@@ -66,9 +66,9 @@ class MonitoringApiController extends BaseApiController
             'kondisi'         => 'required|string|max:50',
             'status_aset'     => 'nullable|string|max:50',
             'keterangan'      => 'nullable|string',
-            'lokasi_id'       => 'nullable|exists:lokasi_aset,lokasi_id',
+            'lokasi_id'       => 'required_if:kondisi,Tidak Teridentifikasi|nullable|exists:lokasi_aset,lokasi_id',
             'kode_organisasi' => 'nullable|string',
-            'foto_bukti'      => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
+            'foto_bukti'      => 'required_if:kondisi,Tidak Teridentifikasi|nullable|image|mimes:jpeg,png,jpg|max:4096',
         ]);
 
         $logData = [
@@ -97,26 +97,28 @@ class MonitoringApiController extends BaseApiController
             $namaLokasiBaru = $lokasiBaru ? $lokasiBaru->nama_lokasi : '-';
             $perubahan[] = "Lokasi: " . $lokasiLama . " ➔ " . $namaLokasiBaru;
         }
-        if ($request->kode_organisasi && $aset->kode_organisasi != $request->kode_organisasi) {
-            $perubahan[] = "Perpindahan Divisi/Departemen";
-        }
+        if ($request->kondisi !== 'Hilang') {
+            if ($request->kode_organisasi && $aset->kode_organisasi != $request->kode_organisasi) {
+                $perubahan[] = "Perpindahan Divisi/Departemen";
+            }
 
-        if ($request->kode_organisasi) {
-            $parts = explode('_', $request->kode_organisasi);
-            if (count($parts) === 2) {
-                $type = $parts[0];
-                $id = $parts[1];
-                
-                $logData["id_{$type}"] = $id;
+            if ($request->kode_organisasi) {
+                $parts = explode('_', $request->kode_organisasi);
+                if (count($parts) === 2) {
+                    $type = $parts[0];
+                    $id = $parts[1];
+                    
+                    $logData["id_{$type}"] = $id;
 
-                // Reset struktur organisasi sebelumnya
-                $aset->id_director = null;
-                $aset->id_divisi = null;
-                $aset->id_department = null;
-                $aset->id_section = null;
-                $aset->id_unit = null;
+                    // Reset struktur organisasi sebelumnya
+                    $aset->id_director = null;
+                    $aset->id_divisi = null;
+                    $aset->id_department = null;
+                    $aset->id_section = null;
+                    $aset->id_unit = null;
 
-                $aset->{"id_{$type}"} = $id;
+                    $aset->{"id_{$type}"} = $id;
+                }
             }
         }
 
@@ -135,6 +137,9 @@ class MonitoringApiController extends BaseApiController
         // Update DataAset jika ada perubahan
         if ($request->kondisi) $aset->status_kondisi = $request->kondisi;
         if ($request->status_aset) $aset->status_aset = $request->status_aset;
+        if ($request->kondisi === 'Hilang') {
+            $aset->status_aset = 'Hilang';
+        }
         if ($request->lokasi_id) $aset->lokasi_id = $request->lokasi_id;
         $aset->save();
 
