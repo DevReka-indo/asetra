@@ -120,6 +120,9 @@ Route::middleware(['auth', 'ga-admin'])->group(function () {
     Route::get('/aset/template', [DataAsetController::class, 'downloadTemplate'])->name('aset.template');
 });
 
+// Data Aset Publik (QR Code Scan)
+Route::get('/aset/{id}', [DataAsetController::class, 'show'])->name('aset.show');
+
 // All Staff
 Route::middleware(['auth'])->group(function () {
     // Notifications
@@ -130,7 +133,11 @@ Route::middleware(['auth'])->group(function () {
     // Data Aset
     Route::get('/aset', [DataAsetController::class, 'index'])->name('aset.index');
     Route::get('/aset-pic', [DataAsetController::class, 'picIndex'])->name('aset.pic');
-    Route::get('/aset/{id}', [DataAsetController::class, 'show'])->name('aset.show');
+    
+    // Action handler untuk redirect dari QR Scan Publik
+    Route::get('/aset/{id}/action', function(\Illuminate\Http\Request $request, $id) {
+        return redirect()->route('aset.show', $id)->with('open_modal', $request->query('action'));
+    })->name('aset.action');
 
     // Scanner QR Code
     Route::get('/aset-scanner', [DataAsetController::class, 'scanner'])->name('aset.scanner');
