@@ -418,7 +418,7 @@
                                 <option value="Tidak Aktif" {{ $aset->status_aset == 'Tidak Aktif' ? 'selected' : '' }}>⚪ Tidak Aktif</option>
                                 <option value="Dalam Perbaikan" {{ $aset->status_aset == 'Dalam Perbaikan' ? 'selected' : '' }}>🛠️ Dalam Perbaikan</option>
                                 <option value="Dipinjam" {{ $aset->status_aset == 'Dipinjam' ? 'selected' : '' }}>🔁 Dipinjam</option>
-                                <option value="Hilang" {{ $aset->status_aset == 'Hilang' ? 'selected' : '' }}>❓ Hilang</option>
+                                <option value="Hilang" {{ $aset->status_aset == 'Hilang' ? 'selected' : '' }}>❌ Hilang</option>
                             </select>
                         </div>
 
@@ -632,6 +632,74 @@
                     dropdownParent: dropdownParent,
                     placeholder: $select.data('placeholder') || 'Cari struktur organisasi'
                 });
+            });
+        }
+
+        // Handle dynamic fields in modalMonitoring
+        if (window.jQuery) {
+            const $modalMon = $('#modalMonitoring');
+            const $kondisiSelect = $modalMon.find('[name="kondisi"]');
+            const $statusSelect = $modalMon.find('[name="status_aset"]');
+            const $lokasiSelect = $modalMon.find('[name="lokasi_id"]');
+            const $fotoInput = $modalMon.find('[name="foto_bukti"]');
+            const $orgSelect = $modalMon.find('[name="kode_organisasi"]');
+
+            function handleMonKondisiChange() {
+                const kondisi = $kondisiSelect.val();
+                const isLost = kondisi === 'Hilang';
+                const isUnidentified = kondisi === 'Tidak Teridentifikasi';
+
+                if (isLost) {
+                    $statusSelect.val('Hilang').prop('disabled', true);
+                    $lokasiSelect.val('').prop('disabled', true).prop('required', false);
+                    $fotoInput.val('').prop('disabled', true).prop('required', false);
+                    $orgSelect.val('').prop('disabled', true).trigger('change');
+
+                    // Add hidden input to submit status_aset because disabled inputs aren't submitted
+                    if ($modalMon.find('#mon_status_hidden').length === 0) {
+                        $modalMon.find('form').append('<input type="hidden" id="mon_status_hidden" name="status_aset" value="Hilang">');
+                    }
+                    
+                    // Hide asterisks from lokasi and foto label
+                    $lokasiSelect.closest('.col-md-6').find('.text-danger').addClass('d-none');
+                    $fotoInput.closest('.col-12').find('.text-danger').addClass('d-none');
+                } else {
+                    $statusSelect.prop('disabled', false);
+                    $orgSelect.prop('disabled', false).trigger('change');
+                    $modalMon.find('#mon_status_hidden').remove();
+
+                    if (isUnidentified) {
+                        $lokasiSelect.prop('disabled', false).prop('required', true);
+                        $fotoInput.prop('disabled', false).prop('required', true);
+
+                        // Ensure red asterisks are shown/added
+                        const $lokLabel = $lokasiSelect.closest('.col-md-6').find('label');
+                        if ($lokLabel.find('.text-danger').length === 0) {
+                            $lokLabel.append(' <span class="text-danger">*</span>');
+                        } else {
+                            $lokLabel.find('.text-danger').removeClass('d-none');
+                        }
+
+                        const $fotoLabel = $fotoInput.closest('.col-12').find('label');
+                        if ($fotoLabel.find('.text-danger').length === 0) {
+                            $fotoLabel.append(' <span class="text-danger">*</span>');
+                        } else {
+                            $fotoLabel.find('.text-danger').removeClass('d-none');
+                        }
+                    } else {
+                        $lokasiSelect.prop('disabled', false).prop('required', false);
+                        $fotoInput.prop('disabled', false).prop('required', false);
+
+                        // Hide asterisks
+                        $lokasiSelect.closest('.col-md-6').find('.text-danger').addClass('d-none');
+                        $fotoInput.closest('.col-12').find('.text-danger').addClass('d-none');
+                    }
+                }
+            }
+
+            $kondisiSelect.on('change', handleMonKondisiChange);
+            $modalMon.on('shown.bs.modal', function () {
+                handleMonKondisiChange();
             });
         }
 
