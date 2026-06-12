@@ -63,31 +63,6 @@ class StockOpnameReminderCommand extends Command
                     $title = 'Pemberitahuan Stock Opname';
                     $formattedDeadline = $deadline->format('d M Y');
 
-                    // Map users to their unchecked assets to prevent notification spamming
-                    $userAssets = [];
-                    foreach ($uncheckedAsets as $aset) {
-                        $recipientIds = array_filter(array_unique([$aset->pic_id, $aset->penanggung_jawab_id]));
-                        foreach ($recipientIds as $userId) {
-                            if (!isset($userAssets[$userId])) {
-                                $userAssets[$userId] = [];
-                            }
-                            $userAssets[$userId][] = $aset;
-                        }
-                    }
-
-                    // Notify each User/PIC/PJ
-                    foreach ($userAssets as $userId => $assets) {
-                        $user = User::find($userId);
-                        if ($user) {
-                            $count = count($assets);
-                            $message = "Anda memiliki {$count} aset yang belum dilakukan stock opname. Batas akhir {$daysLeft} hari lagi ({$formattedDeadline}).";
-                            $url = route('stock-opname.user-show', $opname->id);
-                            
-                            $user->notify(new SystemNotification($title, $message, $url, 'stock_opname'));
-                            $this->info("Notified User ID: {$userId} for {$count} unchecked assets.");
-                        }
-                    }
-
                     // Notify all GA & Superadmins
                     $adminGas = User::where('role_id_role', 1)->get()->merge(
                         User::all()->filter(fn($u) => $u->isGeneralAffairs())

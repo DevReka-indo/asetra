@@ -63,13 +63,15 @@ class StockOpnameController extends Controller
             'status' => 'aktif'
         ]);
 
-        // Notify all active users
-        $users = User::all();
+        // Notify only General Affairs and Superadmins
+        $users = User::where('role_id_role', 1)->get()->merge(
+            User::all()->filter(fn($u) => $u->isGeneralAffairs())
+        )->unique('id');
         $title = 'Jadwal Stock Opname Baru';
         $formattedMulai = \Carbon\Carbon::parse($request->tanggal_mulai)->format('d M');
         $formattedAkhir = \Carbon\Carbon::parse($request->tanggal_berakhir)->format('d M Y');
         $message = "Periode Stock Opname {$request->periode} telah dibuat. Pelaksanaan mulai {$formattedMulai} s/d {$formattedAkhir}.";
-        $url = route('stock-opname.user-index');
+        $url = route('stock-opname.index');
         $type = 'stock_opname';
 
         foreach ($users as $u) {
