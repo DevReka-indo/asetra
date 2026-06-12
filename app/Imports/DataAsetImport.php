@@ -86,7 +86,7 @@ class DataAsetImport implements ToCollection
                                ->first();
                 }
             }
-            $picId = $pic ? $pic->id : auth()->id();
+            $picId = $pic ? $pic->id : null;
 
             // Penanggung Jawab Aset: Indeks 20
             $pjNameOrEmail = isset($cells[20]) ? trim((string) $cells[20]) : '';
@@ -101,7 +101,7 @@ class DataAsetImport implements ToCollection
                                ->first();
                 }
             }
-            $pjId = $pj ? $pj->id : $picId;
+            $pjId = $pj ? $pj->id : null;
 
             // 5. Cari / Buat Lokasi Aset otomatis berdasarkan data Excel
             // Nama Lokasi: Indeks 13, Kode Lokasi: Indeks 14, Detail Lokasi: Indeks 15
