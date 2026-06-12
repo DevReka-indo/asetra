@@ -324,6 +324,10 @@ class DataAsetController extends Controller
             'logAset' => fn($q) => $q->latest('tanggal_cek')->limit(10),
         ])->findOrFail($id);
 
+        if (!auth()->check()) {
+            return view('aset.public_show', compact('aset'));
+        }
+
         $user = auth()->user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 

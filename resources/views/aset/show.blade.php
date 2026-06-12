@@ -83,7 +83,7 @@
 
                             @if($aset->foto->isNotEmpty())
                                 @foreach($aset->foto as $foto)
-                                    <img src="{{ filter_var($foto->path_foto, FILTER_VALIDATE_URL) ? $foto->path_foto : asset('storage/' . $foto->path_foto) }}"
+                                    <img src="{{ Storage::url($foto->path_foto) }}"
                                          class="img-fluid {{ !$loop->last ? 'border-bottom' : 'rounded-bottom' }}"
                                          alt="Foto Aset"
                                          style="cursor: zoom-in;"
@@ -92,12 +92,10 @@
                                          onclick="document.getElementById('previewImage').src=this.src;">
                                 @endforeach
                             @else
-                                @if(!$latestLogPhoto)
-                                    <div class="py-5 bg-light text-muted">
-                                        <i class="fas fa-camera fa-3x mb-2"></i><br>
-                                        Tidak ada foto
-                                    </div>
-                                @endif
+                                <div class="py-5 bg-light text-muted">
+                                    <i class="fas fa-camera fa-3x mb-2"></i><br>
+                                    <span style="font-size: 14px;">Tidak ada foto utama aset</span>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -383,7 +381,7 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-navy text-white text-center d-block position-relative border-0 shadow-sm" style="background-color: #253070;">
                 <h5 class="modal-title fw-bold text-white mb-0" id="modalMonitoringLabel">
-                    <i class="fas fa-clipboard-check me-2"></i> Update Monitoring Log / Kondisi Aset
+                    <i class="fas fa-clipboard-check me-2"></i> Monitoring Aset
                 </h5>
                 <button type="button" class="btn-close btn-close-white position-absolute top-50 translate-middle-y end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -394,7 +392,7 @@
                     {{-- Alert Note --}}
                     <div class="alert alert-info border-info d-flex align-items-center py-2 px-3 mb-4 rounded-3 shadow-sm" role="alert">
                         <i class="fas fa-info-circle fa-lg me-3 text-info"></i>
-                        <span class="small m-0 text-dark">Laporan ini akan memperbarui <strong>status aset, lokasi, dan divisi utama</strong> pada master data secara otomatis. Cukup kosongkan *Keterangan* jika tidak ada keluhan.</span>
+                        <span class="small m-0 text-dark">Laporan ini akan memperbarui <strong>status aset, lokasi, dan divisi utama</strong> pada master data secara otomatis.</span>
                     </div>
 
                     <input type="hidden" name="aset_id" value="{{ $aset->id }}">
@@ -747,6 +745,24 @@
                     @endforeach
                 </ul>`;
                 showNotification('error', 'Gagal Validasi!', errorHtml, true);
+            @endif
+
+            @if (session('open_modal') == 'monitoring')
+                setTimeout(() => {
+                    const modal = new bootstrap.Modal(document.getElementById('modalMonitoring'));
+                    modal.show();
+                }, 500);
+            @endif
+
+            @if (session('open_modal') == 'perbaikan')
+                @if(!$adaPengajuanAktif)
+                    setTimeout(() => {
+                        const modal = new bootstrap.Modal(document.getElementById('modalPerbaikan'));
+                        modal.show();
+                    }, 500);
+                @else
+                    showNotification('warning', 'Perhatian!', 'Aset ini sedang dalam proses perbaikan yang aktif.');
+                @endif
             @endif
         }
     });

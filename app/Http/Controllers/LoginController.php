@@ -87,7 +87,7 @@ class LoginController extends Controller
 
         $roleName = strtolower($user->role->nm_role);
 
-        return redirect()->route($roleName . '.dashboard');
+        return redirect()->intended(route($roleName . '.dashboard'));
     }
 
     

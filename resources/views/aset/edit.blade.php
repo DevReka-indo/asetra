@@ -348,7 +348,7 @@
                                 @foreach($aset->foto as $f)
                                     <div class="col-md-2 position-relative">
                                         <div class="rounded-3 overflow-hidden shadow-sm" style="height: 100px;">
-                                            <img src="{{ filter_var($f->path_foto, FILTER_VALIDATE_URL) ? $f->path_foto : asset('storage/' . $f->path_foto) }}" class="w-100 h-100 object-fit-cover" alt="Foto Aset">
+                                            <img src="{{ Storage::url($f->path_foto) }}" class="w-100 h-100 object-fit-cover" alt="Foto Aset">
                                         </div>
                                         <div class="form-check position-absolute top-0 end-0 m-1 bg-white rounded px-1 shadow-sm">
                                             <input class="form-check-input" type="checkbox" name="hapus_foto[]" value="{{ $f->id }}" id="f{{ $f->id }}">
