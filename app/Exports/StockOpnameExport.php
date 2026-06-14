@@ -62,6 +62,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                 'Lokasi Aset',
                 '',
                 '',
+                'Divisi/Dept',
                 'Tanggal Cek Terakhir',
                 'BAST',
                 'PIC Aset',
@@ -91,6 +92,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                 'Nama Lokasi',
                 'Kode Lokasi',
                 'Detail Lokasi',
+                '',
                 '',
                 '',
                 '',
@@ -151,6 +153,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
             $aset->lokasi->nama_lokasi ?? '',
             $aset->lokasi->kode_lokasi ?? '',
             $aset->lokasi->detail_lokasi ?? '',
+            $aset->organisasi_terikat ?? '',
             $aset && $aset->tanggal_cek_terakhir ? date('Y-m-d', strtotime($aset->tanggal_cek_terakhir)) : '',
             $aset->bast ?? '',
             $aset->pic->fullname ?? '',
@@ -176,19 +179,20 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                 $sheet->mergeCells('E1:E2'); // Deskripsi Aset
                 $sheet->mergeCells('F1:F2'); // Merk Aset
                 $sheet->mergeCells('G1:G2'); // Tanggal Kapitalisasi
-                $sheet->mergeCells('Q1:Q2'); // Tanggal Cek Terakhir
-                $sheet->mergeCells('R1:R2'); // BAST
-                $sheet->mergeCells('S1:S2'); // PIC Aset
-                $sheet->mergeCells('T1:T2'); // Penanggung Jawab Aset
-                $sheet->mergeCells('U1:U2'); // Dokumentasi Aset
-                $sheet->mergeCells('Y1:Y2'); // Keterangan Temuan
-                $sheet->mergeCells('Z1:Z2'); // Dicek Oleh
-                $sheet->mergeCells('AA1:AA2'); // Tanggal Cek Opname
+                $sheet->mergeCells('Q1:Q2'); // Divisi/Dept
+                $sheet->mergeCells('R1:R2'); // Tanggal Cek Terakhir
+                $sheet->mergeCells('S1:S2'); // BAST
+                $sheet->mergeCells('T1:T2'); // PIC Aset
+                $sheet->mergeCells('U1:U2'); // Penanggung Jawab Aset
+                $sheet->mergeCells('V1:V2'); // Dokumentasi Aset
+                $sheet->mergeCells('Z1:Z2'); // Keterangan Temuan
+                $sheet->mergeCells('AA1:AA2'); // Dicek Oleh
+                $sheet->mergeCells('AB1:AB2'); // Tanggal Cek Opname
 
                 $sheet->mergeCells('C1:D1'); // Kode Aset
                 $sheet->mergeCells('H1:M1'); // Kondisi Aset
                 $sheet->mergeCells('N1:P1'); // Lokasi Aset
-                $sheet->mergeCells('V1:X1'); // Hasil Stock Opname
+                $sheet->mergeCells('W1:Y1'); // Hasil Stock Opname
 
                 // 3. Style header
                 $headerStyle = [
@@ -213,10 +217,10 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                         ],
                     ],
                 ];
-                $sheet->getStyle('A1:AA2')->applyFromArray($headerStyle);
+                $sheet->getStyle('A1:AB2')->applyFromArray($headerStyle);
 
                 // Highlight kolom Hasil Stock Opname
-                $sheet->getStyle('V1:X2')->getFill()
+                $sheet->getStyle('W1:Y2')->getFill()
                     ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FFD6E4F7');
 
@@ -227,7 +231,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                 // Style data rows
                 $highestRow = $sheet->getHighestRow();
                 if ($highestRow >= 3) {
-                    $sheet->getStyle('A3:AA' . $highestRow)->applyFromArray([
+                    $sheet->getStyle('A3:AB' . $highestRow)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -244,9 +248,9 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                     $sheet->getStyle('C3:D' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('G3:G' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('H3:M' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('Q3:Q' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('V3:V' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('AA3:AA' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('R3:R' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('W3:W' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('AB3:AB' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
                     // Tinggi baris data
                     for ($row = 3; $row <= $highestRow; $row++) {
