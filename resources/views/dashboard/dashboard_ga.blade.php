@@ -60,16 +60,16 @@
             </div>
         </div>
 
-        {{-- Card 3: Aset Baru Bulan Ini --}}
+        {{-- Card 3: Aset Divisi --}}
         <div class="col-xl-3 col-sm-6">
             <div class="card glass-card h-100 p-3">
                 <div class="d-flex align-items-center">
                     <div class="metric-icon icon-warning me-3" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">
-                        <i class="fas fa-plus-circle"></i>
+                        <i class="fas fa-boxes"></i>
                     </div>
                     <div>
-                        <p class="text-muted mb-0 small fw-bold text-uppercase">Baru Bulan Ini</p>
-                        <h3 class="fw-bold mb-0 text-dark">{{ number_format($asetBulanIni) }}</h3>
+                        <p class="text-muted mb-0 small fw-bold text-uppercase">Aset Divisi</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ number_format($totalAsetDept) }}</h3>
                     </div>
                 </div>
             </div>

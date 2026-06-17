@@ -238,7 +238,7 @@ class DashboardController extends Controller
         $totalAset = \App\Models\DataAset::count();
         $totalKategori = \App\Models\KategoriAset::count();
         $asetAktif = \App\Models\DataAset::where('status_aset', 'Aktif')->count();
-        $asetBulanIni = \App\Models\DataAset::whereMonth('created_at', date('m'))->whereYear('created_at', date('Y'))->count();
+        $totalAsetDept = \App\Models\DataAset::forUser($user)->count();
         
         // Grafik Kondisi Aset
         $kondisiAset = \App\Models\DataAset::select('status_kondisi', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
@@ -363,7 +363,7 @@ class DashboardController extends Controller
             ->pluck('total', 'status')->toArray();
 
         return view('dashboard.dashboard_ga', compact(
-            'totalAset', 'totalKategori', 'asetAktif', 'asetBulanIni', 'kondisiAset', 'statusAset', 'latestOpname', 'opnameProgress', 'monthlyAsetData', 'kategoriStats', 'jenisKategoriStats', 'jenisKategoriColors', 'perbaikanTerbaru', 'perbaikanStats', 'monitoringTerbaru', 'selectedYear', 'availableYears',
+            'totalAset', 'totalKategori', 'asetAktif', 'totalAsetDept', 'kondisiAset', 'statusAset', 'latestOpname', 'opnameProgress', 'monthlyAsetData', 'kategoriStats', 'jenisKategoriStats', 'jenisKategoriColors', 'perbaikanTerbaru', 'perbaikanStats', 'monitoringTerbaru', 'selectedYear', 'availableYears',
             'lokasiStats', 'namaLokasiTerpadat', 'totalLokasiTerpadat', 'namaLokasiRusak', 'totalLokasiRusak'
         ));
     }
