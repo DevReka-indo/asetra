@@ -131,7 +131,7 @@ class DataAsetImport implements ToCollection
                 $aset = DataAset::where('nomor_aset', $nomorAset)->first();
                 $parts = explode('/', $nomorAset);
                 if (count($parts) >= 2) {
-                    $nomorUrut = str_pad($parts[1], 5, '0', STR_PAD_LEFT);
+                    $nomorUrut = trim((string)$parts[1]);
                 }
             }
 

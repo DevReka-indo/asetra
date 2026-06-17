@@ -41,7 +41,7 @@ class DataAset extends Model
     public static function getNextNomorUrut(): string
     {
         $max = self::max(\DB::raw('CAST(nomor_urut AS UNSIGNED)')) ?? 0;
-        return str_pad($max + 1, 5, '0', STR_PAD_LEFT);
+        return (string)($max + 1);
     }
 
     public function generateNomorAset(?string $noUrut = null): string
@@ -51,8 +51,6 @@ class DataAset extends Model
         // Fallback jika kosong
         if (empty($noUrut)) {
             $noUrut = self::getNextNomorUrut();
-        } else {
-            $noUrut = str_pad($noUrut, 5, '0', STR_PAD_LEFT);
         }
 
         // Tahun kapitalisasi
@@ -78,8 +76,6 @@ class DataAset extends Model
         static::creating(function ($aset) {
             if (empty($aset->nomor_urut)) {
                 $aset->nomor_urut = self::getNextNomorUrut();
-            } else {
-                $aset->nomor_urut = str_pad($aset->nomor_urut, 5, '0', STR_PAD_LEFT);
             }
         });
 
@@ -89,9 +85,6 @@ class DataAset extends Model
         });
 
         static::updating(function ($aset) {
-            if ($aset->isDirty('nomor_urut') && !empty($aset->nomor_urut)) {
-                $aset->nomor_urut = str_pad($aset->nomor_urut, 5, '0', STR_PAD_LEFT);
-            }
             if ($aset->isDirty('lokasi_id') || $aset->isDirty('kategori_id') || $aset->isDirty('tahun_kapitalisasi') || $aset->isDirty('nomor_urut')) {
                 $aset->nomor_aset = $aset->generateNomorAset();
             }

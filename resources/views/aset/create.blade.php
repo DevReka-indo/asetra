@@ -74,14 +74,14 @@
                                     <input type="text" name="nomor_urut" id="nomor_urut"
                                            class="form-control border-start-0 ps-0 shadow-none bg-white"
                                            value="{{ old('nomor_urut') }}"
-                                           placeholder="Contoh: 00001"
+                                           placeholder="Contoh: 1 atau 00001"
                                            maxlength="5"
                                            inputmode="numeric"
                                            style="cursor: text;"
                                            required>
                                 </div>
                                 <small class="text-muted" id="hint_urut" style="font-size: 0.7rem;">
-                                    Masukkan 5 digit nomor urut (contoh: 00001)
+                                    Masukkan nomor urut (contoh: 1 atau 00001)
                                 </small>
                                 @error('nomor_urut')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
@@ -497,8 +497,7 @@
         let isOverride = @json($isCustomNomorUrut);
 
         function padNoUrut(val) {
-            const num = val.replace(/\D/g, '').slice(0, 5);
-            return num.padStart(5, '0');
+            return val.replace(/\D/g, '').slice(0, 5);
         }
 
         function updateNomor() {

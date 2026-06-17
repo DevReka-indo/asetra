@@ -275,9 +275,7 @@ class DataAsetController extends Controller
             'foto.*'               => 'image|mimes:jpeg,png,jpg|max:4096',
         ]);
 
-        if ($request->filled('nomor_urut')) {
-            $validatedData['nomor_urut'] = str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT);
-        }
+
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
@@ -463,9 +461,7 @@ class DataAsetController extends Controller
             'hapus_foto.*'         => 'integer|exists:aset_foto,id',
         ]);
 
-        if ($request->filled('nomor_urut')) {
-            $validatedData['nomor_urut'] = str_pad($request->input('nomor_urut'), 5, '0', STR_PAD_LEFT);
-        }
+
 
         if (isset($validatedData['kode_organisasi'])) {
             $parts = explode('_', $validatedData['kode_organisasi']);
