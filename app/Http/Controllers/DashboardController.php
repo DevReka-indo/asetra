@@ -157,18 +157,18 @@ class DashboardController extends Controller
             ));
         } elseif ($user->role_id_role == 3) {
             // Role 3 adalah Manager
-            $totalAsetDept = \App\Models\DataAset::where('id_department', $user->department_id_department)->count();
-            $totalAsetDeptAktif = \App\Models\DataAset::where('id_department', $user->department_id_department)->where('status_aset', 'Aktif')->count();
+            $totalAsetDept = \App\Models\DataAset::forUser($user)->count();
+            $totalAsetDeptAktif = \App\Models\DataAset::forUser($user)->where('status_aset', 'Aktif')->count();
             
             $totalPerbaikan = \App\Models\PengajuanPerbaikan::whereHas('aset', function($q) use($user) {
-                $q->where('id_department', $user->department_id_department);
+                $q->forUser($user);
             })->count();
 
             $latestOpname = \App\Models\StockOpname::latest('tanggal_mulai')->first();
             $opnameProgress = 0;
             $deptCheckedCount = 0;
             if ($latestOpname) {
-                $deptAssets = \App\Models\DataAset::where('id_department', $user->department_id_department)->pluck('id');
+                $deptAssets = \App\Models\DataAset::forUser($user)->pluck('id');
                 $deptCheckedCount = \App\Models\StockOpnameDetail::where('stock_opname_id', $latestOpname->id)
                     ->whereIn('aset_id', $deptAssets)
                     ->count();
@@ -176,11 +176,11 @@ class DashboardController extends Controller
             }
 
             $perbaikanTerbaru = \App\Models\PengajuanPerbaikan::whereHas('aset', function($q) use($user) {
-                $q->where('id_department', $user->department_id_department);
+                $q->forUser($user);
             })->with(['aset', 'pengaju'])->latest()->take(5)->get();
 
             $monitoringTerbaru = \App\Models\LogAset::whereHas('aset', function($q) use($user) {
-                $q->where('id_department', $user->department_id_department);
+                $q->forUser($user);
             })->with(['aset', 'dicatatOleh'])->latest()->take(5)->get();
 
             return view('dashboard.dashboard_manager', compact(
@@ -188,7 +188,7 @@ class DashboardController extends Controller
             ));
         } else {
             // Role 2 dan Role lainnya (Staff)
-            $totalAsetDept = \App\Models\DataAset::where('id_department', $user->department_id_department)->count();
+            $totalAsetDept = \App\Models\DataAset::forUser($user)->count();
             $totalAsetPic = \App\Models\DataAset::where('pic_id', $user->id)->count();
             
             $totalPerbaikan = \App\Models\PengajuanPerbaikan::where('diajukan_oleh', $user->id)->count();
@@ -197,7 +197,7 @@ class DashboardController extends Controller
             $opnameProgress = 0;
             $deptCheckedCount = 0;
             if ($latestOpname) {
-                $deptAssets = \App\Models\DataAset::where('id_department', $user->department_id_department)->pluck('id');
+                $deptAssets = \App\Models\DataAset::forUser($user)->pluck('id');
                 $deptCheckedCount = \App\Models\StockOpnameDetail::where('stock_opname_id', $latestOpname->id)
                     ->whereIn('aset_id', $deptAssets)
                     ->count();
@@ -208,7 +208,7 @@ class DashboardController extends Controller
                 ->with('aset')->latest()->take(5)->get();
 
             $monitoringTerbaru = \App\Models\LogAset::whereHas('aset', function($q) use($user) {
-                $q->where('id_department', $user->department_id_department);
+                $q->forUser($user);
             })->with(['aset', 'dicatatOleh'])->latest()->take(5)->get();
 
             return view('dashboard.dashboard_user', compact(
