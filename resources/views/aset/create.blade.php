@@ -74,14 +74,14 @@
                                     <input type="text" name="nomor_urut" id="nomor_urut"
                                            class="form-control border-start-0 ps-0 shadow-none bg-white"
                                            value="{{ old('nomor_urut') }}"
-                                           placeholder="Contoh: 1 atau 00001"
+                                           placeholder="Contoh: 1 atau 105"
                                            maxlength="5"
                                            inputmode="numeric"
                                            style="cursor: text;"
                                            required>
                                 </div>
                                 <small class="text-muted" id="hint_urut" style="font-size: 0.7rem;">
-                                    Masukkan nomor urut (contoh: 1 atau 00001)
+                                    Masukkan nomor urut (contoh: 1)
                                 </small>
                                 @error('nomor_urut')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>

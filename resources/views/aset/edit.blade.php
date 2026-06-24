@@ -49,7 +49,7 @@
             
             @php
                 $nomorAsetParts = explode('/', $aset->nomor_aset);
-                $currentNomorUrut = $aset->nomor_urut ?? (count($nomorAsetParts) >= 2 ? $nomorAsetParts[1] : '00001');
+                $currentNomorUrut = count($nomorAsetParts) >= 2 ? $nomorAsetParts[1] : ($aset->nomor_urut ?? '1');
             @endphp
             <form action="{{ route('aset.update', $aset->id) }}" method="POST" enctype="multipart/form-data" id="formAset" autocomplete="off" novalidate>
                 @csrf
@@ -74,14 +74,14 @@
                                     <input type="text" name="nomor_urut" id="nomor_urut"
                                            class="form-control border-start-0 ps-0 shadow-none bg-white"
                                            value="{{ old('nomor_urut', $currentNomorUrut) }}"
-                                           placeholder="Contoh: 1 atau 00001"
+                                           placeholder="Contoh: 1 atau 105"
                                            maxlength="5"
                                            inputmode="numeric"
                                            style="cursor: text;"
                                            required>
                                 </div>
                                 <small class="text-muted" id="hint_urut" style="font-size: 0.7rem;">
-                                    Masukkan nomor urut (contoh: 1 atau 00001)
+                                    Masukkan nomor urut (contoh: 1 atau 105)
                                 </small>
                                 @error('nomor_urut')<div class="text-danger small mt-1 fw-bold"><i class="fas fa-exclamation-circle me-1"></i>{{ $message }}</div>@enderror
                             </div>
