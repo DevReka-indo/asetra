@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class StockOpnameController extends Controller
 {
@@ -59,7 +60,7 @@ class StockOpnameController extends Controller
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_berakhir' => $request->tanggal_berakhir,
             'keterangan' => $request->keterangan,
-            'created_by' => auth()->id(),
+            'created_by' => Auth::id(),
             'status' => 'aktif'
         ]);
 
@@ -111,14 +112,14 @@ class StockOpnameController extends Controller
         $allFindings = StockOpnameDetail::with(['aset.lokasi', 'dicekOleh'])
             ->where('stock_opname_id', $id)
             ->get();
-        
+
         $totalChecked = $allFindings->count();
         $checkedAsetIds = $allFindings->pluck('aset_id')->toArray();
 
         // 3. Deteksi Anomali
         $anomaliLokasi = [];
         $anomaliKondisi = [];
-        
+
         foreach ($allFindings as $finding) {
             if (!$finding->aset) continue;
 
@@ -152,7 +153,7 @@ class StockOpnameController extends Controller
             $groupAsetIds = $groupAsets->pluck('id')->toArray();
             $groupCheckedCount = $allFindings->whereIn('aset_id', $groupAsetIds)->count();
             $totalInGroup = $groupAsets->count();
-            
+
             $deptStats[] = [
                 'name' => $groupName,
                 'total' => $totalInGroup,
@@ -166,12 +167,12 @@ class StockOpnameController extends Controller
         $belumDicek = $allAsets->whereNotIn('id', $checkedAsetIds);
 
         return view('stock-opname.show', compact(
-            'session', 
-            'totalAset', 
-            'totalChecked', 
-            'deptStats', 
-            'anomaliLokasi', 
-            'anomaliKondisi', 
+            'session',
+            'totalAset',
+            'totalChecked',
+            'deptStats',
+            'anomaliLokasi',
+            'anomaliKondisi',
             'belumDicek'
         ));
     }
@@ -182,7 +183,7 @@ class StockOpnameController extends Controller
     public function updateStatus($id, Request $request)
     {
         $session = StockOpname::findOrFail($id);
-        
+
         $request->validate([
             'status' => 'required|in:aktif,selesai'
         ]);
@@ -309,7 +310,7 @@ class StockOpnameController extends Controller
                         $exists = AsetFoto::where('aset_id', $aset->id)
                             ->where('path_foto', $detail->foto_temuan)
                             ->exists();
-                        
+
                         if (!$exists) {
                             $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
                             AsetFoto::create([
@@ -351,7 +352,7 @@ class StockOpnameController extends Controller
             return redirect()->route('stock-opname.user-index')->with('error', 'Jadwal Stock Opname tersebut sudah tidak aktif.');
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
         $queryAset = DataAset::with(['lokasi', 'kategoriAset']);
@@ -382,7 +383,7 @@ class StockOpnameController extends Controller
 
         $telahDicekIds = $telahDicek->pluck('aset_id')->toArray();
 
-        // Aset yang belum dicek pada sesi ini 
+        // Aset yang belum dicek pada sesi ini
         $belumDicek = DataAset::with([
             'lokasi',
             'kategoriAset',
@@ -449,7 +450,7 @@ class StockOpnameController extends Controller
             $asetId = $aset->id;
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
         if (!$isAdmin) {
@@ -482,7 +483,7 @@ class StockOpnameController extends Controller
         StockOpnameDetail::create([
             'stock_opname_id' => $request->stock_opname_id,
             'aset_id' => $asetId,
-            'dicek_oleh' => auth()->id(),
+            'dicek_oleh' => Auth::id(),
             'tanggal_cek' => now(),
             'kondisi_temuan' => $request->kondisi_temuan,
             'lokasi_temuan' => $request->lokasi_temuan,
