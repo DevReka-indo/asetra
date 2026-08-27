@@ -2,38 +2,29 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('data_aset', function (Blueprint $table) {
-            $fks = collect(DB::select("
-                SELECT CONSTRAINT_NAME
-                FROM information_schema.KEY_COLUMN_USAGE
-                WHERE TABLE_NAME = 'data_aset'
-                  AND TABLE_SCHEMA = DATABASE()
-                  AND REFERENCED_TABLE_NAME IS NOT NULL
-                  AND COLUMN_NAME IN ('pic_monitoring', 'tanggal_cek_terakhir', 'dokumentasi_img', 'qr_code')
-            "))->pluck('CONSTRAINT_NAME');
+        $deprecatedColumns = ['tanggal_cek_terakhir', 'pic_monitoring', 'dokumentasi_img', 'qr_code'];
+        $foreignKeys = collect(Schema::getForeignKeys('data_aset'))
+            ->filter(fn (array $foreignKey): bool => array_intersect($foreignKey['columns'], $deprecatedColumns) !== []);
 
-            foreach ($fks as $fk) {
-                $table->dropForeign($fk);
-            }
-        });
+        foreach ($foreignKeys as $foreignKey) {
+            Schema::table('data_aset', function (Blueprint $table) use ($foreignKey) {
+                $table->dropForeign($foreignKey['name'] ?? $foreignKey['columns']);
+            });
+        }
 
         Schema::table('data_aset', function (Blueprint $table) {
-            $cols = collect(DB::select("SHOW COLUMNS FROM data_aset"))
-                ->pluck('Field')->toArray();
-
             $toDrop = array_intersect(
                 ['tanggal_cek_terakhir', 'pic_monitoring', 'dokumentasi_img', 'qr_code'],
-                $cols
+                Schema::getColumnListing('data_aset')
             );
 
-            if (!empty($toDrop)) {
+            if (! empty($toDrop)) {
                 $table->dropColumn($toDrop);
             }
         });

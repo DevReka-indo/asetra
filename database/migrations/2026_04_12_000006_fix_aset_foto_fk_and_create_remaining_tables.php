@@ -2,28 +2,21 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
-     * Perbaiki FK aset_foto yang gagal 
+     * Perbaiki FK aset_foto yang gagal
      */
     public function up(): void
     {
-        // Drop FK lama 
-        $existingFk = DB::select("
-            SELECT CONSTRAINT_NAME
-            FROM information_schema.KEY_COLUMN_USAGE
-            WHERE TABLE_NAME = 'aset_foto'
-              AND TABLE_SCHEMA = DATABASE()
-              AND CONSTRAINT_NAME = 'aset_foto_aset_id_foreign'
-        ");
+        $existingForeignKey = collect(Schema::getForeignKeys('aset_foto'))
+            ->first(fn (array $foreignKey): bool => $foreignKey['columns'] === ['aset_id']);
 
-        if (!empty($existingFk)) {
-            Schema::table('aset_foto', function (Blueprint $table) {
-                $table->dropForeign('aset_foto_aset_id_foreign');
+        if ($existingForeignKey !== null) {
+            Schema::table('aset_foto', function (Blueprint $table) use ($existingForeignKey) {
+                $table->dropForeign($existingForeignKey['name'] ?? $existingForeignKey['columns']);
             });
         }
 
@@ -34,13 +27,13 @@ return new class extends Migration
         // Tambahkan FK
         Schema::table('aset_foto', function (Blueprint $table) {
             $table->foreign('aset_id')
-                  ->references('id')
-                  ->on('data_aset')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('data_aset')
+                ->onDelete('cascade');
         });
 
         //  tabel log_aset
-        if (!Schema::hasTable('log_aset')) {
+        if (! Schema::hasTable('log_aset')) {
             Schema::create('log_aset', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('aset_id');
@@ -58,7 +51,7 @@ return new class extends Migration
         }
 
         // tabel stock_opname
-        if (!Schema::hasTable('stock_opname')) {
+        if (! Schema::hasTable('stock_opname')) {
             Schema::create('stock_opname', function (Blueprint $table) {
                 $table->id();
                 $table->date('tanggal');
@@ -72,10 +65,10 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('stock_opname_detail')) {
+        if (! Schema::hasTable('stock_opname_detail')) {
             Schema::create('stock_opname_detail', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('stock_opname_id'); 
+                $table->unsignedBigInteger('stock_opname_id');
                 $table->unsignedBigInteger('aset_id');
                 $table->unsignedBigInteger('dicek_oleh');
                 $table->date('tanggal_cek');

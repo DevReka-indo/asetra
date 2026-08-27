@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -15,7 +16,11 @@ return new class extends Migration
             $table->date('tanggal_kapitalisasi')->nullable()->after('tahun_kapitalisasi');
         });
 
-        \Illuminate\Support\Facades\DB::statement("UPDATE data_aset SET tanggal_kapitalisasi = CONCAT(tahun_kapitalisasi, '-01-01') WHERE tahun_kapitalisasi IS NOT NULL AND tahun_kapitalisasi != 0");
+        $statement = DB::getDriverName() === 'sqlite'
+            ? "UPDATE data_aset SET tanggal_kapitalisasi = CAST(tahun_kapitalisasi AS TEXT) || '-01-01' WHERE tahun_kapitalisasi IS NOT NULL AND tahun_kapitalisasi != 0"
+            : "UPDATE data_aset SET tanggal_kapitalisasi = CONCAT(tahun_kapitalisasi, '-01-01') WHERE tahun_kapitalisasi IS NOT NULL AND tahun_kapitalisasi != 0";
+
+        DB::statement($statement);
 
         Schema::table('data_aset', function (Blueprint $table) {
             $table->dropColumn('tahun_kapitalisasi');
@@ -31,7 +36,11 @@ return new class extends Migration
             $table->integer('tahun_kapitalisasi')->nullable()->after('tanggal_kapitalisasi');
         });
 
-        \Illuminate\Support\Facades\DB::statement("UPDATE data_aset SET tahun_kapitalisasi = YEAR(tanggal_kapitalisasi) WHERE tanggal_kapitalisasi IS NOT NULL");
+        $statement = DB::getDriverName() === 'sqlite'
+            ? "UPDATE data_aset SET tahun_kapitalisasi = CAST(strftime('%Y', tanggal_kapitalisasi) AS INTEGER) WHERE tanggal_kapitalisasi IS NOT NULL"
+            : 'UPDATE data_aset SET tahun_kapitalisasi = YEAR(tanggal_kapitalisasi) WHERE tanggal_kapitalisasi IS NOT NULL';
+
+        DB::statement($statement);
 
         Schema::table('data_aset', function (Blueprint $table) {
             $table->dropColumn('tanggal_kapitalisasi');

@@ -2,30 +2,28 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Position;
-use App\Models\LokasiAset;
+use App\Models\DataAset;
 use App\Models\JenisKategori;
 use App\Models\KategoriAset;
-use App\Models\DataAset;
+use App\Models\LokasiAset;
 use App\Models\StockOpname;
-use App\Models\StockOpnameDetail;
-use App\Models\PengajuanPerbaikan;
-use App\Models\LogAset;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 class ApiTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected $user;
+
     protected $token;
+
     protected $headers;
 
     protected function setUp(): void
@@ -33,23 +31,26 @@ class ApiTest extends TestCase
         parent::setUp();
 
         // 1. Create dependencies
-        $role = Role::firstOrCreate(['id_role' => 1], [
+        DB::table('role')->insert([
+            'id_role' => 1,
             'nm_role' => 'Superadmin',
-            'desc_role' => 'Superadmin'
         ]);
 
-        $position = Position::firstOrCreate(['id_position' => 1], [
+        DB::table('position')->insert([
+            'id_position' => 1,
             'nm_position' => 'Staff IT',
-            'desc_position' => 'Staff IT'
         ]);
 
         // 2. Create a test user
         $this->user = User::factory()->create([
+            'firstname' => 'API',
+            'lastname' => 'Test User',
             'email' => 'api_test_user@example.com',
             'nip' => '999999999',
             'password' => Hash::make('password123'),
-            'role_id_role' => $role->id_role,
-            'position_id_position' => $position->id_position,
+            'phone_number' => '080000000000',
+            'role_id_role' => 1,
+            'position_id_position' => 1,
         ]);
 
         // 3. Generate Bearer Token (Alternative A)
@@ -60,7 +61,7 @@ class ApiTest extends TestCase
         $this->token = Crypt::encryptString(json_encode($payload));
 
         $this->headers = [
-            'Authorization' => 'Bearer ' . $this->token,
+            'Authorization' => 'Bearer '.$this->token,
             'Accept' => 'application/json',
         ];
     }
@@ -72,32 +73,32 @@ class ApiTest extends TestCase
     {
         $response = $this->postJson('/api/login', [
             'credential' => 'api_test_user@example.com',
-            'password' => 'password123'
+            'password' => 'password123',
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'status',
-                     'message',
-                     'data' => [
-                         'token',
-                         'user'
-                     ]
-                 ]);
+            ->assertJsonStructure([
+                'status',
+                'message',
+                'data' => [
+                    'token',
+                    'user',
+                ],
+            ]);
     }
 
     public function test_api_login_failed()
     {
         $response = $this->postJson('/api/login', [
             'credential' => 'api_test_user@example.com',
-            'password' => 'wrongpassword'
+            'password' => 'wrongpassword',
         ]);
 
         $response->assertStatus(401)
-                 ->assertJson([
-                     'status' => 'error',
-                     'message' => 'Password yang Anda masukkan salah.'
-                 ]);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Password yang Anda masukkan salah.',
+            ]);
     }
 
     /**
@@ -108,7 +109,7 @@ class ApiTest extends TestCase
         $response = $this->withHeaders($this->headers)->getJson('/api/me');
 
         $response->assertStatus(200)
-                 ->assertJsonPath('data.email', 'api_test_user@example.com');
+            ->assertJsonPath('data.email', 'api_test_user@example.com');
     }
 
     public function test_api_me_unauthenticated()
@@ -116,10 +117,10 @@ class ApiTest extends TestCase
         $response = $this->getJson('/api/me');
 
         $response->assertStatus(401)
-                 ->assertJson([
-                     'status' => 'error',
-                     'message' => 'Token tidak ditemukan. Silakan gunakan header Authorization Bearer.'
-                 ]);
+            ->assertJson([
+                'status' => 'error',
+                'message' => 'Token tidak ditemukan. Silakan gunakan header Authorization Bearer.',
+            ]);
     }
 
     /**
@@ -131,7 +132,7 @@ class ApiTest extends TestCase
         $responseStore = $this->withHeaders($this->headers)->postJson('/api/lokasi-aset', [
             'kode_lokasi' => 'TEST_LOK_1',
             'nama_lokasi' => 'Test Location 1',
-            'detail_lokasi' => 'Detail of test location 1'
+            'detail_lokasi' => 'Detail of test location 1',
         ]);
         $responseStore->assertStatus(210);
         $lokasiId = $responseStore->json('data.lokasi_id');
@@ -141,21 +142,21 @@ class ApiTest extends TestCase
         $responseIndex->assertStatus(200);
 
         // 3. Show
-        $responseShow = $this->withHeaders($this->headers)->getJson('/api/lokasi-aset/' . $lokasiId);
+        $responseShow = $this->withHeaders($this->headers)->getJson('/api/lokasi-aset/'.$lokasiId);
         $responseShow->assertStatus(200)
-                     ->assertJsonPath('data.nama_lokasi', 'Test Location 1');
+            ->assertJsonPath('data.nama_lokasi', 'Test Location 1');
 
         // 4. Update
-        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/lokasi-aset/' . $lokasiId, [
+        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/lokasi-aset/'.$lokasiId, [
             'kode_lokasi' => 'TEST_LOK_1_EDIT',
             'nama_lokasi' => 'Test Location 1 Edited',
-            'detail_lokasi' => 'Updated details'
+            'detail_lokasi' => 'Updated details',
         ]);
         $responseUpdate->assertStatus(200)
-                       ->assertJsonPath('data.nama_lokasi', 'Test Location 1 Edited');
+            ->assertJsonPath('data.nama_lokasi', 'Test Location 1 Edited');
 
         // 5. Destroy
-        $responseDestroy = $this->withHeaders($this->headers)->deleteJson('/api/lokasi-aset/' . $lokasiId);
+        $responseDestroy = $this->withHeaders($this->headers)->deleteJson('/api/lokasi-aset/'.$lokasiId);
         $responseDestroy->assertStatus(200);
     }
 
@@ -168,25 +169,25 @@ class ApiTest extends TestCase
         $responseStore = $this->withHeaders($this->headers)->postJson('/api/jenis-kategori', [
             'kode_awalan' => '9',
             'nama_jenis' => 'Test Jenis Kategori',
-            'warna_label' => '#ea6565'
+            'warna_label' => '#ea6565',
         ]);
         $responseStore->assertStatus(210);
         $jenisId = $responseStore->json('data.id');
 
         // 2. Show
-        $responseShow = $this->withHeaders($this->headers)->getJson('/api/jenis-kategori/' . $jenisId);
+        $responseShow = $this->withHeaders($this->headers)->getJson('/api/jenis-kategori/'.$jenisId);
         $responseShow->assertStatus(200);
 
         // 3. Update
-        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/jenis-kategori/' . $jenisId, [
+        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/jenis-kategori/'.$jenisId, [
             'kode_awalan' => '9',
             'nama_jenis' => 'Test Jenis Kategori Updated',
-            'warna_label' => '#ea6565'
+            'warna_label' => '#ea6565',
         ]);
         $responseUpdate->assertStatus(200);
 
         // 4. Destroy
-        $responseDestroy = $this->withHeaders($this->headers)->deleteJson('/api/jenis-kategori/' . $jenisId);
+        $responseDestroy = $this->withHeaders($this->headers)->deleteJson('/api/jenis-kategori/'.$jenisId);
         $responseDestroy->assertStatus(200);
     }
 
@@ -199,14 +200,14 @@ class ApiTest extends TestCase
         $jenis = JenisKategori::create([
             'kode_awalan' => '8',
             'nama_jenis' => 'Test Jenis 8',
-            'warna_label' => '#333333'
+            'warna_label' => '#333333',
         ]);
 
         // 1. Store
         $responseStore = $this->withHeaders($this->headers)->postJson('/api/kategori-aset', [
             'kode' => '801',
             'nama' => 'Test Kategori Aset',
-            'jenis_kategori_id' => $jenis->id
+            'jenis_kategori_id' => $jenis->id,
         ]);
         $responseStore->assertStatus(210);
         $kategoriId = $responseStore->json('data.id');
@@ -216,19 +217,19 @@ class ApiTest extends TestCase
         $responseIndex->assertStatus(200);
 
         // 3. Show
-        $responseShow = $this->withHeaders($this->headers)->getJson('/api/kategori-aset/' . $kategoriId);
+        $responseShow = $this->withHeaders($this->headers)->getJson('/api/kategori-aset/'.$kategoriId);
         $responseShow->assertStatus(200);
 
         // 4. Update
-        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/kategori-aset/' . $kategoriId, [
+        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/kategori-aset/'.$kategoriId, [
             'kode' => '802',
             'nama' => 'Test Kategori Aset Updated',
-            'jenis_kategori_id' => $jenis->id
+            'jenis_kategori_id' => $jenis->id,
         ]);
         $responseUpdate->assertStatus(200);
 
         // 5. Destroy
-        $responseDestroy = $this->withHeaders($this->headers)->deleteJson('/api/kategori-aset/' . $kategoriId);
+        $responseDestroy = $this->withHeaders($this->headers)->deleteJson('/api/kategori-aset/'.$kategoriId);
         $responseDestroy->assertStatus(200);
     }
 
@@ -239,22 +240,28 @@ class ApiTest extends TestCase
     {
         Storage::fake('public');
 
+        DB::table('director')->insert([
+            'id_director' => 1,
+            'name_director' => 'Test Directorate',
+            'kode_director' => 'TEST',
+        ]);
+
         $lokasi = LokasiAset::create([
             'kode_lokasi' => 'TEST_LOK_ASET',
             'nama_lokasi' => 'Test Location Asset',
-            'detail_lokasi' => 'Detail'
+            'detail_lokasi' => 'Detail',
         ]);
 
         $jenis = JenisKategori::create([
             'kode_awalan' => '7',
             'nama_jenis' => 'Test Jenis 7',
-            'warna_label' => '#444444'
+            'warna_label' => '#444444',
         ]);
 
         $kategori = KategoriAset::create([
             'kode' => '701',
             'nama' => 'Test Kategori 7',
-            'jenis_kategori_id' => $jenis->id
+            'jenis_kategori_id' => $jenis->id,
         ]);
 
         // 1. Store Data Aset
@@ -273,7 +280,7 @@ class ApiTest extends TestCase
             'status_kondisi' => 'Baik',
             'status_aset' => 'Aktif',
             'keterangan' => 'Rutin',
-            'foto' => [$photo]
+            'foto' => [$photo],
         ]);
         $responseStore->assertStatus(210);
         $asetId = $responseStore->json('data.id');
@@ -283,12 +290,12 @@ class ApiTest extends TestCase
         $responseIndex->assertStatus(200);
 
         // 3. Show
-        $responseShow = $this->withHeaders($this->headers)->getJson('/api/data-aset/' . $asetId);
+        $responseShow = $this->withHeaders($this->headers)->getJson('/api/data-aset/'.$asetId);
         $responseShow->assertStatus(200);
 
         // 4. Update
         $photoNew = UploadedFile::fake()->image('asset_new.jpg');
-        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/data-aset/' . $asetId, [
+        $responseUpdate = $this->withHeaders($this->headers)->putJson('/api/data-aset/'.$asetId, [
             'nama_aset' => 'Test Laptop Dev Updated',
             'kategori_id' => $kategori->id,
             'kode_organisasi' => 'director_1',
@@ -302,15 +309,15 @@ class ApiTest extends TestCase
             'status_kondisi' => 'Baik',
             'status_aset' => 'Aktif',
             'keterangan' => 'Rutin',
-            'foto_baru' => [$photoNew]
+            'foto_baru' => [$photoNew],
         ]);
         $responseUpdate->assertStatus(200);
 
         // 5. Destroy (Soft Delete) - Requires PDF file
         $pdf = UploadedFile::fake()->create('deletion.pdf', 500, 'application/pdf');
-        $responseDestroy = $this->withHeaders($this->headers)->postJson('/api/data-aset/' . $asetId, [
+        $responseDestroy = $this->withHeaders($this->headers)->postJson('/api/data-aset/'.$asetId, [
             '_method' => 'DELETE',
-            'dokumen_penghapusan' => $pdf
+            'dokumen_penghapusan' => $pdf,
         ]);
         $responseDestroy->assertStatus(200);
     }
@@ -329,7 +336,7 @@ class ApiTest extends TestCase
             'tanggal_berakhir' => '2026-05-31',
             'keterangan' => 'Test',
             'created_by' => $this->user->id,
-            'status' => 'aktif'
+            'status' => 'aktif',
         ]);
 
         $lokasi = LokasiAset::create([
@@ -345,7 +352,7 @@ class ApiTest extends TestCase
         $kategori = KategoriAset::create([
             'kode' => '601',
             'nama' => 'Test Kat 6',
-            'jenis_kategori_id' => $jenis->id
+            'jenis_kategori_id' => $jenis->id,
         ]);
 
         $aset = DataAset::create([
@@ -369,14 +376,14 @@ class ApiTest extends TestCase
             'kondisi_temuan' => 'Rusak',
             'lokasi_temuan' => (string) $lokasi->lokasi_id,
             'foto_temuan' => $photo,
-            'keterangan' => 'Layar retak'
+            'keterangan' => 'Layar retak',
         ]);
         $responseScan->assertStatus(210);
 
         // 2. Show session
-        $responseShow = $this->withHeaders($this->headers)->getJson('/api/stock-opname/' . $session->id);
+        $responseShow = $this->withHeaders($this->headers)->getJson('/api/stock-opname/'.$session->id);
         $responseShow->assertStatus(200)
-                     ->assertJsonPath('data.total_checked', 1);
+            ->assertJsonPath('data.total_checked', 1);
 
         // 3. Sync findings to master
         $responseSync = $this->withHeaders($this->headers)->postJson("/api/stock-opname/{$session->id}/sync");
@@ -404,7 +411,7 @@ class ApiTest extends TestCase
         $kategori = KategoriAset::create([
             'kode' => '501',
             'nama' => 'Test Kat 5',
-            'jenis_kategori_id' => $jenis->id
+            'jenis_kategori_id' => $jenis->id,
         ]);
 
         $aset = DataAset::create([
@@ -426,29 +433,29 @@ class ApiTest extends TestCase
             'aset_id' => $aset->id,
             'deskripsi_kerusakan' => 'Power supply meledak',
             'tingkat_urgensi' => 'tinggi',
-            'foto_kerusakan' => $photo
+            'foto_kerusakan' => $photo,
         ]);
         $responseStore->assertStatus(210);
         $perbId = $responseStore->json('data.id');
         $this->assertEquals('Dalam Perbaikan', $aset->fresh()->status_aset);
 
         // 2. Show request
-        $responseShow = $this->withHeaders($this->headers)->getJson('/api/perbaikan/' . $perbId);
+        $responseShow = $this->withHeaders($this->headers)->getJson('/api/perbaikan/'.$perbId);
         $responseShow->assertStatus(200);
 
         // 3. Process request (Approve)
         $responseProses = $this->withHeaders($this->headers)->putJson("/api/perbaikan/{$perbId}/proses", [
-            'aksi' => 'disetujui'
+            'aksi' => 'disetujui',
         ]);
         $responseProses->assertStatus(200);
 
         // 4. Mark finished (Selesai)
         $responseSelesai = $this->withHeaders($this->headers)->putJson("/api/perbaikan/{$perbId}/selesai", [
             'kondisi_setelah' => 'Baik',
-            'catatan' => 'Diganti power supply baru'
+            'catatan' => 'Diganti power supply baru',
         ]);
         $responseSelesai->assertStatus(200);
-        
+
         $this->assertEquals('Baik', $aset->fresh()->status_kondisi);
         $this->assertEquals('Aktif', $aset->fresh()->status_aset);
     }
@@ -473,7 +480,7 @@ class ApiTest extends TestCase
         $kategori = KategoriAset::create([
             'kode' => '401',
             'nama' => 'Test Kat 4',
-            'jenis_kategori_id' => $jenis->id
+            'jenis_kategori_id' => $jenis->id,
         ]);
 
         $aset = DataAset::create([
@@ -497,7 +504,7 @@ class ApiTest extends TestCase
             'status_aset' => 'Dalam Perbaikan',
             'lokasi_id' => $lokasi->lokasi_id,
             'foto_bukti' => $photo,
-            'keterangan' => 'Keyboard tidak responsif'
+            'keterangan' => 'Keyboard tidak responsif',
         ]);
         $responseStore->assertStatus(210);
 
