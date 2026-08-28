@@ -2,57 +2,34 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-
-use App\Models\PengajuanPerbaikan;
 use App\Models\DataAset;
 use App\Models\LogAset;
+use App\Models\PengajuanPerbaikan;
 use App\Models\User;
 use App\Notifications\SystemNotification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class PengajuanPerbaikanApiController extends BaseApiController
 {
     use \App\Traits\HandlesImageUploads;
-    /**
-     * Check if user is General Affairs / superadmin
-     */
-    private function canProcess(): bool
-    {
-        $user = Auth::user();
-        if (!$user) return false;
 
-        // Superadmin bypass
-        if ($user->role_id_role === 1 || strtolower($user->role->nm_role ?? '') === 'superadmin') {
-            return true;
-        }
-
-        $adminRoles = ['admin', 'superadmin'];
-        $isAdmin = in_array(strtolower($user->role->nm_role ?? ''), $adminRoles);
-
-        return $isAdmin && $user->isBagianUmum();
-    }
-
-    /**
-     * 
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
         $query = PengajuanPerbaikan::with(['aset', 'pengaju', 'pemroses'])->latest();
 
-        if (!$this->canProcess()) {
-            //
-            $query->where(function($q) use ($user) {
+        if (Gate::denies('manage_perbaikan_aset')) {
+            $query->where(function ($q) use ($user) {
                 $q->where('diajukan_oleh', $user->id)
-                  ->orWhereHas('aset', function($qAset) use ($user) {
-                      $qAset->where(function($subQ) use ($user) {
-                          $subQ->forUser($user);
-                          $subQ->orWhere('pic_id', $user->id);
-                      });
-                  });
+                    ->orWhereHas('aset', function ($qAset) use ($user) {
+                        $qAset->where(function ($subQ) use ($user) {
+                            $subQ->forUser($user);
+                            $subQ->orWhere('pic_id', $user->id);
+                        });
+                    });
             });
         }
 
@@ -72,10 +49,10 @@ class PengajuanPerbaikanApiController extends BaseApiController
     public function store(Request $request)
     {
         $request->validate([
-            'aset_id'             => 'required|exists:data_aset,id',
+            'aset_id' => 'required|exists:data_aset,id',
             'deskripsi_kerusakan' => 'required|string|max:2000',
-            'tingkat_urgensi'     => 'required|in:rendah,sedang,tinggi',
-            'foto_kerusakan'      => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'tingkat_urgensi' => 'required|in:rendah,sedang,tinggi',
+            'foto_kerusakan' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         // Mencegah duplikasi pengajuan untuk aset yang sama yang masih dalam proses
@@ -88,12 +65,12 @@ class PengajuanPerbaikanApiController extends BaseApiController
         }
 
         $data = [
-            'aset_id'             => $request->aset_id,
-            'diajukan_oleh'       => Auth::id(),
-            'tanggal_pengajuan'   => now()->toDateString(),
+            'aset_id' => $request->aset_id,
+            'diajukan_oleh' => Auth::id(),
+            'tanggal_pengajuan' => now()->toDateString(),
             'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
-            'tingkat_urgensi'     => $request->tingkat_urgensi,
-            'status'              => 'menunggu',
+            'tingkat_urgensi' => $request->tingkat_urgensi,
+            'status' => 'menunggu',
         ];
 
         if ($request->hasFile('foto_kerusakan')) {
@@ -110,7 +87,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
         try {
             $userFullName = Auth::user()->fullname;
             $adminGas = User::where('role_id_role', 1)->get()->merge(
-                User::all()->filter(fn($u) => $u->isGeneralAffairs())
+                User::all()->filter(fn ($u) => $u->isGeneralAffairs())
             )->unique('id');
 
             $title = 'Pengajuan Perbaikan Baru';
@@ -122,7 +99,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
                 $adminGa->notify(new SystemNotification($title, $message, $url, $type));
             }
         } catch (\Exception $e) {
-            Log::warning("Repair submission notifications failed: " . $e->getMessage());
+            Log::warning('Repair submission notifications failed: '.$e->getMessage());
         }
 
         $pengajuan->load(['aset', 'pengaju']);
@@ -139,7 +116,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
         $user = Auth::user();
 
         // Access control
-        if (!$this->canProcess() && $pengajuan->diajukan_oleh !== $user->id) {
+        if (Gate::denies('manage_perbaikan_aset') && $pengajuan->diajukan_oleh !== $user->id) {
             $aset = $pengajuan->aset;
             $isAuthorized = false;
 
@@ -147,7 +124,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
                 $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
             }
 
-            if (!$isAuthorized) {
+            if (! $isAuthorized) {
                 return $this->error('Anda tidak memiliki akses ke pengajuan ini.', 403);
             }
         }
@@ -156,30 +133,28 @@ class PengajuanPerbaikanApiController extends BaseApiController
     }
 
     /**
-     * Approve or reject a repair submission (GA/superadmin only)
+     * Approve or reject a repair submission.
      */
     public function proses(Request $request, $id)
     {
-        if (!$this->canProcess()) {
-            return $this->error('Hanya Bagian Umum yang dapat memproses pengajuan ini.', 403);
-        }
+        Gate::authorize('manage_perbaikan_aset');
 
         $request->validate([
-            'aksi'    => 'required|in:disetujui,ditolak',
+            'aksi' => 'required|in:disetujui,ditolak',
             'catatan' => 'required_if:aksi,ditolak|nullable|string|max:1000',
         ]);
 
         $pengajuan = PengajuanPerbaikan::findOrFail($id);
 
-        if (!$pengajuan->isPending()) {
+        if (! $pengajuan->isPending()) {
             return $this->error('Pengajuan ini sudah diproses sebelumnya.', 422);
         }
 
         $pengajuan->update([
-            'status'          => $request->aksi,
-            'catatan'         => $request->catatan,
-            'diproses_oleh'   => Auth::id(),
-            'tanggal_diproses'=> now()->toDateString(),
+            'status' => $request->aksi,
+            'catatan' => $request->catatan,
+            'diproses_oleh' => Auth::id(),
+            'tanggal_diproses' => now()->toDateString(),
         ]);
 
         // If rejected, set status_aset back to "Aktif"
@@ -205,7 +180,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
                 $pengajuUser->notify(new SystemNotification($title, $message, $url, $type));
             }
         } catch (\Exception $e) {
-            Log::warning("Repair process status notifications failed: " . $e->getMessage());
+            Log::warning('Repair process status notifications failed: '.$e->getMessage());
         }
 
         $pengajuan->load(['aset', 'pengaju', 'pemroses']);
@@ -214,29 +189,27 @@ class PengajuanPerbaikanApiController extends BaseApiController
     }
 
     /**
-     * Mark a repair as completed (GA/superadmin only)
+     * Mark a repair as completed.
      */
     public function selesai(Request $request, $id)
     {
-        if (!$this->canProcess()) {
-            return $this->error('Hanya Bagian Umum yang dapat menandai perbaikan selesai.', 403);
-        }
+        Gate::authorize('manage_perbaikan_aset');
 
         $request->validate([
             'kondisi_setelah' => 'required|string|max:50',
-            'catatan'         => 'nullable|string|max:1000',
+            'catatan' => 'nullable|string|max:1000',
         ]);
 
         $pengajuan = PengajuanPerbaikan::with('aset')->findOrFail($id);
 
-        if (!$pengajuan->isApproved()) {
+        if (! $pengajuan->isApproved()) {
             return $this->error('Hanya pengajuan yang sudah disetujui yang bisa ditandai selesai.', 422);
         }
 
         $pengajuan->update([
-            'status'          => 'selesai',
+            'status' => 'selesai',
             'kondisi_setelah' => $request->kondisi_setelah,
-            'catatan'         => $request->catatan ?? $pengajuan->catatan,
+            'catatan' => $request->catatan ?? $pengajuan->catatan,
             'tanggal_selesai' => now()->toDateString(),
         ]);
 
@@ -244,17 +217,17 @@ class PengajuanPerbaikanApiController extends BaseApiController
         if ($pengajuan->aset) {
             $pengajuan->aset->update([
                 'status_kondisi' => $request->kondisi_setelah,
-                'status_aset'    => 'Aktif',
+                'status_aset' => 'Aktif',
             ]);
 
             // Create LogAset record
             LogAset::create([
-                'aset_id'      => $pengajuan->aset_id,
-                'tanggal_cek'  => now()->toDateString(),
-                'kondisi'      => $request->kondisi_setelah,
-                'status_aset'  => 'Aktif',
-                'keterangan'   => 'Selesai perbaikan — ref. Pengajuan #' . $pengajuan->id
-                                  . ($request->catatan ? ' | Catatan: ' . $request->catatan : ''),
+                'aset_id' => $pengajuan->aset_id,
+                'tanggal_cek' => now()->toDateString(),
+                'kondisi' => $request->kondisi_setelah,
+                'status_aset' => 'Aktif',
+                'keterangan' => 'Selesai perbaikan — ref. Pengajuan #'.$pengajuan->id
+                                  .($request->catatan ? ' | Catatan: '.$request->catatan : ''),
                 'dicatat_oleh' => Auth::id(),
             ]);
         }
@@ -274,7 +247,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
                 $pengajuUser->notify(new SystemNotification($title, $message, $url, $type));
             }
         } catch (\Exception $e) {
-            Log::warning("Repair completion notifications failed: " . $e->getMessage());
+            Log::warning('Repair completion notifications failed: '.$e->getMessage());
         }
 
         $pengajuan->load(['aset', 'pengaju', 'pemroses']);

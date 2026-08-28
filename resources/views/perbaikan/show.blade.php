@@ -288,15 +288,8 @@
                 </div>
             </div>
 
-            {{-- AKSI ADMIN BAGIAN UMUM --}}
-            @php
-                $user = Auth::user();
-                $isSuperAdmin = $user->role_id_role === 1 || strtolower($user->role->nm_role ?? '') === 'superadmin';
-                $isAdmin = in_array(strtolower($user->role->nm_role ?? ''), ['admin', 'superadmin']);
-                $canProcess = $isSuperAdmin || ($isAdmin && $user->isBagianUmum());
-            @endphp
-
-            @if($canProcess)
+            {{-- AKSI PENGELOLA PERBAIKAN --}}
+            @can('manage_perbaikan_aset')
 
                 {{-- Setujui / Tolak jika masih menunggu --}}
                 @if($pengajuan->isPending())
@@ -364,7 +357,7 @@
                     </div>
                 </div>
                 @endif
-            @endif
+            @endcan
         </div>
     </div>
 
