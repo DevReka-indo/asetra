@@ -32,11 +32,9 @@ class GeneralAffairsOrAdmin
         }
 
         if ($isStockOpnameRoute) {
-            if ($user && ($user->role_id_role == 1 || $user->isBagianUmum())) {
-                return $next($request);
-            }
+            Gate::authorize('manage_stock_opname');
 
-            abort(403, 'Akses hanya untuk superadmin atau staff bagian umum (General Affairs).');
+            return $next($request);
         }
 
         // untuk modul non-stock-opname: superadmin (role 1) atau

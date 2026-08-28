@@ -2,19 +2,20 @@
 
 namespace App\Exports;
 
-use App\Models\StockOpname;
-use App\Models\StockOpnameDetail;
 use App\Models\LokasiAset;
+use App\Models\StockOpnameDetail;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, WithEvents, ShouldAutoSize
+class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping
 {
     protected $stockOpnameId;
+
     private $rowNum = 0;
 
     public function __construct($stockOpnameId)
@@ -22,7 +23,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
         $this->stockOpnameId = $stockOpnameId;
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         return StockOpnameDetail::with([
             'aset.kategoriAset',
@@ -38,8 +39,8 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
             'aset.penanggungJawab',
             'dicekOleh',
         ])
-        ->where('stock_opname_id', $this->stockOpnameId)
-        ->get();
+            ->where('stock_opname_id', $this->stockOpnameId)
+            ->get();
     }
 
     public function headings(): array
@@ -104,7 +105,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                 '',
                 '',
                 '',
-            ]
+            ],
         ];
     }
 
@@ -117,7 +118,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
         $fotoLinks = '';
         if ($aset && $aset->foto) {
             $fotoLinks = $aset->foto->pluck('path_foto')->map(function ($path) {
-                return filter_var($path, FILTER_VALIDATE_URL) ? $path : asset('storage/' . $path);
+                return filter_var($path, FILTER_VALIDATE_URL) ? $path : asset('storage/'.$path);
             })->implode(', ');
         }
 
@@ -126,10 +127,10 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
         if ($row->foto_temuan) {
             $fotoTemuan = filter_var($row->foto_temuan, FILTER_VALIDATE_URL)
                 ? $row->foto_temuan
-                : asset('storage/' . $row->foto_temuan);
+                : asset('storage/'.$row->foto_temuan);
         }
 
-        // Lokasi temuan 
+        // Lokasi temuan
         $lokasiTemuan = $row->lokasi_temuan;
         if (is_numeric($lokasiTemuan)) {
             $lokasiObj = LokasiAset::find($lokasiTemuan);
@@ -163,7 +164,7 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
             $lokasiTemuan,
             $fotoTemuan,
             $row->keterangan ?? '',
-            $row->dicekOleh ? ($row->dicekOleh->firstname . ' ' . $row->dicekOleh->lastname) : '',
+            $row->dicekOleh ? ($row->dicekOleh->firstname.' '.$row->dicekOleh->lastname) : '',
             $row->tanggal_cek ? $row->tanggal_cek->format('Y-m-d') : '',
         ];
     }
@@ -203,17 +204,17 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                     ],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                        'wrapText'   => true,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
                     ],
                     'fill' => [
-                        'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => ['argb' => 'FFEFEFEF'],
                     ],
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color'       => ['argb' => 'FF000000'],
+                            'color' => ['argb' => 'FF000000'],
                         ],
                     ],
                 ];
@@ -231,11 +232,11 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                 // Style data rows
                 $highestRow = $sheet->getHighestRow();
                 if ($highestRow >= 3) {
-                    $sheet->getStyle('A3:AB' . $highestRow)->applyFromArray([
+                    $sheet->getStyle('A3:AB'.$highestRow)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                                'color'       => ['argb' => 'FF000000'],
+                                'color' => ['argb' => 'FF000000'],
                             ],
                         ],
                         'alignment' => [
@@ -244,13 +245,13 @@ class StockOpnameExport implements FromCollection, WithHeadings, WithMapping, Wi
                     ]);
 
                     // Center-align kolom tertentu
-                    $sheet->getStyle('A3:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('C3:D' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('G3:G' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('H3:M' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('R3:R' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('W3:W' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('AB3:AB' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('A3:A'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('C3:D'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('G3:G'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('H3:M'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('R3:R'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('W3:W'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('AB3:AB'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
                     // Tinggi baris data
                     for ($row = 3; $row <= $highestRow; $row++) {

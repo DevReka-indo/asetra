@@ -7,6 +7,7 @@ use App\Models\AsetFoto;
 use App\Models\DataAset;
 use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class StockOpnameLifecycle
@@ -96,6 +97,29 @@ final class StockOpnameLifecycle
             $lockedSession->update(['synced_at' => now()]);
 
             return $lockedSession->fresh();
+        }, 3);
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    public function delete(StockOpname $session): Collection
+    {
+        return DB::transaction(function () use ($session): Collection {
+            $lockedSession = $this->lockSession($session);
+
+            if ($lockedSession->isCompleted()) {
+                throw StockOpnameStateException::cannotDeleteCompleted($lockedSession);
+            }
+
+            $findingPhotoPaths = $lockedSession->detail()
+                ->whereNotNull('foto_temuan')
+                ->pluck('foto_temuan');
+
+            $lockedSession->detail()->delete();
+            $lockedSession->delete();
+
+            return $findingPhotoPaths;
         }, 3);
     }
 

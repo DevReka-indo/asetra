@@ -103,12 +103,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('stock-opname.index') || request()->routeIs('stock-opname.show') || request()->routeIs('stock-opname.export') ? 'active_' : '' }}">
-                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
-                        <i class="fas fa-clipboard-list"></i>
-                        <p>Stock Opname</p>
-                    </a>
-                </li>
                 @if(\App\Models\StockOpname::where('status', 'aktif')->exists())
                     <li class="nav-item {{ request()->routeIs('stock-opname.user-*') ? 'active_' : '' }}">
                         <a href="{{ route('stock-opname.user-index') }}" class="nav-link">
@@ -259,12 +253,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item {{ request()->routeIs('stock-opname.index') || request()->routeIs('stock-opname.show') ? 'active_' : '' }}">
-                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
-                        <i class="fas fa-boxes"></i>
-                        <p>Stock Opname</p>
-                    </a>
-                </li>
                 @if(\App\Models\StockOpname::where('status', 'aktif')->exists())
                     <li class="nav-item {{ request()->routeIs('stock-opname.user-*') ? 'active_' : '' }}">
                         <a href="{{ route('stock-opname.user-index') }}" class="nav-link">
@@ -365,6 +353,15 @@
                 </li>
 
             @endif
+
+            @can('manage_stock_opname')
+                <li class="nav-item {{ request()->routeIs('stock-opname.index') || request()->routeIs('stock-opname.show') || request()->routeIs('stock-opname.export') ? 'active_' : '' }}">
+                    <a href="{{ route('stock-opname.index') }}" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Stock Opname</p>
+                    </a>
+                </li>
+            @endcan
         </ul>
     </div>
 </div>

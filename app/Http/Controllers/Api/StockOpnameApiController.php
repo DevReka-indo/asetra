@@ -10,6 +10,7 @@ use App\Models\StockOpnameDetail;
 use App\Models\User;
 use App\Notifications\SystemNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -25,6 +26,8 @@ class StockOpnameApiController extends BaseApiController
      */
     public function index()
     {
+        Gate::authorize('manage_stock_opname');
+
         $sessions = StockOpname::with('createdBy')->latest()->get();
 
         return $this->success($sessions, 'Stock opname sessions retrieved successfully.');
@@ -37,12 +40,15 @@ class StockOpnameApiController extends BaseApiController
     {
         $session = StockOpname::findOrFail($id);
         $user = auth()->user();
-        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+        $isAdmin = Gate::allows('manage_stock_opname');
 
         $queryAset = DataAset::with(['lokasi', 'kategoriAset']);
 
         if (! $isAdmin) {
-            $queryAset->forUser($user);
+            $queryAset->where(function ($query) use ($user) {
+                $query->forUser($user)
+                    ->orWhere('pic_id', $user->id);
+            });
         }
 
         $allAsetIds = $queryAset->pluck('id')->toArray();
@@ -109,6 +115,8 @@ class StockOpnameApiController extends BaseApiController
      */
     public function store(Request $request)
     {
+        Gate::authorize('manage_stock_opname');
+
         // Check if there is an active session
         $activeOpname = StockOpname::where('status', 'aktif')->first();
         if ($activeOpname) {
@@ -158,6 +166,8 @@ class StockOpnameApiController extends BaseApiController
      */
     public function updateStatus($id, Request $request)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
         $request->validate([
@@ -207,7 +217,7 @@ class StockOpnameApiController extends BaseApiController
         }
 
         $user = auth()->user();
-        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+        $isAdmin = Gate::allows('manage_stock_opname');
 
         if (! $isAdmin) {
             $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
@@ -264,6 +274,8 @@ class StockOpnameApiController extends BaseApiController
      */
     public function sync($id)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
         try {

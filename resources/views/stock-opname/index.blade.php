@@ -215,12 +215,16 @@
                                             <i class="fas fa-edit"></i>
                                         </button>
 
-                                        {{-- Tombol Hapus (Danger) --}}
-                                        <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0" 
-                                            style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;"
-                                            title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $session->id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('manage_stock_opname')
+                                            @if($session->isActive())
+                                                {{-- Tombol Hapus (Danger) --}}
+                                                <button type="button" class="btn btn-danger btn-sm rounded-circle text-white border-0"
+                                                    style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;"
+                                                    title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $session->id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endif
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -406,35 +410,39 @@
         </div>
     </div>
 
-    <!-- Modal Delete -->
-    <div class="modal fade so-modal" id="deleteModal{{ $session->id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-body p-5 text-center bg-light">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f8d7da;">
-                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
-                    </div>
-                    <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
-                    <p class="text-muted mb-4" style="font-size: 1rem;">
-                        Anda yakin ingin menghapus jadwal Stock Opname periode <br>
-                        <strong class="text-danger fs-5">{{ $session->periode }}</strong>?
-                    </p>
-                    <div class="alert alert-warning border-0 rounded-3 text-start small mb-4">
-                        <i class="fas fa-exclamation-circle me-2 text-warning"></i>
-                        <strong>Peringatan:</strong> Menghapus jadwal ini juga akan menghapus secara permanen semua data scan temuan aset, catatan kondisi, dan file foto yang terkait dengan periode ini.
-                    </div>
-                    <div class="d-flex justify-content-center gap-3">
-                        <form action="{{ route('stock-opname.destroy', $session->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
-                            <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
-                        </form>
+    @can('manage_stock_opname')
+        @if($session->isActive())
+            <!-- Modal Delete -->
+            <div class="modal fade so-modal" id="deleteModal{{ $session->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                        <div class="modal-body p-5 text-center bg-light">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-4 mb-4" style="width: 80px; height: 80px; background-color: #f8d7da;">
+                                <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark mb-2">Konfirmasi Hapus</h4>
+                            <p class="text-muted mb-4" style="font-size: 1rem;">
+                                Anda yakin ingin menghapus jadwal Stock Opname periode <br>
+                                <strong class="text-danger fs-5">{{ $session->periode }}</strong>?
+                            </p>
+                            <div class="alert alert-warning border-0 rounded-3 text-start small mb-4">
+                                <i class="fas fa-exclamation-circle me-2 text-warning"></i>
+                                <strong>Peringatan:</strong> Menghapus jadwal ini juga akan menghapus secara permanen semua data scan temuan aset, catatan kondisi, dan file foto yang terkait dengan periode ini.
+                            </div>
+                            <div class="d-flex justify-content-center gap-3">
+                                <form action="{{ route('stock-opname.destroy', $session->id) }}" method="POST" class="w-100 d-flex justify-content-center gap-3">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm border" style="width: 120px;" data-bs-dismiss="modal">Batalkan</button>
+                                    <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm" style="width: 140px;">Ya, Hapus</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        @endif
+    @endcan
 @endforeach
 @endsection
 

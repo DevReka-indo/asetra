@@ -244,12 +244,14 @@
                         <span class="fw-bold small text-center">Data Aset</span>
                     </a>
                 </div>
-                <div class="col-6">
-                    <a href="{{ route('stock-opname.index') }}" class="quick-access-btn shadow-sm">
-                        <i class="fas fa-boxes"></i>
-                        <span class="fw-bold small text-center">Stock Opname</span>
-                    </a>
-                </div>
+                @can('manage_stock_opname')
+                    <div class="col-6">
+                        <a href="{{ route('stock-opname.index') }}" class="quick-access-btn shadow-sm">
+                            <i class="fas fa-boxes"></i>
+                            <span class="fw-bold small text-center">Stock Opname</span>
+                        </a>
+                    </div>
+                @endcan
                 <div class="col-6">
                     <a href="{{ route('log-aset.index') }}" class="quick-access-btn shadow-sm">
                         <i class="fas fa-history"></i>

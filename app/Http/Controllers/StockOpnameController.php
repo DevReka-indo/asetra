@@ -13,7 +13,7 @@ use App\Models\User;
 use App\Notifications\SystemNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -30,6 +30,8 @@ class StockOpnameController extends Controller
      */
     public function index()
     {
+        Gate::authorize('manage_stock_opname');
+
         $sessions = StockOpname::with('createdBy')->latest()->get();
 
         return view('stock-opname.index', compact('sessions'));
@@ -40,6 +42,8 @@ class StockOpnameController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('manage_stock_opname');
+
         // Cek apakah ada jadwal opname yang masih aktif
         $activeOpname = StockOpname::where('status', 'aktif')->first();
         if ($activeOpname) {
@@ -102,6 +106,8 @@ class StockOpnameController extends Controller
      */
     public function show($id)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
         // 1. Ambil SEMUA Aset Aktif yang seharusnya dicek
@@ -193,6 +199,8 @@ class StockOpnameController extends Controller
      */
     public function updateStatus($id, Request $request)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
         $request->validate([
@@ -213,6 +221,8 @@ class StockOpnameController extends Controller
      */
     public function update(Request $request, $id)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
         $request->validate([
@@ -252,32 +262,28 @@ class StockOpnameController extends Controller
      */
     public function destroy($id)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
-        DB::beginTransaction();
         try {
-            // Hapus file gambar temuan dari storage public jika ada
-            $details = StockOpnameDetail::where('stock_opname_id', $id)->get();
-            foreach ($details as $detail) {
-                if ($detail->foto_temuan) {
-                    Storage::disk('public')->delete($detail->foto_temuan);
-                }
-            }
+            $findingPhotoPaths = $this->lifecycle->delete($session);
+        } catch (StockOpnameStateException $exception) {
+            return redirect()->back()->with('error', $exception->getMessage());
+        } catch (Throwable $exception) {
+            Log::error('Stock opname deletion failed.', [
+                'stock_opname_id' => $session->id,
+                'exception' => $exception,
+            ]);
 
-            // Hapus detail stock opname terkait
-            StockOpnameDetail::where('stock_opname_id', $id)->delete();
-
-            // Hapus data stock opname utama
-            $session->delete();
-
-            DB::commit();
-
-            return redirect()->route('stock-opname.index')->with('success', 'Jadwal Stock Opname berhasil dihapus.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()->with('error', 'Gagal menghapus jadwal: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus jadwal Stock Opname.');
         }
+
+        foreach ($findingPhotoPaths as $findingPhotoPath) {
+            Storage::disk('public')->delete($findingPhotoPath);
+        }
+
+        return redirect()->route('stock-opname.index')->with('success', 'Jadwal Stock Opname berhasil dihapus.');
     }
 
     /**
@@ -285,6 +291,8 @@ class StockOpnameController extends Controller
      */
     public function syncData($id)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
 
         try {
@@ -326,12 +334,15 @@ class StockOpnameController extends Controller
         }
 
         $user = Auth::user();
-        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+        $isAdmin = Gate::allows('manage_stock_opname');
 
         $queryAset = DataAset::with(['lokasi', 'kategoriAset']);
 
         if (! $isAdmin) {
-            $queryAset->forUser($user);
+            $queryAset->where(function ($query) use ($user) {
+                $query->forUser($user)
+                    ->orWhere('pic_id', $user->id);
+            });
         }
 
         // Semua aset yang masuk scope user
@@ -435,7 +446,7 @@ class StockOpnameController extends Controller
         }
 
         $user = Auth::user();
-        $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
+        $isAdmin = Gate::allows('manage_stock_opname');
 
         if (! $isAdmin) {
             $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
@@ -502,6 +513,8 @@ class StockOpnameController extends Controller
      */
     public function export($id)
     {
+        Gate::authorize('manage_stock_opname');
+
         $session = StockOpname::findOrFail($id);
         $fileName = 'Laporan_StockOpname_'.preg_replace('/[^A-Za-z0-9_\-]/', '_', $session->periode).'.xlsx';
 

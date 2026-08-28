@@ -30,6 +30,14 @@ final class StockOpnameStateException extends StockOpnameException
         );
     }
 
+    public static function cannotDeleteCompleted(StockOpname $session): self
+    {
+        return new self(
+            'Sesi Stock Opname yang sudah selesai tidak dapat dihapus.',
+            context: ['stock_opname_id' => $session->getKey(), 'status' => $session->status],
+        );
+    }
+
     public static function mustBeCompleted(StockOpname $session): self
     {
         return new self(
