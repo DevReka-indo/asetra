@@ -2,26 +2,31 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domain\StockOpname\Exceptions\StockOpnameStateException;
+use App\Domain\StockOpname\StockOpnameLifecycle;
+use App\Models\DataAset;
 use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
-use App\Models\DataAset;
-use App\Models\AsetFoto;
-use App\Models\LokasiAset;
 use App\Models\User;
 use App\Notifications\SystemNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class StockOpnameApiController extends BaseApiController
 {
     use \App\Traits\HandlesImageUploads;
+
+    public function __construct(private readonly StockOpnameLifecycle $lifecycle) {}
+
     /**
      * List all Stock Opname sessions
      */
     public function index()
     {
         $sessions = StockOpname::with('createdBy')->latest()->get();
+
         return $this->success($sessions, 'Stock opname sessions retrieved successfully.');
     }
 
@@ -36,7 +41,7 @@ class StockOpnameApiController extends BaseApiController
 
         $queryAset = DataAset::with(['lokasi', 'kategoriAset']);
 
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             $queryAset->forUser($user);
         }
 
@@ -70,7 +75,9 @@ class StockOpnameApiController extends BaseApiController
             $anomaliKondisi = [];
 
             foreach ($telahDicek as $finding) {
-                if (!$finding->aset) continue;
+                if (! $finding->aset) {
+                    continue;
+                }
 
                 // Location anomaly
                 if (is_numeric($finding->lokasi_temuan) && $finding->lokasi_temuan != $finding->aset->lokasi_id) {
@@ -105,29 +112,29 @@ class StockOpnameApiController extends BaseApiController
         // Check if there is an active session
         $activeOpname = StockOpname::where('status', 'aktif')->first();
         if ($activeOpname) {
-            return $this->error('Gagal membuat jadwal baru. Masih ada jadwal Stock Opname (' . $activeOpname->periode . ') yang sedang berjalan.', 422);
+            return $this->error('Gagal membuat jadwal baru. Masih ada jadwal Stock Opname ('.$activeOpname->periode.') yang sedang berjalan.', 422);
         }
 
         $request->validate([
-            'periode'          => 'required|string|max:20',
-            'tanggal_mulai'    => 'required|date',
+            'periode' => 'required|string|max:20',
+            'tanggal_mulai' => 'required|date',
             'tanggal_berakhir' => 'required|date|after_or_equal:tanggal_mulai',
-            'keterangan'       => 'nullable|string',
+            'keterangan' => 'nullable|string',
         ]);
 
         $session = StockOpname::create([
-            'periode'          => $request->periode,
-            'tanggal_mulai'    => $request->tanggal_mulai,
+            'periode' => $request->periode,
+            'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_berakhir' => $request->tanggal_berakhir,
-            'keterangan'       => $request->keterangan,
-            'created_by'       => auth()->id(),
-            'status'           => 'aktif'
+            'keterangan' => $request->keterangan,
+            'created_by' => auth()->id(),
+            'status' => 'aktif',
         ]);
 
         // Notify only General Affairs and Superadmins
         try {
             $users = User::where('role_id_role', 1)->get()->merge(
-                User::all()->filter(fn($u) => $u->isGeneralAffairs())
+                User::all()->filter(fn ($u) => $u->isGeneralAffairs())
             )->unique('id');
             $title = 'Jadwal Stock Opname Baru';
             $formattedMulai = \Carbon\Carbon::parse($request->tanggal_mulai)->format('d M');
@@ -140,7 +147,7 @@ class StockOpnameApiController extends BaseApiController
                 $u->notify(new SystemNotification($title, $message, $url, $type));
             }
         } catch (\Exception $e) {
-            Log::warning("Notifications failed for new stock opname: " . $e->getMessage());
+            Log::warning('Notifications failed for new stock opname: '.$e->getMessage());
         }
 
         return $this->success($session, 'Jadwal Stock Opname berhasil dibuat.', 210);
@@ -154,10 +161,14 @@ class StockOpnameApiController extends BaseApiController
         $session = StockOpname::findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:aktif,selesai'
+            'status' => 'required|in:aktif,selesai',
         ]);
 
-        $session->update(['status' => $request->status]);
+        try {
+            $session = $this->lifecycle->update($session, ['status' => $request->status]);
+        } catch (StockOpnameStateException $exception) {
+            return $this->error($exception->getMessage(), $exception->httpStatus);
+        }
 
         return $this->success($session, 'Status Stock Opname berhasil diperbarui.');
     }
@@ -169,20 +180,28 @@ class StockOpnameApiController extends BaseApiController
     {
         $request->validate([
             'stock_opname_id' => 'required|exists:stock_opname,id',
-            'aset_id'         => 'required|string', // Can be ID or Nomor Aset
-            'kondisi_temuan'  => 'required|string',
-            'lokasi_temuan'   => 'required_unless:kondisi_temuan,Tidak Teridentifikasi,Hilang|nullable|string',
-            'foto_temuan'     => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
-            'keterangan'      => 'nullable|string'
+            'aset_id' => 'required|string', // Can be ID or Nomor Aset
+            'kondisi_temuan' => 'required|string',
+            'lokasi_temuan' => 'required_unless:kondisi_temuan,Tidak Teridentifikasi,Hilang|nullable|string',
+            'foto_temuan' => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
+            'keterangan' => 'nullable|string',
         ]);
+
+        $session = StockOpname::findOrFail($request->integer('stock_opname_id'));
+
+        if (! $session->canAcceptFindings()) {
+            $exception = StockOpnameStateException::cannotAcceptFindings($session);
+
+            return $this->error($exception->getMessage(), $exception->httpStatus);
+        }
 
         $asetIdOrNo = $request->aset_id;
         $aset = DataAset::find($asetIdOrNo);
 
-        if (!$aset) {
+        if (! $aset) {
             // Find by asset number
             $aset = DataAset::where('nomor_aset', $asetIdOrNo)->first();
-            if (!$aset) {
+            if (! $aset) {
                 return $this->error('Aset tidak ditemukan di database.', 404);
             }
         }
@@ -190,15 +209,15 @@ class StockOpnameApiController extends BaseApiController
         $user = auth()->user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             $isAuthorized = DataAset::where('id', $aset->id)->forUser($user)->exists() || $aset->pic_id == $user->id;
-            if (!$isAuthorized) {
+            if (! $isAuthorized) {
                 return $this->error('Anda tidak memiliki akses untuk melakukan stock opname pada aset dari divisi/departemen lain.', 403);
             }
         }
 
         // Check if already scanned in this session
-        $existing = StockOpnameDetail::where('stock_opname_id', $request->stock_opname_id)
+        $existing = StockOpnameDetail::where('stock_opname_id', $session->id)
             ->where('aset_id', $aset->id)
             ->first();
 
@@ -211,16 +230,29 @@ class StockOpnameApiController extends BaseApiController
             $fotoPath = $this->compressAndStore($request->file('foto_temuan'), 'stock_opname_foto');
         }
 
-        $detail = StockOpnameDetail::create([
-            'stock_opname_id' => $request->stock_opname_id,
-            'aset_id'         => $aset->id,
-            'dicek_oleh'      => auth()->id(),
-            'tanggal_cek'     => now(),
-            'kondisi_temuan'  => $request->kondisi_temuan,
-            'lokasi_temuan'   => $request->lokasi_temuan,
-            'foto_temuan'     => $fotoPath,
-            'keterangan'      => $request->keterangan
-        ]);
+        try {
+            $detail = $this->lifecycle->recordFinding($session, [
+                'aset_id' => $aset->id,
+                'dicek_oleh' => auth()->id(),
+                'tanggal_cek' => now(),
+                'kondisi_temuan' => $request->kondisi_temuan,
+                'lokasi_temuan' => $request->lokasi_temuan,
+                'foto_temuan' => $fotoPath,
+                'keterangan' => $request->keterangan,
+            ]);
+        } catch (StockOpnameStateException $exception) {
+            if ($fotoPath !== null) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            return $this->error($exception->getMessage(), $exception->httpStatus);
+        } catch (Throwable $exception) {
+            if ($fotoPath !== null) {
+                Storage::disk('public')->delete($fotoPath);
+            }
+
+            throw $exception;
+        }
 
         $detail->load(['aset', 'dicekOleh']);
 
@@ -233,43 +265,20 @@ class StockOpnameApiController extends BaseApiController
     public function sync($id)
     {
         $session = StockOpname::findOrFail($id);
-        $details = StockOpnameDetail::where('stock_opname_id', $id)->get();
 
-        DB::beginTransaction();
         try {
-            foreach ($details as $detail) {
-                $aset = DataAset::find($detail->aset_id);
-                if ($aset) {
-                    $aset->status_kondisi = $detail->kondisi_temuan;
-                    // If location is a numeric ID, update it
-                    if (is_numeric($detail->lokasi_temuan)) {
-                        $aset->lokasi_id = $detail->lokasi_temuan;
-                    }
-                    $aset->save();
+            $session = $this->lifecycle->synchronize($session);
 
-                    // Sinkronisasi foto temuan jika ada
-                    if ($detail->foto_temuan) {
-                        $exists = AsetFoto::where('aset_id', $aset->id)
-                            ->where('path_foto', $detail->foto_temuan)
-                            ->exists();
-                        
-                        if (!$exists) {
-                            $urutanTerakhir = $aset->foto()->max('urutan') ?? 0;
-                            AsetFoto::create([
-                                'aset_id'   => $aset->id,
-                                'path_foto' => $detail->foto_temuan,
-                                'urutan'    => $urutanTerakhir + 1,
-                                'keterangan' => 'Sinkronisasi dari Stock Opname: ' . ($session->periode ?? 'Temuan'),
-                            ]);
-                        }
-                    }
-                }
-            }
-            DB::commit();
-            return $this->success(null, 'Master data berhasil disinkronisasi dengan temuan Stock Opname.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->error('Gagal menyinkronkan data: ' . $e->getMessage(), 500);
+            return $this->success($session, 'Master data berhasil disinkronisasi dengan temuan Stock Opname.');
+        } catch (StockOpnameStateException $exception) {
+            return $this->error($exception->getMessage(), $exception->httpStatus);
+        } catch (Throwable $exception) {
+            Log::error('Stock opname API synchronization failed.', [
+                'stock_opname_id' => $session->id,
+                'exception' => $exception,
+            ]);
+
+            return $this->error('Gagal menyinkronkan data Stock Opname.', 500);
         }
     }
 }

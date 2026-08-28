@@ -375,7 +375,9 @@
                                     @php
                                         $currentStatus = old('form_type') == 'edit_'.$session->id ? old('status') : $session->status;
                                     @endphp
-                                    <option value="aktif" {{ $currentStatus == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                    @if($session->isActive())
+                                        <option value="aktif" {{ $currentStatus == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                    @endif
                                     <option value="selesai" {{ $currentStatus == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                 </select>
                             </div>

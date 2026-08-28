@@ -385,7 +385,12 @@ class ApiTest extends TestCase
         $responseShow->assertStatus(200)
             ->assertJsonPath('data.total_checked', 1);
 
-        // 3. Sync findings to master
+        // 3. Finalize and sync findings to master
+        $responseFinalize = $this->withHeaders($this->headers)->putJson("/api/stock-opname/{$session->id}/status", [
+            'status' => 'selesai',
+        ]);
+        $responseFinalize->assertStatus(200);
+
         $responseSync = $this->withHeaders($this->headers)->postJson("/api/stock-opname/{$session->id}/sync");
         $responseSync->assertStatus(200);
         $this->assertEquals('Rusak', $aset->fresh()->status_kondisi);

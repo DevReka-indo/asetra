@@ -68,12 +68,18 @@
                        class="btn btn-light fw-semibold rounded-pill px-3 shadow-sm">
                         <i class="fas fa-file-excel me-2 text-success"></i> Export Laporan
                     </a>
-                    <form id="syncForm" action="{{ route('stock-opname.sync', $session->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="button" class="btn btn-warning fw-semibold rounded-pill px-3 shadow-sm text-dark" id="btnSync">
-                            <i class="fas fa-sync-alt me-2"></i> Sinkronkan ke Master
-                        </button>
-                    </form>
+                    @if($session->canSynchronize())
+                        <form id="syncForm" action="{{ route('stock-opname.sync', $session->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="button" class="btn btn-warning fw-semibold rounded-pill px-3 shadow-sm text-dark" id="btnSync">
+                                <i class="fas fa-sync-alt me-2"></i> Sinkronkan ke Master
+                            </button>
+                        </form>
+                    @elseif($session->isSynchronized())
+                        <span class="btn btn-success fw-semibold rounded-pill px-3 shadow-sm disabled">
+                            <i class="fas fa-check me-2"></i> Tersinkronisasi
+                        </span>
+                    @endif
                     @if($session->status == 'aktif')
                     <form id="closePeriodForm" action="{{ route('stock-opname.update-status', $session->id) }}" method="POST" class="d-inline">
                         @csrf @method('PUT')
