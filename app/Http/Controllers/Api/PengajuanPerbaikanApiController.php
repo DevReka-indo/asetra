@@ -9,8 +9,11 @@ use App\Models\User;
 use App\Notifications\SystemNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class PengajuanPerbaikanApiController extends BaseApiController
 {
@@ -55,8 +58,11 @@ class PengajuanPerbaikanApiController extends BaseApiController
             'foto_kerusakan' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
+        $aset = DataAset::query()->findOrFail($request->integer('aset_id'));
+        Gate::authorize('submit_repair_for_asset', $aset);
+
         // Mencegah duplikasi pengajuan untuk aset yang sama yang masih dalam proses
-        $sudahAda = PengajuanPerbaikan::where('aset_id', $request->aset_id)
+        $sudahAda = PengajuanPerbaikan::where('aset_id', $aset->id)
             ->whereIn('status', ['menunggu', 'disetujui'])
             ->exists();
 
@@ -65,7 +71,7 @@ class PengajuanPerbaikanApiController extends BaseApiController
         }
 
         $data = [
-            'aset_id' => $request->aset_id,
+            'aset_id' => $aset->id,
             'diajukan_oleh' => Auth::id(),
             'tanggal_pengajuan' => now()->toDateString(),
             'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
@@ -73,15 +79,23 @@ class PengajuanPerbaikanApiController extends BaseApiController
             'status' => 'menunggu',
         ];
 
-        if ($request->hasFile('foto_kerusakan')) {
-            $data['foto_kerusakan'] = $this->compressAndStore($request->file('foto_kerusakan'), 'perbaikan');
+        $fotoKerusakanPath = $this->compressAndStore($request->file('foto_kerusakan'), 'perbaikan');
+        $data['foto_kerusakan'] = $fotoKerusakanPath;
+
+        try {
+            $pengajuan = DB::transaction(function () use ($aset, $data): PengajuanPerbaikan {
+                $pengajuan = PengajuanPerbaikan::create($data);
+                $aset->update(['status_aset' => 'Dalam Perbaikan']);
+
+                return $pengajuan;
+            });
+        } catch (Throwable $exception) {
+            if ($fotoKerusakanPath !== null) {
+                Storage::disk('public')->delete($fotoKerusakanPath);
+            }
+
+            throw $exception;
         }
-
-        $pengajuan = PengajuanPerbaikan::create($data);
-
-        // Update status_aset to "Dalam Perbaikan"
-        $aset = DataAset::findOrFail($request->aset_id);
-        $aset->update(['status_aset' => 'Dalam Perbaikan']);
 
         // Kirim Notification
         try {

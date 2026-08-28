@@ -9,7 +9,10 @@ use App\Models\User;
 use App\Notifications\SystemNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class PengajuanPerbaikanController extends Controller
 {
@@ -99,8 +102,11 @@ class PengajuanPerbaikanController extends Controller
             'foto_kerusakan' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
+        $aset = DataAset::query()->findOrFail($request->integer('aset_id'));
+        Gate::authorize('submit_repair_for_asset', $aset);
+
         // Cegah pengajuan ganda untuk aset yang masih menunggu/disetujui
-        $sudahAda = PengajuanPerbaikan::where('aset_id', $request->aset_id)
+        $sudahAda = PengajuanPerbaikan::where('aset_id', $aset->id)
             ->whereIn('status', ['menunggu', 'disetujui'])
             ->exists();
 
@@ -109,7 +115,7 @@ class PengajuanPerbaikanController extends Controller
         }
 
         $data = [
-            'aset_id' => $request->aset_id,
+            'aset_id' => $aset->id,
             'diajukan_oleh' => Auth::id(),
             'tanggal_pengajuan' => now()->toDateString(),
             'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
@@ -117,20 +123,29 @@ class PengajuanPerbaikanController extends Controller
             'status' => 'menunggu',
         ];
 
-        if ($request->hasFile('foto_kerusakan')) {
-            $data['foto_kerusakan'] = $this->compressAndStore($request->file('foto_kerusakan'), 'perbaikan');
+        $fotoKerusakanPath = $this->compressAndStore($request->file('foto_kerusakan'), 'perbaikan');
+        $data['foto_kerusakan'] = $fotoKerusakanPath;
+
+        try {
+            $pengajuan = DB::transaction(function () use ($aset, $data): PengajuanPerbaikan {
+                $pengajuan = PengajuanPerbaikan::create($data);
+
+                $aset->update([
+                    'status_aset' => 'Dalam Perbaikan',
+                ]);
+
+                return $pengajuan;
+            });
+        } catch (Throwable $exception) {
+            if ($fotoKerusakanPath !== null) {
+                Storage::disk('public')->delete($fotoKerusakanPath);
+            }
+
+            throw $exception;
         }
 
-        $pengajuan = PengajuanPerbaikan::create($data);
-
-        // Update status aset menjadi "Dalam Perbaikan" saat pengajuan dibuat
-        DataAset::findOrFail($request->aset_id)->update([
-            'status_aset' => 'Dalam Perbaikan',
-        ]);
-
         // Notify GA / Superadmin
-        $aset = DataAset::find($request->aset_id);
-        $asetName = $aset ? $aset->nama_aset : 'Aset';
+        $asetName = $aset->nama_aset;
         $userFullName = Auth::user()->fullname;
 
         $adminGas = User::where('role_id_role', 1)->get()->merge(

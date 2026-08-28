@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\DataAset;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -47,5 +48,12 @@ class AppServiceProvider extends ServiceProvider
         foreach (self::PERMISSION_ABILITIES as $ability) {
             Gate::define($ability, static fn (User $user): bool => $user->hasPermission($ability));
         }
+
+        Gate::define('submit_repair_for_asset', static function (User $user, DataAset $asset): bool {
+            return DataAset::query()
+                ->whereKey($asset->getKey())
+                ->forUser($user)
+                ->exists() || $asset->pic_id === $user->getKey();
+        });
     }
 }
