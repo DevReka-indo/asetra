@@ -194,7 +194,7 @@ class StockOpnameApiController extends BaseApiController
             'kondisi_temuan' => 'required|string',
             'lokasi_temuan' => 'required_unless:kondisi_temuan,Tidak Teridentifikasi,Hilang|nullable|string',
             'foto_temuan' => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
-            'keterangan' => 'nullable|string',
+            'deskripsi_temuan' => 'nullable|string',
         ]);
 
         $session = StockOpname::findOrFail($request->integer('stock_opname_id'));
@@ -240,16 +240,21 @@ class StockOpnameApiController extends BaseApiController
             $fotoPath = $this->compressAndStore($request->file('foto_temuan'), 'stock_opname_foto');
         }
 
+        $findingAttributes = [
+            'aset_id' => $aset->id,
+            'dicek_oleh' => auth()->id(),
+            'tanggal_cek' => now(),
+            'kondisi_temuan' => $request->kondisi_temuan,
+            'lokasi_temuan' => $request->lokasi_temuan,
+            'foto_temuan' => $fotoPath,
+        ];
+
+        if ($request->exists('deskripsi_temuan')) {
+            $findingAttributes['deskripsi_temuan'] = $request->input('deskripsi_temuan');
+        }
+
         try {
-            $detail = $this->lifecycle->recordFinding($session, [
-                'aset_id' => $aset->id,
-                'dicek_oleh' => auth()->id(),
-                'tanggal_cek' => now(),
-                'kondisi_temuan' => $request->kondisi_temuan,
-                'lokasi_temuan' => $request->lokasi_temuan,
-                'foto_temuan' => $fotoPath,
-                'keterangan' => $request->keterangan,
-            ]);
+            $detail = $this->lifecycle->recordFinding($session, $findingAttributes);
         } catch (StockOpnameStateException $exception) {
             if ($fotoPath !== null) {
                 Storage::disk('public')->delete($fotoPath);

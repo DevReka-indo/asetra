@@ -220,6 +220,7 @@
                                     data-aset-id="{{ $aset->id }}"
                                     data-aset-nomor="{{ $aset->nomor_aset }}"
                                     data-aset-nama="{{ $aset->nama_aset }}"
+                                    data-aset-deskripsi="{{ $aset->deskripsi }}"
                                     title="Input temuan manual untuk aset ini"
                                 >
                                     <i class="fas fa-pen-to-square me-1"></i>

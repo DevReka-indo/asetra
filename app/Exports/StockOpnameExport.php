@@ -51,7 +51,7 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                 'Nama Aset',
                 'Kode Aset',
                 '',
-                'Deskripsi Aset',
+                'Deskripsi Aset Master',
                 'Merk Aset',
                 'Tanggal Kapitalisasi',
                 'Kondisi Aset',
@@ -72,7 +72,8 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                 'Hasil Stock Opname',
                 '',
                 '',
-                'Keterangan Temuan',
+                'Deskripsi Aset',
+                'Catatan Temuan Historis',
                 'Dicek Oleh',
                 'Tanggal Cek Opname',
             ],
@@ -102,6 +103,7 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                 'Kondisi Temuan',
                 'Lokasi Temuan',
                 'Foto Temuan',
+                '',
                 '',
                 '',
                 '',
@@ -163,6 +165,7 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
             $row->kondisi_temuan ?? '',
             $lokasiTemuan,
             $fotoTemuan,
+            $row->deskripsi_temuan ?? '',
             $row->keterangan ?? '',
             $row->dicekOleh ? ($row->dicekOleh->firstname.' '.$row->dicekOleh->lastname) : '',
             $row->tanggal_cek ? $row->tanggal_cek->format('Y-m-d') : '',
@@ -186,9 +189,10 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                 $sheet->mergeCells('T1:T2'); // PIC Aset
                 $sheet->mergeCells('U1:U2'); // Penanggung Jawab Aset
                 $sheet->mergeCells('V1:V2'); // Dokumentasi Aset
-                $sheet->mergeCells('Z1:Z2'); // Keterangan Temuan
-                $sheet->mergeCells('AA1:AA2'); // Dicek Oleh
-                $sheet->mergeCells('AB1:AB2'); // Tanggal Cek Opname
+                $sheet->mergeCells('Z1:Z2'); // Deskripsi Aset
+                $sheet->mergeCells('AA1:AA2'); // Catatan Temuan Historis
+                $sheet->mergeCells('AB1:AB2'); // Dicek Oleh
+                $sheet->mergeCells('AC1:AC2'); // Tanggal Cek Opname
 
                 $sheet->mergeCells('C1:D1'); // Kode Aset
                 $sheet->mergeCells('H1:M1'); // Kondisi Aset
@@ -218,7 +222,7 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                         ],
                     ],
                 ];
-                $sheet->getStyle('A1:AB2')->applyFromArray($headerStyle);
+                $sheet->getStyle('A1:AC2')->applyFromArray($headerStyle);
 
                 // Highlight kolom Hasil Stock Opname
                 $sheet->getStyle('W1:Y2')->getFill()
@@ -232,7 +236,7 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                 // Style data rows
                 $highestRow = $sheet->getHighestRow();
                 if ($highestRow >= 3) {
-                    $sheet->getStyle('A3:AB'.$highestRow)->applyFromArray([
+                    $sheet->getStyle('A3:AC'.$highestRow)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -251,7 +255,7 @@ class StockOpnameExport implements FromCollection, ShouldAutoSize, WithEvents, W
                     $sheet->getStyle('H3:M'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('R3:R'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('W3:W'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('AB3:AB'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('AC3:AC'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
                     // Tinggi baris data
                     for ($row = 3; $row <= $highestRow; $row++) {

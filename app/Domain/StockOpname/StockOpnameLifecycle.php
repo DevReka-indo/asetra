@@ -21,7 +21,7 @@ final class StockOpnameLifecycle
     private const CORRECTABLE_FINDING_FIELDS = [
         'kondisi_temuan',
         'lokasi_temuan',
-        'keterangan',
+        'deskripsi_temuan',
         'foto_temuan',
     ];
 
@@ -66,6 +66,12 @@ final class StockOpnameLifecycle
                 throw StockOpnameStateException::findingAlreadyRecorded($lockedSession, $assetId);
             }
 
+            if (! array_key_exists('deskripsi_temuan', $attributes)) {
+                $attributes['deskripsi_temuan'] = DataAset::query()
+                    ->whereKey($assetId)
+                    ->value('deskripsi');
+            }
+
             return $lockedSession->detail()->create($attributes);
         }, 3);
     }
@@ -100,6 +106,10 @@ final class StockOpnameLifecycle
 
                 if (is_numeric($detail->lokasi_temuan)) {
                     $asset->lokasi_id = $detail->lokasi_temuan;
+                }
+
+                if (filled($detail->deskripsi_temuan) && $detail->deskripsi_temuan !== $asset->deskripsi) {
+                    $asset->deskripsi = $detail->deskripsi_temuan;
                 }
 
                 $asset->save();

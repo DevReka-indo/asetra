@@ -305,6 +305,7 @@
                                                         data-aset-id="{{ $aset->id }}"
                                                         data-aset-nomor="{{ $aset->nomor_aset }}"
                                                         data-aset-nama="{{ $aset->nama_aset }}"
+                                                        data-aset-deskripsi="{{ $aset->deskripsi }}"
                                                         title="Input temuan manual untuk aset ini">
                                                         <i class="fas fa-pen-to-square me-1"></i> Cek Manual
                                                     </button>
@@ -385,6 +386,7 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Aset</th>
+                                            <th>Deskripsi Aset</th>
                                             <th>Kondisi Temuan</th>
                                             <th>Lokasi Temuan</th>
                                             @if ($isAdmin)
@@ -431,6 +433,12 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </td>
+                                                <td>
+                                                    <span class="text-dark small">{{ $detail->deskripsi_temuan ?: '-' }}</span>
+                                                    @if($detail->keterangan)
+                                                        <small class="d-block text-muted mt-1">Catatan lama: {{ $detail->keterangan }}</small>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     @php
@@ -611,9 +619,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold small" style="color: #253070;">Keterangan (Opsional)</label>
-                            <textarea name="keterangan" id="so_keterangan" class="form-control shadow-sm rounded-3" rows="2"
-                                placeholder="Tambahkan catatan jika perlu..."></textarea>
+                            <label class="form-label fw-bold small" for="so_deskripsi_temuan" style="color: #253070;">Deskripsi Aset</label>
+                            <textarea name="deskripsi_temuan" id="so_deskripsi_temuan" class="form-control shadow-sm rounded-3" rows="3"
+                                placeholder="Deskripsi aset saat pemeriksaan"></textarea>
                         </div>
 
                 </div>
@@ -1266,6 +1274,9 @@
                         const asetNama =
                             button.attr('data-aset-nama');
 
+                        const asetDeskripsi =
+                            button.attr('data-aset-deskripsi') || '';
+
                         /*
                         |--------------------------------------------------------------------------
                         | GET FORM
@@ -1303,6 +1314,9 @@
                         */
                         $('#so_aset_id')
                             .val(asetId);
+
+                        $('#so_deskripsi_temuan')
+                            .val(asetDeskripsi);
 
                         $('#scanned_aset_display')
                             .text(

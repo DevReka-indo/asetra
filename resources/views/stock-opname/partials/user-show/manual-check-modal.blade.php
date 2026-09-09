@@ -133,19 +133,19 @@
 
                     <div class="mb-3">
                         <label
-                            for="so_keterangan"
+                            for="so_deskripsi_temuan"
                             class="form-label fw-bold small"
                             style="color: #253070;"
                         >
-                            Keterangan (Opsional)
+                            Deskripsi Aset
                         </label>
 
                         <textarea
-                            name="keterangan"
-                            id="so_keterangan"
+                            name="deskripsi_temuan"
+                            id="so_deskripsi_temuan"
                             class="form-control shadow-sm rounded-3"
-                            rows="2"
-                            placeholder="Tambahkan catatan jika perlu..."
+                            rows="3"
+                            placeholder="Deskripsi aset saat pemeriksaan"
                         ></textarea>
                     </div>
                 </div>

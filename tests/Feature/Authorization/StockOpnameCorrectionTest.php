@@ -41,7 +41,7 @@ class StockOpnameCorrectionTest extends TestCase
         $response = $this->correct($manager, $session, $finding, [
             'kondisi_temuan' => 'Rusak',
             'lokasi_temuan' => (string) $newLocation->lokasi_id,
-            'keterangan' => 'Kondisi dikoreksi setelah pemeriksaan ulang.',
+            'deskripsi_temuan' => 'Deskripsi dikoreksi setelah pemeriksaan ulang.',
         ]);
 
         $response->assertRedirect(route('stock-opname.show', $session))
@@ -49,19 +49,20 @@ class StockOpnameCorrectionTest extends TestCase
         $finding->refresh();
         $this->assertSame('Rusak', $finding->kondisi_temuan);
         $this->assertSame((string) $newLocation->lokasi_id, (string) $finding->lokasi_temuan);
-        $this->assertSame('Kondisi dikoreksi setelah pemeriksaan ulang.', $finding->keterangan);
+        $this->assertSame('Deskripsi dikoreksi setelah pemeriksaan ulang.', $finding->deskripsi_temuan);
+        $this->assertSame('Hasil pemeriksaan awal', $finding->keterangan);
 
         $revision = StockOpnameDetailRevision::query()->sole();
         $this->assertSame($manager->id, $revision->changed_by);
         $this->assertSame([
             'kondisi_temuan' => 'Baik',
             'lokasi_temuan' => (string) $finding->aset->lokasi_id,
-            'keterangan' => 'Hasil pemeriksaan awal',
+            'deskripsi_temuan' => 'Stock opname correction test asset',
         ], $revision->before_values);
         $this->assertSame([
             'kondisi_temuan' => 'Rusak',
             'lokasi_temuan' => (string) $newLocation->lokasi_id,
-            'keterangan' => 'Kondisi dikoreksi setelah pemeriksaan ulang.',
+            'deskripsi_temuan' => 'Deskripsi dikoreksi setelah pemeriksaan ulang.',
         ], $revision->after_values);
     }
 
@@ -72,11 +73,11 @@ class StockOpnameCorrectionTest extends TestCase
         $session = $this->createSession($superadmin);
         $finding = $this->createFinding($session, $this->createAsset(), $checker);
 
-        $this->correct($superadmin, $session, $finding, ['keterangan' => 'Koreksi superadmin'])
+        $this->correct($superadmin, $session, $finding, ['deskripsi_temuan' => 'Koreksi superadmin'])
             ->assertRedirect()
             ->assertSessionHas('success');
 
-        $this->assertSame('Koreksi superadmin', $finding->fresh()->keterangan);
+        $this->assertSame('Koreksi superadmin', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseHas('stock_opname_detail_revisions', ['changed_by' => $superadmin->id]);
     }
 
@@ -92,7 +93,7 @@ class StockOpnameCorrectionTest extends TestCase
         );
 
         $response = $this->correct($checker, $session, $finding, [
-            'keterangan' => 'Koreksi oleh pemeriksa',
+            'deskripsi_temuan' => 'Koreksi oleh pemeriksa',
             'correction_context' => 'execution',
             'correction_detail_id' => $finding->id,
         ]);
@@ -102,11 +103,11 @@ class StockOpnameCorrectionTest extends TestCase
             'tab' => 'checked',
         ]))->assertSessionHas('success', 'Hasil pemeriksaan berhasil dikoreksi.');
 
-        $this->assertSame('Koreksi oleh pemeriksa', $finding->fresh()->keterangan);
+        $this->assertSame('Koreksi oleh pemeriksa', $finding->fresh()->deskripsi_temuan);
         $revision = StockOpnameDetailRevision::query()->sole();
         $this->assertSame($checker->id, $revision->changed_by);
-        $this->assertSame(['keterangan' => 'Hasil pemeriksaan awal'], $revision->before_values);
-        $this->assertSame(['keterangan' => 'Koreksi oleh pemeriksa'], $revision->after_values);
+        $this->assertSame(['deskripsi_temuan' => 'Stock opname correction test asset'], $revision->before_values);
+        $this->assertSame(['deskripsi_temuan' => 'Koreksi oleh pemeriksa'], $revision->after_values);
 
         $this->get($response->headers->get('Location'))
             ->assertOk()
@@ -121,10 +122,10 @@ class StockOpnameCorrectionTest extends TestCase
         $session = $this->createSession($checker);
         $finding = $this->createFinding($session, $this->createAsset(), $checker);
 
-        $this->correct($otherUser, $session, $finding, ['keterangan' => 'Forged correction'])
+        $this->correct($otherUser, $session, $finding, ['deskripsi_temuan' => 'Forged correction'])
             ->assertForbidden();
 
-        $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+        $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
     }
 
@@ -137,8 +138,8 @@ class StockOpnameCorrectionTest extends TestCase
         $finding = $this->createFinding($session, $this->createAsset(), $checker);
 
         $this->assertTrue($user->isBagianUmum());
-        $this->correct($user, $session, $finding, ['keterangan' => 'Tidak sah'])->assertForbidden();
-        $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+        $this->correct($user, $session, $finding, ['deskripsi_temuan' => 'Tidak sah'])->assertForbidden();
+        $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
     }
 
@@ -149,8 +150,8 @@ class StockOpnameCorrectionTest extends TestCase
         $session = $this->createSession($user);
         $finding = $this->createFinding($session, $this->createAsset(), $checker);
 
-        $this->correct($user, $session, $finding, ['keterangan' => 'Tidak sah'])->assertForbidden();
-        $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+        $this->correct($user, $session, $finding, ['deskripsi_temuan' => 'Tidak sah'])->assertForbidden();
+        $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
     }
 
@@ -164,11 +165,11 @@ class StockOpnameCorrectionTest extends TestCase
             $session = $this->createSession($user, 'selesai');
             $finding = $this->createFinding($session, $this->createAsset(), $user);
 
-            $this->correct($user, $session, $finding, ['keterangan' => 'Tidak boleh berubah'])
+            $this->correct($user, $session, $finding, ['deskripsi_temuan' => 'Tidak boleh berubah'])
                 ->assertRedirect()
                 ->assertSessionHas('error', 'Temuan pada sesi Stock Opname yang sudah selesai tidak dapat dikoreksi.');
 
-            $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+            $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         }
 
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
@@ -180,11 +181,11 @@ class StockOpnameCorrectionTest extends TestCase
         $session = $this->createSession($checker, 'selesai');
         $finding = $this->createFinding($session, $this->createAsset(), $checker);
 
-        $this->correct($checker, $session, $finding, ['keterangan' => 'Tidak boleh berubah'])
+        $this->correct($checker, $session, $finding, ['deskripsi_temuan' => 'Tidak boleh berubah'])
             ->assertRedirect()
             ->assertSessionHas('error', 'Temuan pada sesi Stock Opname yang sudah selesai tidak dapat dikoreksi.');
 
-        $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+        $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
     }
 
@@ -200,7 +201,8 @@ class StockOpnameCorrectionTest extends TestCase
         $finding = $this->createFinding($session, $asset, $manager);
 
         $this->correct($manager, $session, $finding, [
-            'keterangan' => 'Hanya hasil yang berubah',
+            'deskripsi_temuan' => 'Hanya hasil yang berubah',
+            'keterangan' => 'Catatan lama tidak boleh berubah',
             'aset_id' => $otherAsset->id,
             'stock_opname_id' => $otherSession->id,
             'dicek_oleh' => $otherUser->id,
@@ -212,8 +214,9 @@ class StockOpnameCorrectionTest extends TestCase
         $this->assertSame($session->id, $finding->stock_opname_id);
         $this->assertSame($manager->id, $finding->dicek_oleh);
         $this->assertSame('2026-08-28', $finding->tanggal_cek->format('Y-m-d'));
-        $this->assertSame('Hanya hasil yang berubah', $finding->keterangan);
-        $this->assertSame(['keterangan' => 'Hanya hasil yang berubah'], $finding->revisions()->sole()->after_values);
+        $this->assertSame('Hanya hasil yang berubah', $finding->deskripsi_temuan);
+        $this->assertSame('Hasil pemeriksaan awal', $finding->keterangan);
+        $this->assertSame(['deskripsi_temuan' => 'Hanya hasil yang berubah'], $finding->revisions()->sole()->after_values);
     }
 
     public function test_detail_from_another_session_cannot_be_corrected_through_current_session_url(): void
@@ -224,10 +227,10 @@ class StockOpnameCorrectionTest extends TestCase
         $secondSession = $this->createSession($manager);
         $finding = $this->createFinding($secondSession, $this->createAsset(), $manager);
 
-        $this->correct($manager, $firstSession, $finding, ['keterangan' => 'IDOR attempt'])
+        $this->correct($manager, $firstSession, $finding, ['deskripsi_temuan' => 'IDOR attempt'])
             ->assertNotFound();
 
-        $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+        $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
     }
 
@@ -255,7 +258,7 @@ class StockOpnameCorrectionTest extends TestCase
         $this->actingAs($manager)->patch(route('stock-opname.detail.update', [$session, $finding]), [
             'kondisi_temuan' => 'INVALID',
             'lokasi_temuan' => $finding->lokasi_temuan,
-            'keterangan' => 'Tidak boleh tersimpan',
+            'deskripsi_temuan' => 'Tidak boleh tersimpan',
         ])->assertSessionHasErrors('kondisi_temuan');
 
         $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
@@ -275,7 +278,7 @@ class StockOpnameCorrectionTest extends TestCase
 
         $response = $this->correct($checker, $session, $finding, [
             'lokasi_temuan' => '999999',
-            'keterangan' => 'Tidak boleh tersimpan',
+            'deskripsi_temuan' => 'Tidak boleh tersimpan',
             'correction_context' => 'execution',
             'correction_detail_id' => $finding->id,
         ]);
@@ -309,11 +312,11 @@ class StockOpnameCorrectionTest extends TestCase
             END
             SQL);
 
-        $this->correct($manager, $session, $finding, ['keterangan' => 'Harus rollback'])
+        $this->correct($manager, $session, $finding, ['deskripsi_temuan' => 'Harus rollback'])
             ->assertRedirect()
             ->assertSessionHas('error', 'Gagal mengoreksi temuan Stock Opname.');
 
-        $this->assertSame('Hasil pemeriksaan awal', $finding->fresh()->keterangan);
+        $this->assertSame('Stock opname correction test asset', $finding->fresh()->deskripsi_temuan);
         $this->assertDatabaseCount('stock_opname_detail_revisions', 0);
     }
 
@@ -531,6 +534,7 @@ class StockOpnameCorrectionTest extends TestCase
             'tanggal_cek' => '2026-08-28',
             'kondisi_temuan' => 'Baik',
             'lokasi_temuan' => (string) $asset->lokasi_id,
+            'deskripsi_temuan' => $asset->deskripsi,
             'keterangan' => 'Hasil pemeriksaan awal',
             'foto_temuan' => $photoPath,
         ]);
@@ -548,7 +552,7 @@ class StockOpnameCorrectionTest extends TestCase
         $payload = array_merge([
             'kondisi_temuan' => $finding->kondisi_temuan,
             'lokasi_temuan' => $finding->lokasi_temuan,
-            'keterangan' => $finding->keterangan,
+            'deskripsi_temuan' => $finding->deskripsi_temuan,
         ], $overrides);
 
         return $this->actingAs($user)

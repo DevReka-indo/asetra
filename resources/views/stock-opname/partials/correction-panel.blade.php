@@ -19,7 +19,7 @@
                             <th>Aset</th>
                             <th>Kondisi</th>
                             <th>Lokasi Temuan</th>
-                            <th>Keterangan</th>
+                            <th>Deskripsi Aset</th>
                             <th>Pemeriksa</th>
                             <th>Foto</th>
                             @can('manage_stock_opname')
@@ -38,7 +38,12 @@
                                 </td>
                                 <td><span class="badge bg-light text-dark border">{{ $finding->kondisi_temuan }}</span></td>
                                 <td>{{ $finding->lokasiTemuan->nama_lokasi ?? $finding->lokasi_temuan ?? '-' }}</td>
-                                <td>{{ $finding->keterangan ?: '-' }}</td>
+                                <td>
+                                    <div>{{ $finding->deskripsi_temuan ?: '-' }}</div>
+                                    @if($finding->keterangan)
+                                        <small class="text-muted">Catatan pemeriksaan lama: {{ $finding->keterangan }}</small>
+                                    @endif
+                                </td>
                                 <td>
                                     <div>{{ $finding->dicekOleh->name ?? '-' }}</div>
                                     <small class="text-muted">{{ optional($finding->tanggal_cek)->format('d M Y') }}</small>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exports\StockOpnameExport;
 use App\Models\AsetFoto;
 use App\Models\DataAset;
 use App\Models\JenisKategori;
@@ -40,6 +41,66 @@ class StockOpnameLifecycleTest extends TestCase
             'stock_opname_id' => $session->id,
             'aset_id' => $asset->id,
             'dicek_oleh' => $user->id,
+            'deskripsi_temuan' => $asset->deskripsi,
+        ]);
+    }
+
+    public function test_manual_check_page_preloads_asset_master_description(): void
+    {
+        $departmentId = $this->createDepartment('Manual Check Department');
+        $user = $this->createUser(departmentId: $departmentId);
+        $session = $this->createSession($user, 'aktif');
+        $asset = $this->createAsset(departmentId: $departmentId);
+        $asset->update(['deskripsi' => 'Deskripsi dari master aset']);
+
+        $this->actingAs($user)
+            ->get(route('stock-opname.user-show', $session))
+            ->assertOk()
+            ->assertSee('Deskripsi Aset')
+            ->assertSee('data-aset-deskripsi="Deskripsi dari master aset"', false)
+            ->assertSee('name="deskripsi_temuan"', false)
+            ->assertDontSee('name="keterangan"', false);
+    }
+
+    #[DataProvider('surfaces')]
+    public function test_submitted_description_is_stored_without_immediately_changing_master(string $surface): void
+    {
+        $departmentId = $this->createDepartment('Description Department');
+        $user = $this->createUser(departmentId: $departmentId);
+        $session = $this->createSession($user, 'aktif');
+        $asset = $this->createAsset(departmentId: $departmentId);
+
+        $response = $this->scan($surface, $user, $session, (string) $asset->id, [
+            'deskripsi_temuan' => 'Deskripsi hasil koreksi lapangan',
+        ]);
+
+        $this->assertScanSucceeded($response, $surface);
+        $this->assertDatabaseHas('stock_opname_detail', [
+            'stock_opname_id' => $session->id,
+            'aset_id' => $asset->id,
+            'deskripsi_temuan' => 'Deskripsi hasil koreksi lapangan',
+            'keterangan' => null,
+        ]);
+        $this->assertSame('Stock opname lifecycle test asset', $asset->fresh()->deskripsi);
+    }
+
+    #[DataProvider('surfaces')]
+    public function test_qr_finding_snapshots_description_server_side(string $surface): void
+    {
+        $departmentId = $this->createDepartment('QR Department');
+        $user = $this->createUser(departmentId: $departmentId);
+        $session = $this->createSession($user, 'aktif');
+        $asset = $this->createAsset(departmentId: $departmentId);
+        $asset->update(['deskripsi' => 'Snapshot QR dari master']);
+
+        $response = $this->scan($surface, $user, $session, $asset->nomor_aset);
+
+        $this->assertScanSucceeded($response, $surface);
+        $this->assertDatabaseHas('stock_opname_detail', [
+            'stock_opname_id' => $session->id,
+            'aset_id' => $asset->id,
+            'deskripsi_temuan' => 'Snapshot QR dari master',
+            'keterangan' => null,
         ]);
     }
 
@@ -171,6 +232,7 @@ class StockOpnameLifecycleTest extends TestCase
             condition: 'Rusak',
             location: (string) $targetLocation->lokasi_id,
             photoPath: 'stock_opname_foto/finding.jpg',
+            description: 'Deskripsi final hasil opname',
         );
 
         $response = $this->synchronize($surface, $manager, $session);
@@ -179,6 +241,7 @@ class StockOpnameLifecycleTest extends TestCase
         $asset->refresh();
         $this->assertSame('Rusak', $asset->status_kondisi);
         $this->assertSame($targetLocation->lokasi_id, $asset->lokasi_id);
+        $this->assertSame('Deskripsi final hasil opname', $asset->deskripsi);
         $this->assertNotNull($session->fresh()->synced_at);
         $this->assertDatabaseHas('aset_foto', [
             'aset_id' => $asset->id,
@@ -199,15 +262,23 @@ class StockOpnameLifecycleTest extends TestCase
             $manager,
             condition: 'Rusak',
             photoPath: 'stock_opname_foto/stale-finding.jpg',
+            description: 'Deskripsi sinkron pertama',
         );
         $this->synchronize($surface, $manager, $session);
-        $asset->refresh()->update(['status_kondisi' => 'Baik']);
-        $finding->update(['kondisi_temuan' => 'Bongkar']);
+        $asset->refresh()->update([
+            'status_kondisi' => 'Baik',
+            'deskripsi' => 'Deskripsi master sesudah sinkron',
+        ]);
+        $finding->update([
+            'kondisi_temuan' => 'Bongkar',
+            'deskripsi_temuan' => 'Deskripsi stale yang tidak boleh diterapkan',
+        ]);
 
         $response = $this->synchronize($surface, $manager, $session);
 
         $this->assertStateConflict($response, $surface);
         $this->assertSame('Baik', $asset->fresh()->status_kondisi);
+        $this->assertSame('Deskripsi master sesudah sinkron', $asset->fresh()->deskripsi);
         $this->assertSame(1, AsetFoto::query()->where('aset_id', $asset->id)->count());
     }
 
@@ -217,7 +288,13 @@ class StockOpnameLifecycleTest extends TestCase
         $manager = $this->createUser(roleId: 1, roleName: 'Root Operator');
         $session = $this->createSession($manager, 'selesai');
         $asset = $this->createAsset();
-        $this->createFinding($session, $asset, $manager, condition: 'Rusak');
+        $this->createFinding(
+            $session,
+            $asset,
+            $manager,
+            condition: 'Rusak',
+            description: 'Deskripsi yang harus di-rollback',
+        );
         DB::unprepared(<<<'SQL'
             CREATE TRIGGER fail_stock_opname_sync
             BEFORE UPDATE OF status_kondisi ON data_aset
@@ -235,7 +312,73 @@ class StockOpnameLifecycleTest extends TestCase
         }
 
         $this->assertSame('Baik', $asset->fresh()->status_kondisi);
+        $this->assertSame('Stock opname lifecycle test asset', $asset->fresh()->deskripsi);
         $this->assertNull($session->fresh()->synced_at);
+    }
+
+    #[DataProvider('surfaces')]
+    public function test_legacy_note_and_null_description_never_replace_master_description(string $surface): void
+    {
+        $manager = $this->createUser(roleId: 1, roleName: 'Root Operator');
+        $session = $this->createSession($manager, 'selesai');
+        $asset = $this->createAsset();
+        $finding = $this->createFinding($session, $asset, $manager, condition: 'Baik');
+
+        $this->assertNull($finding->deskripsi_temuan);
+        $this->assertSame('Lifecycle finding', $finding->keterangan);
+
+        $response = $this->synchronize($surface, $manager, $session);
+
+        $this->assertManagementMutationSucceeded($response, $surface);
+        $this->assertSame('Stock opname lifecycle test asset', $asset->fresh()->deskripsi);
+    }
+
+    #[DataProvider('surfaces')]
+    public function test_unchanged_finding_description_remains_stable_during_sync(string $surface): void
+    {
+        $manager = $this->createUser(roleId: 1, roleName: 'Root Operator');
+        $session = $this->createSession($manager, 'selesai');
+        $asset = $this->createAsset();
+        $this->createFinding(
+            $session,
+            $asset,
+            $manager,
+            condition: 'Baik',
+            description: $asset->deskripsi,
+        );
+
+        $response = $this->synchronize($surface, $manager, $session);
+
+        $this->assertManagementMutationSucceeded($response, $surface);
+        $this->assertSame('Stock opname lifecycle test asset', $asset->fresh()->deskripsi);
+    }
+
+    public function test_export_separates_finding_description_from_legacy_note(): void
+    {
+        $manager = $this->createUser(roleId: 1, roleName: 'Root Operator');
+        $session = $this->createSession($manager, 'selesai');
+        $asset = $this->createAsset();
+        $this->createFinding(
+            $session,
+            $asset,
+            $manager,
+            condition: 'Baik',
+            description: 'Deskripsi hasil pemeriksaan',
+        );
+        $export = new StockOpnameExport($session->id);
+
+        $headings = $export->headings()[0];
+        $mappedRow = $export->map($export->collection()->sole());
+
+        $this->assertSame('Deskripsi Aset Master', $headings[4]);
+        $this->assertSame('Deskripsi Aset', $headings[25]);
+        $this->assertSame('Catatan Temuan Historis', $headings[26]);
+        $this->assertSame('Deskripsi hasil pemeriksaan', $mappedRow[25]);
+        $this->assertSame('Lifecycle finding', $mappedRow[26]);
+        $this->assertNotEmpty(\Maatwebsite\Excel\Facades\Excel::raw(
+            new StockOpnameExport($session->id),
+            \Maatwebsite\Excel\Excel::XLSX,
+        ));
     }
 
     /** @return array<string, array{string}> */
@@ -331,6 +474,7 @@ class StockOpnameLifecycleTest extends TestCase
         string $condition,
         ?string $location = null,
         ?string $photoPath = null,
+        ?string $description = null,
     ): StockOpnameDetail {
         return StockOpnameDetail::query()->create([
             'stock_opname_id' => $session->id,
@@ -340,6 +484,7 @@ class StockOpnameLifecycleTest extends TestCase
             'kondisi_temuan' => $condition,
             'lokasi_temuan' => $location,
             'foto_temuan' => $photoPath,
+            'deskripsi_temuan' => $description,
             'keterangan' => 'Lifecycle finding',
         ]);
     }
@@ -349,14 +494,14 @@ class StockOpnameLifecycleTest extends TestCase
         User $user,
         StockOpname $session,
         string $assetReference,
+        array $overrides = [],
     ): TestResponse {
-        $payload = [
+        $payload = array_merge([
             'stock_opname_id' => $session->id,
             'aset_id' => $assetReference,
             'kondisi_temuan' => 'Baik',
             'lokasi_temuan' => '1',
-            'keterangan' => 'Lifecycle scan',
-        ];
+        ], $overrides);
 
         if ($surface === 'api') {
             return $this->withHeaders($this->apiHeaders($user))->postJson('/api/stock-opname/scan', $payload);

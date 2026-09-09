@@ -189,11 +189,6 @@
                         <small class="text-muted mt-1 d-block">Langsung dari kamera atau pilih file.</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small" style="color: #253070;">Keterangan (Opsional)</label>
-                        <textarea name="keterangan" id="so_keterangan" class="form-control shadow-sm rounded-3" rows="2" placeholder="Tambahkan catatan jika perlu..."></textarea>
-                    </div>
-
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" id="btnSubmitOpname" style="background-color: #253070 !important; border-color: #253070 !important;">
                             <i class="fas fa-save me-2"></i> Simpan Temuan

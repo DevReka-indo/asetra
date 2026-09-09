@@ -252,6 +252,7 @@
                 const asetId = button.data('aset-id');
                 const asetNomor = button.data('aset-nomor');
                 const asetNama = button.data('aset-nama');
+                const asetDeskripsi = button.attr('data-aset-deskripsi') || '';
                 const form = document.getElementById('stockOpnameForm');
 
                 if (!form || !stockOpnameModal) {
@@ -261,6 +262,7 @@
                 form.reset();
 
                 $('#so_aset_id').val(asetId);
+                $('#so_deskripsi_temuan').val(asetDeskripsi);
 
                 $('#scanned_aset_display').text(
                     asetNomor + ' - ' + asetNama

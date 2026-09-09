@@ -17,6 +17,7 @@ class StockOpnameDetail extends Model
         'tanggal_cek',
         'kondisi_temuan',
         'lokasi_temuan',
+        'deskripsi_temuan',
         'keterangan',
         'foto_temuan',
     ];

@@ -120,6 +120,7 @@
                     <tr>
                         <th width="5%" class="text-center">No</th>
                         <th>Aset</th>
+                        <th>Deskripsi Aset</th>
                         <th>Kategori</th>
                         <th>Kondisi Temuan</th>
                         <th>Lokasi Temuan</th>
@@ -197,6 +198,13 @@
                                         </div>
                                     </div>
                                 </div>
+                            </td>
+
+                            <td>
+                                <span class="text-dark small">{{ $detail->deskripsi_temuan ?: '-' }}</span>
+                                @if($detail->keterangan)
+                                    <small class="d-block text-muted mt-1">Catatan lama: {{ $detail->keterangan }}</small>
+                                @endif
                             </td>
 
                             <td>

@@ -46,8 +46,11 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold" for="keteranganTemuan{{ $finding->id }}">Keterangan</label>
-                            <textarea class="form-control" id="keteranganTemuan{{ $finding->id }}" name="keterangan" rows="3">{{ $isFailedCorrection ? old('keterangan') : $finding->keterangan }}</textarea>
+                            <label class="form-label fw-semibold" for="deskripsiTemuan{{ $finding->id }}">Deskripsi Aset</label>
+                            <textarea class="form-control" id="deskripsiTemuan{{ $finding->id }}" name="deskripsi_temuan" rows="3">{{ $isFailedCorrection ? old('deskripsi_temuan') : $finding->deskripsi_temuan }}</textarea>
+                            @if($finding->keterangan)
+                                <small class="text-muted d-block mt-2">Catatan pemeriksaan lama: {{ $finding->keterangan }}</small>
+                            @endif
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold" for="fotoTemuan{{ $finding->id }}">Ganti Foto Temuan</label>
