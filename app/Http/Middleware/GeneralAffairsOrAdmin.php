@@ -25,6 +25,10 @@ class GeneralAffairsOrAdmin
             && (str_starts_with($routeName, 'stock-opname.')
                 || str_starts_with($routeName, 'pelaksanaan-opname.'));
 
+        if ($routeName === 'stock-opname.detail.update') {
+            return $next($request);
+        }
+
         if ($isRepairManagementRoute) {
             Gate::authorize('manage_perbaikan_aset');
 

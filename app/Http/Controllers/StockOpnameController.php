@@ -11,11 +11,14 @@ use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
 use App\Models\User;
 use App\Notifications\SystemNotification;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 
@@ -123,7 +126,7 @@ class StockOpnameController extends Controller
         $totalAset = $allAsets->count();
 
         // 2. Ambil SEMUA Temuan untuk sesi ini
-        $allFindings = StockOpnameDetail::with(['aset.lokasi', 'dicekOleh'])
+        $allFindings = StockOpnameDetail::with(['aset.lokasi', 'aset.kategoriAset', 'dicekOleh', 'lokasiTemuan'])
             ->where('stock_opname_id', $id)
             ->get();
 
@@ -182,16 +185,117 @@ class StockOpnameController extends Controller
 
         // 5. Aset yang belum dicek sama sekali (Hilang/Belum discan)
         $belumDicek = $allAsets->whereNotIn('id', $checkedAsetIds);
+        $lokasis = LokasiAset::oldest()->get();
 
         return view('stock-opname.show', compact(
             'session',
+            'allFindings',
             'totalAset',
             'totalChecked',
             'deptStats',
             'anomaliLokasi',
             'anomaliKondisi',
-            'belumDicek'
+            'belumDicek',
+            'lokasis'
         ));
+    }
+
+    public function updateDetail(Request $request, $id, $detailId): RedirectResponse
+    {
+        $session = StockOpname::findOrFail($id);
+        $detail = $session->detail()->findOrFail($detailId);
+        Gate::authorize('correct_stock_opname_detail', $detail);
+        $validator = Validator::make($request->all(), [
+            'kondisi_temuan' => [
+                'required',
+                Rule::in(['Baik', 'Rusak', 'Bongkar', 'Tidak Terpakai', 'Hilang', 'Tidak Teridentifikasi']),
+            ],
+            'lokasi_temuan' => [
+                'nullable',
+                'required_unless:kondisi_temuan,Hilang',
+                Rule::exists('lokasi_aset', 'lokasi_id'),
+            ],
+            'keterangan' => ['nullable', 'string'],
+            'foto_temuan' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:4096'],
+            'correction_context' => ['nullable', Rule::in(['execution', 'management'])],
+            'correction_detail_id' => ['nullable', 'integer'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->correctionRedirect($request, $session)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $validated = $validator->validated();
+
+        $newPhotoPath = null;
+        if ($request->hasFile('foto_temuan')) {
+            $newPhotoPath = $this->compressAndStore($request->file('foto_temuan'), 'stock_opname_foto');
+
+            if ($newPhotoPath === null) {
+                return $this->correctionRedirect($request, $session)
+                    ->withInput()
+                    ->with('error', 'Foto temuan gagal disimpan.');
+            }
+
+            $validated['foto_temuan'] = $newPhotoPath;
+        }
+
+        try {
+            $revision = $this->lifecycle->correctFinding($session, $detail, $request->user(), $validated);
+        } catch (StockOpnameStateException $exception) {
+            if ($newPhotoPath !== null) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+
+            return $this->correctionRedirect($request, $session)
+                ->withInput()
+                ->with('error', $exception->getMessage());
+        } catch (Throwable $exception) {
+            if ($newPhotoPath !== null) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+
+            Log::error('Stock opname finding correction failed.', [
+                'stock_opname_id' => $session->id,
+                'stock_opname_detail_id' => $detail->id,
+                'exception' => $exception,
+            ]);
+
+            return $this->correctionRedirect($request, $session)
+                ->withInput()
+                ->with('error', 'Gagal mengoreksi temuan Stock Opname.');
+        }
+
+        if ($revision === null) {
+            return $this->correctionRedirect($request, $session)
+                ->with('success', 'Tidak ada perubahan pada temuan Stock Opname.');
+        }
+
+        $previousPhotoPath = $revision->before_values['foto_temuan'] ?? null;
+        if ($newPhotoPath !== null && $previousPhotoPath !== null && $previousPhotoPath !== $newPhotoPath) {
+            Storage::disk('public')->delete($previousPhotoPath);
+        }
+
+        return $this->correctionRedirect($request, $session)
+            ->with('success', 'Hasil pemeriksaan berhasil dikoreksi.');
+    }
+
+    private function correctionRedirect(Request $request, StockOpname $session): RedirectResponse
+    {
+        if ($request->input('correction_context') === 'execution') {
+            if (! $session->isActive()) {
+                return redirect()->route('stock-opname.user-index');
+            }
+
+            return redirect()->route('stock-opname.user-show', [
+                'id' => $session->getKey(),
+                'tab' => 'checked',
+            ]);
+        }
+
+        return redirect()->route('stock-opname.show', $session);
     }
 
     /**
@@ -359,6 +463,7 @@ class StockOpnameController extends Controller
             'aset.divisi',
             'aset.director',
             'dicekOleh',
+            'lokasiTemuan',
         ])
             ->where('stock_opname_id', $id)
             ->whereIn('aset_id', $allAsetIds)

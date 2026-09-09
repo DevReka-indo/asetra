@@ -39,13 +39,6 @@
             </ul>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3" role="alert">
-                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
         {{-- HERO PERIODE + PROGRESS --}}
         @php
             $totalScope = $belumDicek->count() + $telahDicek->count();
@@ -401,6 +394,9 @@
                                             <th>Foto</th>
                                             <th>Dicek Oleh</th>
                                             <th>Waktu</th>
+                                            @if($session->isActive())
+                                                <th class="text-end">Aksi</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -415,13 +411,7 @@
                                                     'Bongkar',
                                                     'Tidak Teridentifikasi',
                                                 ]);
-                                                $lokasiTemuanNama = $detail->lokasi_temuan;
-                                                if (is_numeric($detail->lokasi_temuan)) {
-                                                    $lokasiObj = \App\Models\LokasiAset::find($detail->lokasi_temuan);
-                                                    if ($lokasiObj) {
-                                                        $lokasiTemuanNama = $lokasiObj->nama_lokasi;
-                                                    }
-                                                }
+                                                $lokasiTemuanNama = $detail->lokasiTemuan->nama_lokasi ?? $detail->lokasi_temuan;
                                                 $lokasiBerubah =
                                                     is_numeric($detail->lokasi_temuan) &&
                                                     $detail->aset &&
@@ -521,11 +511,35 @@
                                                         {{ \Carbon\Carbon::parse($detail->created_at)->format('d M, H:i') }}
                                                     </small>
                                                 </td>
+                                                @if($session->isActive())
+                                                    <td class="text-end">
+                                                        @can('correct_stock_opname_detail', $detail)
+                                                            <button type="button" class="btn so-btn-outline so-action-btn"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#correctionModal{{ $detail->id }}">
+                                                                <i class="fas fa-pen me-1"></i> Koreksi
+                                                            </button>
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endcan
+                                                    </td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
                             </div>
+
+                            @if($session->isActive())
+                                @foreach($telahDicek as $finding)
+                                    @can('correct_stock_opname_detail', $finding)
+                                        @include('stock-opname.partials.correction-modal', [
+                                            'finding' => $finding,
+                                            'correctionContext' => 'execution',
+                                        ])
+                                    @endcan
+                                @endforeach
+                            @endif
                         @endif
                     </div>
 
@@ -623,6 +637,52 @@
 
     <script>
         $(document).ready(function() {
+
+            const showCheckedTab = @js(request()->query('tab') === 'checked' || old('correction_context') === 'execution');
+            const correctionSuccess = @js(session('success'));
+            const correctionError = @js(session('error'));
+            const validationError = @js($errors->first());
+            const correctionModalId = @js(old('correction_detail_id'));
+
+            if (showCheckedTab) {
+                const checkedTab = document.getElementById('pills-ditemukan-tab');
+
+                if (checkedTab) {
+                    bootstrap.Tab.getOrCreateInstance(checkedTab).show();
+                }
+            }
+
+            let feedback = null;
+
+            if (validationError) {
+                feedback = Swal.fire({
+                    icon: 'error',
+                    title: 'Koreksi Gagal',
+                    text: validationError
+                });
+            } else if (correctionError) {
+                feedback = Swal.fire({
+                    icon: 'error',
+                    title: 'Koreksi Gagal',
+                    text: correctionError
+                });
+            } else if (correctionSuccess) {
+                feedback = Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: correctionSuccess
+                });
+            }
+
+            if (feedback && validationError && correctionModalId) {
+                feedback.then(() => {
+                    const correctionModal = document.getElementById(`correctionModal${correctionModalId}`);
+
+                    if (correctionModal) {
+                        bootstrap.Modal.getOrCreateInstance(correctionModal).show();
+                    }
+                });
+            }
 
             /*
             |--------------------------------------------------------------------------

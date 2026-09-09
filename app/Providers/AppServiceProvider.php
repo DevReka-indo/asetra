@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\DataAset;
+use App\Models\StockOpnameDetail;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -54,6 +55,11 @@ class AppServiceProvider extends ServiceProvider
                 ->whereKey($asset->getKey())
                 ->forUser($user)
                 ->exists() || $asset->pic_id === $user->getKey();
+        });
+
+        Gate::define('correct_stock_opname_detail', static function (User $user, StockOpnameDetail $detail): bool {
+            return $user->hasPermission('manage_stock_opname')
+                || $detail->dicek_oleh === $user->getKey();
         });
     }
 }

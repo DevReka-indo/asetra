@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StockOpnameDetail extends Model
 {
@@ -21,8 +23,8 @@ class StockOpnameDetail extends Model
 
     protected $casts = [
         'tanggal_cek' => 'date',
-        'created_at'  => 'datetime',
-        'updated_at'  => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -47,5 +49,15 @@ class StockOpnameDetail extends Model
     public function dicekOleh()
     {
         return $this->belongsTo(User::class, 'dicek_oleh');
+    }
+
+    public function lokasiTemuan(): BelongsTo
+    {
+        return $this->belongsTo(LokasiAset::class, 'lokasi_temuan', 'lokasi_id');
+    }
+
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(StockOpnameDetailRevision::class, 'stock_opname_detail_id');
     }
 }

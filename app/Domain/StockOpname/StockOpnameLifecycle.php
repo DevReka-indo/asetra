@@ -7,11 +7,24 @@ use App\Models\AsetFoto;
 use App\Models\DataAset;
 use App\Models\StockOpname;
 use App\Models\StockOpnameDetail;
+use App\Models\StockOpnameDetailRevision;
+use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 final class StockOpnameLifecycle
 {
+    /**
+     * @var list<string>
+     */
+    private const CORRECTABLE_FINDING_FIELDS = [
+        'kondisi_temuan',
+        'lokasi_temuan',
+        'keterangan',
+        'foto_temuan',
+    ];
+
     /**
      * @param  array<string, mixed>  $attributes
      */
@@ -120,6 +133,48 @@ final class StockOpnameLifecycle
             $lockedSession->delete();
 
             return $findingPhotoPaths;
+        }, 3);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function correctFinding(
+        StockOpname $session,
+        StockOpnameDetail $detail,
+        User $changedBy,
+        array $attributes,
+    ): ?StockOpnameDetailRevision {
+        return DB::transaction(function () use ($session, $detail, $changedBy, $attributes): ?StockOpnameDetailRevision {
+            $lockedSession = $this->lockSession($session);
+
+            if (! $lockedSession->isActive()) {
+                throw StockOpnameStateException::cannotCorrectCompleted($lockedSession);
+            }
+
+            $lockedDetail = $lockedSession->detail()
+                ->lockForUpdate()
+                ->findOrFail($detail->getKey());
+
+            $lockedDetail->fill(Arr::only($attributes, self::CORRECTABLE_FINDING_FIELDS));
+            $afterValues = Arr::only($lockedDetail->getDirty(), self::CORRECTABLE_FINDING_FIELDS);
+
+            if ($afterValues === []) {
+                return null;
+            }
+
+            $beforeValues = [];
+            foreach (array_keys($afterValues) as $field) {
+                $beforeValues[$field] = $lockedDetail->getOriginal($field);
+            }
+
+            $lockedDetail->save();
+
+            return $lockedDetail->revisions()->create([
+                'changed_by' => $changedBy->getKey(),
+                'before_values' => $beforeValues,
+                'after_values' => $afterValues,
+            ]);
         }, 3);
     }
 

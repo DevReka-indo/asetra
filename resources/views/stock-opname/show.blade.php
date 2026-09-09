@@ -320,6 +320,8 @@
             </div>
         </div>
     </div>
+
+    @include('stock-opname.partials.correction-panel')
 </div>
 
 {{-- Modal Belum Dicek --}}

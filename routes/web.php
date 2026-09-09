@@ -202,6 +202,7 @@ Route::middleware(['auth', 'ga-admin'])->group(function () {
     Route::get('/stock-opname', [StockOpnameController::class, 'index'])->name('stock-opname.index');
     Route::post('/stock-opname', [StockOpnameController::class, 'store'])->name('stock-opname.store');
     Route::get('/stock-opname/{id}', [StockOpnameController::class, 'show'])->name('stock-opname.show');
+    Route::patch('/stock-opname/{id}/detail/{detailId}', [StockOpnameController::class, 'updateDetail'])->name('stock-opname.detail.update');
     Route::put('/stock-opname/{id}', [StockOpnameController::class, 'update'])->name('stock-opname.update');
     Route::delete('/stock-opname/{id}', [StockOpnameController::class, 'destroy'])->name('stock-opname.destroy');
     Route::put('/stock-opname/{id}/status', [StockOpnameController::class, 'updateStatus'])->name('stock-opname.update-status');

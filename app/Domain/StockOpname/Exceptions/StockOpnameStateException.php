@@ -38,6 +38,14 @@ final class StockOpnameStateException extends StockOpnameException
         );
     }
 
+    public static function cannotCorrectCompleted(StockOpname $session): self
+    {
+        return new self(
+            'Temuan pada sesi Stock Opname yang sudah selesai tidak dapat dikoreksi.',
+            context: ['stock_opname_id' => $session->getKey(), 'status' => $session->status],
+        );
+    }
+
     public static function mustBeCompleted(StockOpname $session): self
     {
         return new self(
