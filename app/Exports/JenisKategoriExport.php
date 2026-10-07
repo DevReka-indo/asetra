@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\JenisKategori;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -16,14 +17,14 @@ class JenisKategoriExport implements FromCollection, WithHeadings, WithMapping
         $this->search = $search;
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         $query = JenisKategori::query();
 
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('kode_awalan', 'LIKE', "%{$this->search}%")
-                  ->orWhere('nama_jenis', 'LIKE', "%{$this->search}%");
+                    ->orWhere('nama_jenis', 'LIKE', "%{$this->search}%");
             });
         }
 

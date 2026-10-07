@@ -107,7 +107,7 @@ class StockOpnameController extends Controller
     /**
      * Menampilkan Dashboard Detail Stock Opname (Sisi GA/Admin)
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         Gate::authorize('manage_stock_opname');
 
@@ -125,19 +125,20 @@ class StockOpnameController extends Controller
         ])->get();
         $totalAset = $allAsets->count();
 
-        // 2. Ambil SEMUA Temuan untuk sesi ini
-        $allFindings = StockOpnameDetail::with(['aset.lokasi', 'aset.kategoriAset', 'dicekOleh', 'lokasiTemuan'])
+        // 2. Ambil data temuan minimum untuk perhitungan statistik dashboard.
+        //    Tabel hasil pemeriksaan sendiri dipaginasi terpisah agar halaman tidak memuat seluruh detail sekaligus.
+        $statsFindings = StockOpnameDetail::with(['aset.lokasi'])
             ->where('stock_opname_id', $id)
             ->get();
 
-        $totalChecked = $allFindings->count();
-        $checkedAsetIds = $allFindings->pluck('aset_id')->toArray();
+        $totalChecked = $statsFindings->count();
+        $checkedAsetIds = $statsFindings->pluck('aset_id')->toArray();
 
         // 3. Deteksi Anomali
         $anomaliLokasi = [];
         $anomaliKondisi = [];
 
-        foreach ($allFindings as $finding) {
+        foreach ($statsFindings as $finding) {
             if (! $finding->aset) {
                 continue;
             }
@@ -171,7 +172,7 @@ class StockOpnameController extends Controller
 
         foreach ($asetsByGroup as $groupName => $groupAsets) {
             $groupAsetIds = $groupAsets->pluck('id')->toArray();
-            $groupCheckedCount = $allFindings->whereIn('aset_id', $groupAsetIds)->count();
+            $groupCheckedCount = $statsFindings->whereIn('aset_id', $groupAsetIds)->count();
             $totalInGroup = $groupAsets->count();
 
             $deptStats[] = [
@@ -179,13 +180,71 @@ class StockOpnameController extends Controller
                 'total' => $totalInGroup,
                 'checked' => $groupCheckedCount,
                 'progress' => $totalInGroup > 0 ? round(($groupCheckedCount / $totalInGroup) * 100) : 0,
-                'findings' => $allFindings->whereIn('aset_id', $groupAsetIds),
+                'findings' => $statsFindings->whereIn('aset_id', $groupAsetIds),
             ];
         }
 
         // 5. Aset yang belum dicek sama sekali (Hilang/Belum discan)
         $belumDicek = $allAsets->whereNotIn('id', $checkedAsetIds);
         $lokasis = LokasiAset::oldest()->get();
+
+        // 6. Tabel hasil pemeriksaan: server-side filter + pagination.
+        //    Statistik dashboard di atas tetap dihitung dari seluruh temuan sesi.
+        $findingQuery = StockOpnameDetail::with([
+            'aset.lokasi',
+            'aset.kategoriAset',
+            'dicekOleh',
+            'lokasiTemuan',
+        ])->where('stock_opname_id', $id);
+
+        $search = trim((string) $request->query('search', ''));
+        if ($search !== '') {
+            $findingQuery->where(function ($query) use ($search) {
+                $query->where('deskripsi_temuan', 'LIKE', "%{$search}%")
+                    ->orWhereHas('aset', function ($assetQuery) use ($search) {
+                        $assetQuery->where('nomor_aset', 'LIKE', "%{$search}%")
+                            ->orWhere('nama_aset', 'LIKE', "%{$search}%")
+                            ->orWhere('deskripsi', 'LIKE', "%{$search}%");
+                    })
+                    ->orWhereHas('dicekOleh', function ($userQuery) use ($search) {
+                        $userQuery->where('firstname', 'LIKE', "%{$search}%")
+                            ->orWhere('lastname', 'LIKE', "%{$search}%");
+                    });
+            });
+        }
+
+        $kondisi = $request->query('kondisi');
+        if (in_array($kondisi, ['Baik', 'Rusak', 'Bongkar', 'Tidak Terpakai', 'Hilang', 'Tidak Teridentifikasi'], true)) {
+            $findingQuery->where('kondisi_temuan', $kondisi);
+        }
+
+        $lokasiId = $request->query('lokasi_id');
+        if ($lokasiId !== null && $lokasiId !== '') {
+            $findingQuery->where('lokasi_temuan', (string) $lokasiId);
+        }
+
+        $checkerId = $request->query('checker_id');
+        if ($checkerId !== null && $checkerId !== '') {
+            $findingQuery->where('dicek_oleh', $checkerId);
+        }
+
+        $allowedPerPage = [10, 20, 50, 100];
+        $perPage = (int) $request->query('per_page', 20);
+        if (! in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 20;
+        }
+
+        $allFindings = $findingQuery
+            ->latest('tanggal_cek')
+            ->latest('id')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $availableCheckers = User::query()
+            ->whereIn('id', $statsFindings->pluck('dicek_oleh')->filter()->unique())
+            ->orderBy('firstname')
+            ->orderBy('lastname')
+            ->get(['id', 'firstname', 'lastname']);
 
         return view('stock-opname.show', compact(
             'session',
@@ -196,7 +255,8 @@ class StockOpnameController extends Controller
             'anomaliLokasi',
             'anomaliKondisi',
             'belumDicek',
-            'lokasis'
+            'lokasis',
+            'availableCheckers'
         ));
     }
 

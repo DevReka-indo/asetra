@@ -3,23 +3,32 @@
 namespace App\Exports;
 
 use App\Models\DataAset;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Events\AfterSheet;
 
-class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithEvents, ShouldAutoSize
+class DataAsetExport implements FromCollection, ShouldAutoSize, WithEvents, WithHeadings, WithMapping
 {
     protected $search;
+
     protected $kondisi;
+
     protected $status;
+
     protected $lokasiId;
+
     protected $isTemplate;
+
     protected $departmentId;
+
     protected $divisiId;
+
     protected $jenisKategoriId;
+
     private $rowNum = 0;
 
     public function __construct($search = null, $kondisi = null, $status = null, $lokasiId = null, $isTemplate = false, $departmentId = null, $divisiId = null, $jenisKategoriId = null)
@@ -34,7 +43,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
         $this->jenisKategoriId = $jenisKategoriId;
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         if ($this->isTemplate) {
             return collect([]);
@@ -45,24 +54,24 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
             'lokasi',
             'pic',
             'penanggungJawab',
-            'foto'
+            'foto',
         ]);
 
         $user = auth()->user();
         $isAdmin = $user->role_id_role == 1 || $user->isBagianUmum();
 
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             $query->forUser($user);
         }
 
         if ($this->search) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('nomor_aset', 'LIKE', "%{$this->search}%")
-                  ->orWhere('nama_aset', 'LIKE', "%{$this->search}%")
-                  ->orWhereHas('kategoriAset', function($qj) {
-                      $qj->where('nama', 'LIKE', "%{$this->search}%")
-                         ->orWhere('kode', 'LIKE', "%{$this->search}%");
-                  });
+                    ->orWhere('nama_aset', 'LIKE', "%{$this->search}%")
+                    ->orWhereHas('kategoriAset', function ($qj) {
+                        $qj->where('nama', 'LIKE', "%{$this->search}%")
+                            ->orWhere('kode', 'LIKE', "%{$this->search}%");
+                    });
             });
         }
 
@@ -75,7 +84,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
         }
 
         if ($this->jenisKategoriId) {
-            $query->whereHas('kategoriAset', function($q) {
+            $query->whereHas('kategoriAset', function ($q) {
                 $q->where('jenis_kategori_id', $this->jenisKategoriId);
             });
         }
@@ -90,20 +99,20 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
 
         if ($this->divisiId) {
             $divisiId = $this->divisiId;
-            $query->where(function($q) use ($divisiId) {
+            $query->where(function ($q) use ($divisiId) {
                 $q->where('id_divisi', $divisiId)
-                  ->orWhereHas('department', function($qd) use ($divisiId) {
-                      $qd->where('divisi_id_divisi', $divisiId);
-                  })
-                  ->orWhereHas('section.department', function($qsd) use ($divisiId) {
-                      $qsd->where('divisi_id_divisi', $divisiId);
-                  })
-                  ->orWhereHas('unit.department', function($qud) use ($divisiId) {
-                      $qud->where('divisi_id_divisi', $divisiId);
-                  })
-                  ->orWhereHas('unit.section.department', function($qusd) use ($divisiId) {
-                      $qusd->where('divisi_id_divisi', $divisiId);
-                  });
+                    ->orWhereHas('department', function ($qd) use ($divisiId) {
+                        $qd->where('divisi_id_divisi', $divisiId);
+                    })
+                    ->orWhereHas('section.department', function ($qsd) use ($divisiId) {
+                        $qsd->where('divisi_id_divisi', $divisiId);
+                    })
+                    ->orWhereHas('unit.department', function ($qud) use ($divisiId) {
+                        $qud->where('divisi_id_divisi', $divisiId);
+                    })
+                    ->orWhereHas('unit.section.department', function ($qusd) use ($divisiId) {
+                        $qusd->where('divisi_id_divisi', $divisiId);
+                    });
             });
         }
 
@@ -135,7 +144,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 'BAST',
                 'PIC Aset',
                 'Penanggung Jawab Aset',
-                'Dokumentasi Aset'
+                'Dokumentasi Aset',
             ],
             [
                 '',
@@ -159,8 +168,8 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 '',
                 '',
                 '',
-                ''
-            ]
+                '',
+            ],
         ];
     }
 
@@ -169,8 +178,8 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
         $this->rowNum++;
 
         // Gabungkan semua link foto Google Drive menjadi satu string dipisahkan koma
-        $fotoLinks = $row->foto->pluck('path_foto')->map(function($path) {
-            return filter_var($path, FILTER_VALIDATE_URL) ? $path : asset('storage/' . $path);
+        $fotoLinks = $row->foto->pluck('path_foto')->map(function ($path) {
+            return filter_var($path, FILTER_VALIDATE_URL) ? $path : asset('storage/'.$path);
         })->implode(', ');
 
         return [
@@ -195,7 +204,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
             $row->bast,
             $row->pic->fullname ?? '',
             $row->penanggungJawab->fullname ?? '',
-            $fotoLinks
+            $fotoLinks,
         ];
     }
 
@@ -232,11 +241,11 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                     ],
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-                        'wrapText'   => true,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
                     ],
                     'fill' => [
-                        'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => [
                             'argb' => 'FFEFEFEF',
                         ],
@@ -244,7 +253,7 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color'       => ['argb' => 'FF000000'],
+                            'color' => ['argb' => 'FF000000'],
                         ],
                     ],
                 ];
@@ -257,11 +266,11 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                 // 5. Apply styling to data rows (Starts on Row 3)
                 $highestRow = $sheet->getHighestRow();
                 if ($highestRow >= 3) {
-                    $sheet->getStyle('A3:V' . $highestRow)->applyFromArray([
+                    $sheet->getStyle('A3:V'.$highestRow)->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                                'color'       => ['argb' => 'FF000000'],
+                                'color' => ['argb' => 'FF000000'],
                             ],
                         ],
                         'alignment' => [
@@ -270,11 +279,11 @@ class DataAsetExport implements FromCollection, WithHeadings, WithMapping, WithE
                     ]);
 
                     // Center-align specific data columns
-                    $sheet->getStyle('A3:A' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('C3:D' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('G3:G' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('H3:M' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('R3:R' . $highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('A3:A'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('C3:D'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('G3:G'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('H3:M'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('R3:R'.$highestRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
                     // Set Data Row Heights
                     for ($row = 3; $row <= $highestRow; $row++) {

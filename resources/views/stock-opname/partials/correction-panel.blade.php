@@ -1,15 +1,113 @@
+@php
+    $hasFindingFilters = request()->filled('search')
+        || request()->filled('kondisi')
+        || request()->filled('lokasi_id')
+        || request()->filled('checker_id');
+@endphp
+
 <div class="panel-card mt-3 mb-4">
-    <div class="panel-head">
+    <div class="panel-head flex-wrap gap-2">
         <div class="section-title mb-0">
             <span class="dot"></span> Hasil Pemeriksaan Saat Ini
         </div>
-        <span class="summary-pill">{{ $allFindings->count() }} Temuan</span>
+        <span class="summary-pill">
+            {{ $allFindings->total() }} hasil
+            @if($allFindings->total() !== $totalChecked)
+                dari {{ $totalChecked }} temuan
+            @endif
+        </span>
     </div>
+
+    <div class="panel-body border-bottom so-filter-panel">
+        <form method="GET" action="{{ route('stock-opname.show', $session) }}">
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <label class="form-label so-filter-label">Cari Aset / Pemeriksa</label>
+                    <div class="input-group so-filter-control">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input
+                            type="search"
+                            name="search"
+                            class="form-control"
+                            value="{{ request('search') }}"
+                            placeholder="Nomor aset, nama aset, deskripsi, atau pemeriksa..."
+                        >
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label so-filter-label">Kondisi</label>
+                    <select name="kondisi" class="form-select so-filter-control">
+                        <option value="">Semua Kondisi</option>
+                        @foreach(['Baik', 'Rusak', 'Bongkar', 'Tidak Terpakai', 'Hilang', 'Tidak Teridentifikasi'] as $kondisi)
+                            <option value="{{ $kondisi }}" @selected(request('kondisi') === $kondisi)>{{ $kondisi }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label so-filter-label">Lokasi Temuan</label>
+                    <select name="lokasi_id" class="form-select so-filter-control">
+                        <option value="">Semua Lokasi</option>
+                        @foreach($lokasis as $lokasi)
+                            <option value="{{ $lokasi->lokasi_id }}" @selected((string) request('lokasi_id') === (string) $lokasi->lokasi_id)>
+                                {{ $lokasi->nama_lokasi }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1 align-items-end">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label so-filter-label">Pemeriksa</label>
+                    <select name="checker_id" class="form-select so-filter-control">
+                        <option value="">Semua Pemeriksa</option>
+                        @foreach($availableCheckers as $checker)
+                            <option value="{{ $checker->id }}" @selected((string) request('checker_id') === (string) $checker->id)>
+                                {{ trim($checker->firstname.' '.$checker->lastname) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-6">
+                    <label class="form-label so-filter-label">Per Halaman</label>
+                    <select name="per_page" class="form-select so-filter-control">
+                        @foreach([10, 20, 50, 100] as $size)
+                            <option value="{{ $size }}" @selected((int) request('per_page', 20) === $size)>{{ $size }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-lg-6 col-md-3">
+                    <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                        <button type="submit" class="btn btn-primary so-filter-apply">
+                            <i class="fas fa-filter me-2"></i>Terapkan Filter
+                        </button>
+                        @if($hasFindingFilters)
+                            <a href="{{ route('stock-opname.show', $session) }}" class="btn btn-outline-danger so-filter-reset">
+                                <i class="fas fa-rotate-left me-2"></i>Reset
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="panel-body p-0">
         @if($allFindings->isEmpty())
             <div class="empty-state py-5">
                 <i class="fas fa-clipboard-list d-block mb-2"></i>
-                <p class="mb-0">Belum ada hasil pemeriksaan.</p>
+                <p class="mb-1">
+                    {{ $hasFindingFilters ? 'Tidak ada hasil pemeriksaan yang sesuai filter.' : 'Belum ada hasil pemeriksaan.' }}
+                </p>
+                @if($hasFindingFilters)
+                    <a href="{{ route('stock-opname.show', $session) }}" class="btn btn-sm btn-outline-secondary mt-2">
+                        <i class="fas fa-rotate-left me-1"></i> Reset Filter
+                    </a>
+                @endif
             </div>
         @else
             <div class="table-responsive">
@@ -45,7 +143,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div>{{ $finding->dicekOleh->name ?? '-' }}</div>
+                                    <div>{{ trim(($finding->dicekOleh->firstname ?? '').' '.($finding->dicekOleh->lastname ?? '')) ?: '-' }}</div>
                                     <small class="text-muted">{{ optional($finding->tanggal_cek)->format('d M Y') }}</small>
                                 </td>
                                 <td>
@@ -70,6 +168,16 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="px-3 py-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div class="text-muted small">
+                    Menampilkan {{ $allFindings->firstItem() ?? 0 }} sampai {{ $allFindings->lastItem() ?? 0 }}
+                    dari {{ $allFindings->total() }} hasil
+                </div>
+                <div>
+                    {{ $allFindings->links('pagination::bootstrap-5') }}
+                </div>
             </div>
         @endif
     </div>

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\KategoriAset;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -10,15 +11,16 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class KategoriAsetExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $jenisKategoriId;
+
     protected $search;
 
     public function __construct($jenisKategoriId = null, $search = null)
     {
         $this->jenisKategoriId = $jenisKategoriId;
-        $this->search          = $search;
+        $this->search = $search;
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         $query = KategoriAset::with('jenisKategori');
 
@@ -29,7 +31,7 @@ class KategoriAsetExport implements FromCollection, WithHeadings, WithMapping
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('kode', 'LIKE', "%{$this->search}%")
-                  ->orWhere('nama', 'LIKE', "%{$this->search}%");
+                    ->orWhere('nama', 'LIKE', "%{$this->search}%");
             });
         }
 

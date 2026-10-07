@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\LokasiAset;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -16,15 +17,15 @@ class LokasiAsetExport implements FromCollection, WithHeadings, WithMapping
         $this->search = $search;
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         $query = LokasiAset::query();
 
         if ($this->search) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('kode_lokasi', 'LIKE', "%{$this->search}%")
-                  ->orWhere('nama_lokasi', 'LIKE', "%{$this->search}%")
-                  ->orWhere('detail_lokasi', 'LIKE', "%{$this->search}%");
+                    ->orWhere('nama_lokasi', 'LIKE', "%{$this->search}%")
+                    ->orWhere('detail_lokasi', 'LIKE', "%{$this->search}%");
             });
         }
 

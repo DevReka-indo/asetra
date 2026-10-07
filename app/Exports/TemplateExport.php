@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
@@ -14,7 +15,7 @@ class TemplateExport implements FromCollection, WithHeadings
         $this->headings = $headings;
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         return collect([]);
     }

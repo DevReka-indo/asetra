@@ -230,6 +230,83 @@
 .page-stock-opname-show .summary-pill.success { background: rgba(40,167,69,.10); color: #28a745; }
 .page-stock-opname-show .summary-pill.warn { background: rgba(255,159,28,.10); color: #ff9f1c; }
 
+.page-stock-opname-show .so-filter-panel {
+    background: #fbfcff;
+    padding: 1.15rem 1.25rem 1.25rem;
+}
+.page-stock-opname-show .so-filter-label {
+    margin-bottom: .45rem;
+    color: #5d6578;
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+.page-stock-opname-show .so-filter-control,
+.page-stock-opname-show .so-filter-control.form-control,
+.page-stock-opname-show .so-filter-control.form-select,
+.page-stock-opname-show .so-filter-control .form-control,
+.page-stock-opname-show .so-filter-control .input-group-text {
+    min-height: 42px;
+}
+.page-stock-opname-show .so-filter-control .form-control,
+.page-stock-opname-show .so-filter-control.form-select,
+.page-stock-opname-show select.so-filter-control {
+    border-color: #dfe3ee;
+    color: #343a46;
+    box-shadow: none;
+}
+.page-stock-opname-show .so-filter-control .input-group-text {
+    border-color: #dfe3ee;
+    background: #fff;
+    color: #8a94a6;
+}
+.page-stock-opname-show .so-filter-control .form-control:focus,
+.page-stock-opname-show .so-filter-control.form-select:focus,
+.page-stock-opname-show select.so-filter-control:focus {
+    border-color: #7b87c6;
+    box-shadow: 0 0 0 .16rem rgba(37,48,112,.10);
+}
+.page-stock-opname-show .so-filter-apply,
+.page-stock-opname-show .so-filter-reset {
+    min-height: 42px;
+    border-radius: 10px;
+    padding: .62rem 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.page-stock-opname-show .so-filter-apply {
+    background: #253070;
+    border: 1px solid #253070;
+    color: #fff;
+    box-shadow: 0 5px 14px rgba(37,48,112,.16);
+}
+.page-stock-opname-show .so-filter-apply:hover,
+.page-stock-opname-show .so-filter-apply:focus {
+    background: #1d275e;
+    border-color: #1d275e;
+    color: #fff;
+}
+.page-stock-opname-show .so-filter-reset {
+    background: #fff;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+.page-stock-opname-show .so-filter-reset:hover,
+.page-stock-opname-show .so-filter-reset:focus {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+@media (max-width: 767.98px) {
+    .page-stock-opname-show .so-filter-panel {
+        padding: 1rem;
+    }
+    .page-stock-opname-show .so-filter-apply,
+    .page-stock-opname-show .so-filter-reset {
+        flex: 1 1 auto;
+    }
+}
+
 
 /* --- Page: Stock Opname User Index --- */
 .page-stock-opname-user-index .so-user-hero {

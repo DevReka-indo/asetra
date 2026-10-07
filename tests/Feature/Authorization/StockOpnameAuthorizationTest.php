@@ -270,6 +270,79 @@ class StockOpnameAuthorizationTest extends TestCase
             ->assertDontSee('deleteModal'.$completedSession->id);
     }
 
+    public function test_management_detail_paginates_findings_without_changing_dashboard_totals(): void
+    {
+        $manager = $this->createUser();
+        $this->grantManagementPermission($manager);
+        $session = $this->createSession($manager);
+
+        for ($i = 0; $i < 25; $i++) {
+            $asset = $this->createAsset();
+            $this->createFinding($session, $asset, $manager);
+        }
+
+        $firstPage = $this->actingAs($manager)
+            ->get(route('stock-opname.show', $session))
+            ->assertOk();
+
+        $findings = $firstPage->viewData('allFindings');
+
+        $this->assertSame(25, $findings->total());
+        $this->assertSame(20, $findings->count());
+        $this->assertSame(25, $firstPage->viewData('totalChecked'));
+
+        $secondPage = $this->actingAs($manager)
+            ->get(route('stock-opname.show', [
+                'id' => $session->id,
+                'page' => 2,
+            ]))
+            ->assertOk();
+
+        $this->assertSame(5, $secondPage->viewData('allFindings')->count());
+        $this->assertSame(25, $secondPage->viewData('totalChecked'));
+    }
+
+    public function test_management_detail_filters_findings_server_side(): void
+    {
+        $manager = $this->createUser();
+        $this->grantManagementPermission($manager);
+        $otherChecker = $this->createUser();
+        $session = $this->createSession($manager);
+
+        $matchingAsset = $this->createAsset();
+        $matching = $this->createFinding($session, $matchingAsset, $otherChecker);
+        $matching->update([
+            'kondisi_temuan' => 'Rusak',
+            'deskripsi_temuan' => 'Needle filter description',
+        ]);
+
+        $otherAsset = $this->createAsset();
+        $other = $this->createFinding($session, $otherAsset, $manager);
+        $other->update([
+            'kondisi_temuan' => 'Baik',
+            'deskripsi_temuan' => 'Other description',
+        ]);
+
+        $response = $this->actingAs($manager)
+            ->get(route('stock-opname.show', [
+                'id' => $session->id,
+                'search' => 'Needle filter',
+                'kondisi' => 'Rusak',
+                'lokasi_id' => $matchingAsset->lokasi_id,
+                'checker_id' => $otherChecker->id,
+                'per_page' => 10,
+            ]))
+            ->assertOk();
+
+        $findings = $response->viewData('allFindings');
+
+        $this->assertSame(1, $findings->total());
+        $this->assertSame($matching->id, $findings->items()[0]->id);
+        $this->assertSame(2, $response->viewData('totalChecked'));
+        $response->assertSee('Needle filter description')
+            ->assertDontSee('Other description');
+    }
+
     /**
      * @return array<string, array{string}>
      */
